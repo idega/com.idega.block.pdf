@@ -61,7 +61,7 @@
     </dependency>
      <dependency>
         <groupId>itextpdf</groupId>
-        <artifactId>itext-paolo</artifactId>
+        <artifactId>itext-paulo</artifactId>
         <version>139</version>
         <type>jar</type>
         <url>http://itextpdf.sourceforge.net/</url>
