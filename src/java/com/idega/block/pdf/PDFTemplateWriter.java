@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import javax.ejb.CreateException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -137,17 +138,13 @@ public class PDFTemplateWriter {
 			MemoryFileBuffer bout = writeToBuffer(tagmap, xmlTemplateFile);
 			InputStream is = new MemoryInputStream(bout);
 			
-			ICFile pdfFile = ((com.idega.core.data.ICFileHome)com.idega.data.IDOLookup.getHomeLegacy(ICFile.class)).createLegacy();
+			ICFile pdfFile = ((com.idega.core.data.ICFileHome)com.idega.data.IDOLookup.getHome(ICFile.class)).create();
 			pdfFile.setFileValue(is);
 			pdfFile.setMimeType("application/pdf");
 			pdfFile.setName("document.pdf");
 			pdfFile.setFileSize(bout.length());
-			pdfFile.insert();
-			return pdfFile.getID();
-		}
-		catch (java.sql.SQLException ex) {
-			ex.printStackTrace();
-			return -1;
+			pdfFile.store();
+			return ((Integer)pdfFile.getPrimaryKey()).intValue();
 		}
 		catch (DocumentException e) {
 			e.printStackTrace();
@@ -162,6 +159,9 @@ public class PDFTemplateWriter {
 			return -1;
 		}
 		catch (ParserConfigurationException e) {
+			e.printStackTrace();
+			return -1;
+		} catch (CreateException e) {
 			e.printStackTrace();
 			return -1;
 		}
