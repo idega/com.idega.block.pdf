@@ -45,9 +45,29 @@
     <dependency>
         <groupId>itext</groupId>
         <artifactId>itext-xml</artifactId>
-        <version>0.99</version>
+        <version>1.00</version>
         <type>jar</type>
         <url>http://itext.sourceforge.net/</url>
+        <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+     <dependency>
+        <groupId>itextpdf</groupId>
+        <artifactId>itext-paolo</artifactId>
+        <version>139</version>
+        <type>jar</type>
+        <url>http://itextpdf.sourceforge.net/</url>
+        <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+     <dependency>
+        <groupId>ujac</groupId>
+        <artifactId>ujac</artifactId>
+        <version>0.9.18</version>
+        <type>jar</type>
+        <url>http://ujac.sourceforge.net/</url>
         <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
