@@ -52,6 +52,15 @@
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
+	<dependency>
+    		<!-- This is needed because of the IBMainServlet reference -->
+	    <groupId>jspapi</groupId>
+	    <artifactId>jsp-api</artifactId>
+	    <version>2.0</version>
+	    <type>jar</type>
+	    <url>http://jakarta.apache.org/</url>
+	    <properties/>
+	</dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
