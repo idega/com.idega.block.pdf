@@ -2,7 +2,7 @@
 
 <project>
   <extend>${base.project.dir}/block-dependencies.xml</extend>
-  <pomVersion>3</pomVersion>
+  <pomVersion>4</pomVersion>
   <name>idegaWeb Pdf Block</name>
   <artifactId>com.idega.block.pdf</artifactId>
   <currentVersion>1.0-SNAPSHOT</currentVersion>
@@ -37,6 +37,13 @@
       <name>Thorhallur Helgason</name>
       <id>laddi</id>
       <email>laddi@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Aron Birkir</name>
+      <id>aron</id>
+      <email>aron@idega.is</email>
       <organization>idega software</organization>
       <roles/>
     </developer>
