@@ -136,6 +136,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = paragraph.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
+					os.write(NEWLINE);
 					return;
 				}
 			case Element.SECTION :
@@ -150,6 +151,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = section.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
+					os.write(NEWLINE);
 					return;
 				}
 			case Element.LIST :
