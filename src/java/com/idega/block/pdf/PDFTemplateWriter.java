@@ -13,19 +13,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 
-
 import org.xml.sax.SAXException;
 
-import com.idega.block.pdf.*;
 import com.idega.core.data.ICFile;
 import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
-
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.PageSize;

@@ -8,10 +8,10 @@ package com.idega.block.pdf;
 
 import java.util.Map;
 import java.util.Properties;
+
 import org.xml.sax.Attributes;
 
-import com.idega.block.pdf.*;
-import com.lowagie.text.*;
+import com.lowagie.text.DocListener;
 import com.lowagie.text.xml.XmlPeer;
 
 /**
