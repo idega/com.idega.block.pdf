@@ -31,7 +31,7 @@ import com.idega.data.IDOStoreException;
 import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
-import com.idega.io.TxtWriter;
+import com.idega.block.pdf.TxtWriter;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.PageSize;
