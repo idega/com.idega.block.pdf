@@ -27,8 +27,8 @@ import com.lowagie.text.xml.XmlParser;
 public class IWPDFServlet extends IBMainServlet {
 	
 	
-	protected void __initializeIWC(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		super.__initializeIWC( request,  response);
+	protected void initializeIWContext(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		super.initializeIWContext( request,  response);
 		IWContext iwc = getIWContext();
 		
 		iwc.setLanguage(IWConstants.MARKUP_LANGUAGE_PDF_XML);
