@@ -19,7 +19,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.xml.sax.SAXException;
 
-import com.idega.core.data.ICFile;
+import com.idega.core.file.data.ICFile;
 import com.idega.io.MemoryFileBuffer;
 import com.idega.io.MemoryInputStream;
 import com.idega.io.MemoryOutputStream;
@@ -138,7 +138,7 @@ public class PDFTemplateWriter {
 			MemoryFileBuffer bout = writeToBuffer(tagmap, xmlTemplateFile);
 			InputStream is = new MemoryInputStream(bout);
 			
-			ICFile pdfFile = ((com.idega.core.data.ICFileHome)com.idega.data.IDOLookup.getHome(ICFile.class)).create();
+			ICFile pdfFile = ((com.idega.core.file.data.ICFileHome)com.idega.data.IDOLookup.getHome(ICFile.class)).create();
 			pdfFile.setFileValue(is);
 			pdfFile.setMimeType("application/pdf");
 			pdfFile.setName("document.pdf");
