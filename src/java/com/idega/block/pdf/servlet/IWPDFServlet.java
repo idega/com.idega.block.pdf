@@ -66,10 +66,10 @@ public class IWPDFServlet extends IBMainServlet {
 			// step 3: we create a parser and set the document handler
       InputStream inputstream = writer.getInputStream();
 
-			com.idega.util.FileUtil.streamToFile(inputstream, iwc.getApplication().getApplicationRealPath(),"PDF-XML.xml");
+			com.idega.util.FileUtil.streamToFile(inputstream, iwc.getIWMainApplication().getApplicationRealPath(),"PDF-XML.xml");
      
 			// step 4: we parse the document
-			XmlParser.parse(document,"file://"+iwc.getApplication().getApplicationRealPath()+"PDF-XML.xml");
+			XmlParser.parse(document,"file://"+iwc.getIWMainApplication().getApplicationRealPath()+"PDF-XML.xml");
          
 		}
 		catch(Exception e) {
