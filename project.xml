@@ -2,7 +2,7 @@
 
 <project>
   <extend>${base.project.dir}/block-dependencies.xml</extend>
-  <pomVersion>4</pomVersion>
+  <pomVersion>3</pomVersion>
   <name>idegaWeb Pdf Block</name>
   <artifactId>com.idega.block.pdf</artifactId>
   <currentVersion>1.0-SNAPSHOT</currentVersion>
