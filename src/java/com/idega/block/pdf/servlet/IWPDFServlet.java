@@ -31,7 +31,7 @@ public class IWPDFServlet extends IBMainServlet {
 		super.initializeIWContext( request,  response);
 		IWContext iwc = getIWContext();
 		
-		iwc.setLanguage(IWConstants.MARKUP_LANGUAGE_PDF_XML);
+		iwc.setMarkupLanguage(IWConstants.MARKUP_LANGUAGE_PDF_XML);
 		
 
 		StringBufferWriter writer;
