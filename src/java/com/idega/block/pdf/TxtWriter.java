@@ -215,9 +215,9 @@ public class TxtWriter extends DocWriter implements DocListener {
 				}
 			case Element.ANNOTATION :
 				return;
-			case Element.GIF :
+			
 			case Element.JPEG :
-			case Element.PNG :
+		
 				return;
 			default :
 				return;
