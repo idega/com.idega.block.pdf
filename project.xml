@@ -52,7 +52,7 @@
     <dependency>
         <groupId>itext</groupId>
         <artifactId>itext-xml</artifactId>
-        <version>1.02b</version>
+        <version>1.02</version>
         <type>jar</type>
         <url>http://itext.sourceforge.net/</url>
         <properties>
