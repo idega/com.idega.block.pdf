@@ -168,6 +168,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = listItem.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
+					os.write(NEWLINE);
 					return;
 				}
 			case Element.CELL :
@@ -182,6 +183,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 							write((Element) i.next());
 						}
 					}
+					os.write(TAB);
 					return;
 				}
 			case Element.ROW :
@@ -194,6 +196,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 							write(cell);
 						}
 					}
+					os.write(NEWLINE);
 					return;
 				}
 			case Element.TABLE :
