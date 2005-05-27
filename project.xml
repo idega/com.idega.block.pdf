@@ -5,11 +5,17 @@
   <pomVersion>3</pomVersion>
   <name>idegaWeb Pdf Block</name>
   <artifactId>com.idega.block.pdf</artifactId>
-  <currentVersion>1.0.1</currentVersion>
-  <!--currentVersion>1.0-SNAPSHOT</currentVersion-->
+  <!--currentVersion>1.0.1</currentVersion-->
+  <currentVersion>1.0-SNAPSHOT</currentVersion>
+
   <inceptionYear>2000</inceptionYear>
   <shortDescription>Pdf</shortDescription>
   <versions>
+    <version>
+      <id>1.0.1</id>
+      <name>1.0.1</name>
+      <tag>PDF_1_0_1</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -51,66 +57,69 @@
   </developers>
   <dependencies>
     <dependency>
-        <groupId>itext</groupId>
-        <artifactId>itext-xml</artifactId>
-        <version>1.02</version>
-        <type>jar</type>
-        <url>http://itext.sourceforge.net/</url>
-        <properties>
+      <groupId>itext</groupId>
+      <artifactId>itext-xml</artifactId>
+      <version>1.02</version>
+      <type>jar</type>
+      <url>http://itext.sourceforge.net/</url>
+      <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
-     <dependency>
-        <groupId>itextpdf</groupId>
-        <artifactId>itext-paulo</artifactId>
-        <version>139</version>
-        <type>jar</type>
-        <url>http://itextpdf.sourceforge.net/</url>
-        <properties>
+    <dependency>
+      <groupId>itextpdf</groupId>
+      <artifactId>itext-paulo</artifactId>
+      <version>139</version>
+      <type>jar</type>
+      <url>http://itextpdf.sourceforge.net/</url>
+      <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
-     <dependency>
-        <groupId>ujac</groupId>
-        <artifactId>ujac</artifactId>
-        <version>0.9.18</version>
-        <type>jar</type>
-        <url>http://ujac.sourceforge.net/</url>
-        <properties>
+    <dependency>
+      <groupId>ujac</groupId>
+      <artifactId>ujac</artifactId>
+      <version>0.9.18</version>
+      <type>jar</type>
+      <url>http://ujac.sourceforge.net/</url>
+      <properties>
         <idegaweb.bundle.include>true</idegaweb.bundle.include>
       </properties>
     </dependency>
-	<dependency>
-    		<!-- This is needed because of the IBMainServlet reference -->
-	    <groupId>jspapi</groupId>
-	    <artifactId>jsp-api</artifactId>
-	    <version>2.0</version>
-	    <type>jar</type>
-	    <url>http://jakarta.apache.org/</url>
-	    <properties/>
-	</dependency>
+    <dependency>
+      <!-- This is needed because of the IBMainServlet reference -->
+
+      <groupId>jspapi</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.0</version>
+      <type>jar</type>
+      <url>http://jakarta.apache.org/</url>
+      <properties/>
+    </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.core</artifactId>
-      <!--HELPER--><version>3.0.5</version><!--HELPER-->
-      <!--HELPERversion>SNAPSHOT</versionHELPER-->
+      <!--version>3.0.5</version-->
+      <version>SNAPSHOT</version>
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <eclipse.dependency>true</eclipse.dependency>
       </properties>
-	</dependency>
+    </dependency>
     <dependency>
       <groupId>bundles</groupId>
       <artifactId>com.idega.builder</artifactId>
-      <!--HELPER--><version>1.4.2</version><!--HELPER-->
-      <!--HELPERversion>SNAPSHOT</versionHELPER-->
+      <!--version>1.4.2</version-->
+      <version>SNAPSHOT</version>
+
       <type>jar</type>
       <url>http://www.idega.com/</url>
       <properties>
         <eclipse.dependency>true</eclipse.dependency>
       </properties>
-	</dependency>
+    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src/java</sourceDirectory>
