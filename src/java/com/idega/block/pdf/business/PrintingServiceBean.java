@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.4 2006/02/15 08:46:47 laddi Exp $
+ * $Id: PrintingServiceBean.java,v 1.5 2006/02/15 11:30:53 laddi Exp $
  * Created on 15.10.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -26,10 +26,10 @@ import com.idega.business.IBOServiceBean;
 
 /**
  * 
- *  Last modified: $Date: 2006/02/15 08:46:47 $ by $Author: laddi $
+ *  Last modified: $Date: 2006/02/15 11:30:53 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PrintingServiceBean extends IBOServiceBean  implements PrintingService{
     
@@ -68,6 +68,7 @@ public class PrintingServiceBean extends IBOServiceBean  implements PrintingServ
            if(resourceDirectory!=null)
                documentPrinter.setResourceLoader(new FileResourceLoader(resourceDirectory));
            OutputStream os = pcx.getDocumentStream();
+           documentPrinter.setXmlReaderClass("org.apache.xerces.parsers.SAXParser");
            documentPrinter.printDocument(os);
            return documentPrinter;
     } catch (DocumentHandlerException e) {
