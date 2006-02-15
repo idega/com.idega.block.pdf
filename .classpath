@@ -37,8 +37,6 @@
   </classpathentry>
   <classpathentry kind="var" path="MAVEN_REPO/jta/jars/jta-spec1_0_1.jar">
   </classpathentry>
-  <classpathentry kind="var" path="MAVEN_REPO/xerces/jars/xerces-2.4.0.jar">
-  </classpathentry>
   <classpathentry kind="output" path="target/classes">
   </classpathentry>
 </classpath>

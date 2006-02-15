@@ -67,16 +67,6 @@
       </properties>
     </dependency>
     <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xerces</artifactId>
-      <version>2.4.0</version>
-      <type>jar</type>
-      <url>http://xml.apache.org/</url>
-      <properties>
-        <idegaweb.bundle.include>true</idegaweb.bundle.include>
-      </properties>
-    </dependency>
-    <dependency>
       <groupId>ujac</groupId>
       <artifactId>ujac</artifactId>
       <version>0.9.18</version>
