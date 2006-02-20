@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleType.java,v 1.2 2006/02/15 14:17:07 laddi Exp $
+ * $Id: IWBundleType.java,v 1.3 2006/02/20 21:16:02 laddi Exp $
  * Created on 3.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -26,13 +26,15 @@ import com.idega.idegaweb.IWBundle;
 
 /**
  * 
- *  Last modified: $Date: 2006/02/15 14:17:07 $ by $Author: laddi $
+ *  Last modified: $Date: 2006/02/20 21:16:02 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class IWBundleType extends BaseType {
     
+	protected org.ujac.util.exi.ExpressionInterpreter interpreter;
+	
     /**
      * The 'get' operation for ResourceBundles.
      */
@@ -90,6 +92,7 @@ public class IWBundleType extends BaseType {
      */
     public IWBundleType(ExpressionInterpreter interpreter) {
         super(interpreter);
+        this.interpreter = interpreter;
         ExpressionOperation op = new GetOperation();
         addOperation(".", op);
         addOperation("[]", op);
