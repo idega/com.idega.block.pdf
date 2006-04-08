@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.7 2006/02/15 14:17:07 laddi Exp $ Created
+ * $Id: PrintingServiceBean.java,v 1.8 2006/04/08 12:12:53 laddi Exp $ Created
  * on 15.10.2004
  * 
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -20,13 +20,13 @@ import org.ujac.util.io.FileResourceLoader;
 import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
 
-;
+
 /**
  * 
- * Last modified: $Date: 2006/02/15 14:17:07 $ by $Author: laddi $
+ * Last modified: $Date: 2006/04/08 12:12:53 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.7 $
+ * @version $Revision: 1.8 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
 
