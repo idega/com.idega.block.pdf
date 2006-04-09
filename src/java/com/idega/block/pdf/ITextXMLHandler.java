@@ -67,7 +67,7 @@ public class ITextXMLHandler {
 	 * @return type
 	 */
 	public int type(){
-		return fileType;
+		return this.fileType;
 	}
 	
 	/** Constructs memorybuffers for each type, provided a tagmap 
@@ -110,7 +110,7 @@ public class ITextXMLHandler {
 				Vector buffers = new Vector();
 				Vector oses = new Vector();
 				//System.out.println("Type is "+this.fileType);
-				if((fileType & PDF) == 1){
+				if((this.fileType & PDF) == 1){
 					//System.out.println("starting PDF buffer");
 					MemoryFileBuffer buf = new MemoryFileBuffer();
 					OutputStream OS = new MemoryOutputStream(buf);
@@ -118,7 +118,7 @@ public class ITextXMLHandler {
 					buffers.add(buf);
 					oses.add(OS);
 				}
-				if((fileType & TXT)==2){
+				if((this.fileType & TXT)==2){
 					//System.out.println("starting TXT buffer");
 					MemoryFileBuffer buf = new MemoryFileBuffer();
 					OutputStream OS = new MemoryOutputStream(buf);
@@ -126,7 +126,7 @@ public class ITextXMLHandler {
 					buffers.add(buf);
 					oses.add(OS);
 				}
-				if((fileType & HTML)==4){
+				if((this.fileType & HTML)==4){
 						//System.out.println("starting HTML buffer");
 						MemoryFileBuffer buf = new MemoryFileBuffer();
 						OutputStream OS = new MemoryOutputStream(buf);
@@ -216,8 +216,9 @@ public class ITextXMLHandler {
 			
 			StringWriter out =  new StringWriter(buffer.length());
 			int c;
-	   		while ((c = in.read()) != -1)
-		  		out.write(c);
+	   		while ((c = in.read()) != -1) {
+					out.write(c);
+				}
 	   		in.close();
 	   		out.close();
 			return out.toString();

@@ -42,7 +42,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 	 */
 	protected TxtWriter(Document doc, OutputStream os) {
 		super(doc, os);
-		document.addDocListener(this);
+		this.document.addDocListener(this);
 	}
 	public static TxtWriter getInstance(Document document, OutputStream os) {
 		return new TxtWriter(document, os);
@@ -55,7 +55,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 	 */
 	public boolean add(Element element) throws DocumentException {
 		//System.err.println("adding element "+element.toString());
-		if (pause) {
+		if (this.pause) {
 			return false;
 		}
 		try {
@@ -93,8 +93,9 @@ public class TxtWriter extends DocWriter implements DocListener {
 					if (chunk.getImage() != null) {
 						return;
 					}
-					if (chunk.isEmpty())
+					if (chunk.isEmpty()) {
 						return;
+					}
 					HashMap attributes = chunk.getAttributes();
 					if (attributes != null && attributes.get(Chunk.NEWPAGE) != null) {
 						return;
@@ -136,7 +137,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = paragraph.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
-					os.write(NEWLINE);
+					this.os.write(NEWLINE);
 					return;
 				}
 			case Element.SECTION :
@@ -151,7 +152,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = section.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
-					os.write(NEWLINE);
+					this.os.write(NEWLINE);
 					return;
 				}
 			case Element.LIST :
@@ -170,7 +171,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					for (Iterator i = listItem.iterator(); i.hasNext();) {
 						write((Element) i.next());
 					}
-					os.write(NEWLINE);
+					this.os.write(NEWLINE);
 					return;
 				}
 			case Element.CELL :
@@ -178,14 +179,14 @@ public class TxtWriter extends DocWriter implements DocListener {
 					Cell cell = (Cell) element;
 					// start tag
 					if (cell.isEmpty()) {
-						os.write(TAB);
+						this.os.write(TAB);
 					}
 					else {
 						for (Iterator i = cell.getElements(); i.hasNext();) {
 							write((Element) i.next());
 						}
 					}
-					os.write(TAB);
+					this.os.write(TAB);
 					return;
 				}
 			case Element.ROW :
@@ -198,7 +199,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 							write(cell);
 						}
 					}
-					os.write(NEWLINE);
+					this.os.write(NEWLINE);
 					return;
 				}
 			case Element.TABLE :
@@ -230,7 +231,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 	 * @throws  DocumentException when a document isn't open yet, or has been closed
 	 */
 	public boolean add(String string) throws DocumentException {
-		if (pause) {
+		if (this.pause) {
 			return false;
 		}
 		try {

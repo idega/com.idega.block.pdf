@@ -53,8 +53,8 @@ public class SAXpdfHandler extends SAXiTextHandler {
     
 	public void startElement(String uri, String lname, String name, Attributes attrs) {
 		//System.err.println("Start: " + name);
-		if (myTags.containsKey(name)) {
-			XmlPeer peer = (XmlPeer) myTags.get(name);
+		if (this.myTags.containsKey(name)) {
+			XmlPeer peer = (XmlPeer) this.myTags.get(name);
 			handleStartingTags(peer.getTag(), peer.getAttributes(attrs));
 		}
 		else {
@@ -77,8 +77,8 @@ public class SAXpdfHandler extends SAXiTextHandler {
     
 	public void endElement(String uri, String lname, String name) {
 		//System.err.println("Stop: " + name);
-		if (myTags.containsKey(name)) {
-			XmlPeer peer = (XmlPeer) myTags.get(name);
+		if (this.myTags.containsKey(name)) {
+			XmlPeer peer = (XmlPeer) this.myTags.get(name);
 			handleEndingTags(peer.getTag());
 		}
 		else {

@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleType.java,v 1.3 2006/02/20 21:16:02 laddi Exp $
+ * $Id: IWBundleType.java,v 1.4 2006/04/09 11:41:28 laddi Exp $
  * Created on 3.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -26,10 +26,10 @@ import com.idega.idegaweb.IWBundle;
 
 /**
  * 
- *  Last modified: $Date: 2006/02/20 21:16:02 $ by $Author: laddi $
+ *  Last modified: $Date: 2006/04/09 11:41:28 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.3 $
+ * @version $Revision: 1.4 $
  */
 public class IWBundleType extends BaseType {
     
@@ -46,7 +46,7 @@ public class IWBundleType extends BaseType {
           throw new NoOperandException("No operand given for operation: " + expr.getOperation() + " on object " + expr.getObject() + "!");         
         }
         // getting operand
-        String operandValue = interpreter.evalStringOperand(operand, arg1);
+        String operandValue = IWBundleType.this.interpreter.evalStringOperand(operand, arg1);
 
         IWBundle bundle = (IWBundle) (expr.getObject().getValue());
         String s =  bundle.getProperty(operandValue);
@@ -70,7 +70,7 @@ public class IWBundleType extends BaseType {
           throw new NoOperandException("No operand given for operation: " + expr.getOperation() + " on object " + expr.getObject() + "!");         
         }
         // getting operand
-        String operandValue = interpreter.evalStringOperand(operand, new ExpressionContext(params, bean, formatHelper));
+        String operandValue = IWBundleType.this.interpreter.evalStringOperand(operand, new ExpressionContext(params, bean, formatHelper));
 
         IWBundle bundle = (IWBundle) (expr.getObject().getValue());
         String s =  bundle.getProperty(operandValue);

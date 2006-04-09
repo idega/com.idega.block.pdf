@@ -55,7 +55,7 @@ public class SAXiTextHandler extends DefaultHandler {
 	public SAXiTextHandler(DocListener document) {
 		super();
 		this.document = document;
-		stack = new Stack();
+		this.stack = new Stack();
 	}
 /**
  * Sets the parameter that allows you to enable/disable the control over the Document.open() and Document.close() method.
@@ -97,74 +97,74 @@ public class SAXiTextHandler extends DefaultHandler {
     
 	public void handleStartingTags(String name, Properties attributes) {
 		//System.err.println("Start: " + name);
-		if (ignore || ElementTags.IGNORE.equals(name)) {
-			ignore = true;
+		if (this.ignore || ElementTags.IGNORE.equals(name)) {
+			this.ignore = true;
 			return;
 		}
         
 		// maybe there is some meaningful data that wasn't between tags
-		if (currentChunk != null) {
+		if (this.currentChunk != null) {
 			TextElementArray current;
 			try {
-				current = (TextElementArray) stack.pop();
+				current = (TextElementArray) this.stack.pop();
 			}
 			catch(EmptyStackException ese) {
 				current = new Paragraph();
 			}
-			current.add(currentChunk);
-			stack.push(current);
-			currentChunk = null;
+			current.add(this.currentChunk);
+			this.stack.push(current);
+			this.currentChunk = null;
 		}
         
 		// chunks
 		if (Chunk.isTag(name)) {
-			currentChunk = new Chunk(attributes);
+			this.currentChunk = new Chunk(attributes);
 			return;
 		}
         
 		// symbols
 		if (Entities.isTag(name)) {
 			Font f = new Font();
-			if (currentChunk != null) {
+			if (this.currentChunk != null) {
 				handleEndingTags(ElementTags.CHUNK);
-				f = currentChunk.font();
+				f = this.currentChunk.font();
 			}
-			currentChunk = Entities.get(attributes.getProperty(ElementTags.ID), f);
+			this.currentChunk = Entities.get(attributes.getProperty(ElementTags.ID), f);
 			return;
 		}
 		// phrases
 		if (Phrase.isTag(name)) {
-			stack.push(new Phrase(attributes));
+			this.stack.push(new Phrase(attributes));
 			return;
 		}
         
 		// anchors
 		if (Anchor.isTag(name)) {
-			stack.push(new Anchor(attributes));
+			this.stack.push(new Anchor(attributes));
 			return;
 		}
         
 		// paragraphs and titles
 		if (Paragraph.isTag(name) || Section.isTitle(name)) {
-			stack.push(new Paragraph(attributes));
+			this.stack.push(new Paragraph(attributes));
 			return;
 		}
         
 		// lists
 		if (List.isTag(name)) {
-			stack.push(new List(attributes));
+			this.stack.push(new List(attributes));
 			return;
 		}
         
 		// listitems
 		if (ListItem.isTag(name)) {
-			stack.push(new ListItem(attributes));
+			this.stack.push(new ListItem(attributes));
 			return;
 		}
         
 		// cells
 		if (Cell.isTag(name)) {
-			stack.push(new Cell(attributes));
+			this.stack.push(new Cell(attributes));
 			return;
 		}
         
@@ -184,13 +184,13 @@ public class SAXiTextHandler extends DefaultHandler {
 				// this shouldn't happen
 				throw new ExceptionConverter(bee);
 			}
-			stack.push(table);
+			this.stack.push(table);
 			return;
 		}
         
 		// sections
 		if (Section.isTag(name)) {
-			Element previous = (Element) stack.pop();
+			Element previous = (Element) this.stack.pop();
 			Section section;
 			try {
 				section = ((Section)previous).addSection(attributes);
@@ -198,8 +198,8 @@ public class SAXiTextHandler extends DefaultHandler {
 			catch(ClassCastException cce) {
 				throw new ExceptionConverter(cce);
 			}
-			stack.push(previous);
-			stack.push(section);
+			this.stack.push(previous);
+			this.stack.push(section);
 			return;
 		}
         
@@ -207,13 +207,13 @@ public class SAXiTextHandler extends DefaultHandler {
 		if (Chapter.isTag(name)) {
 			String value; // changed after a suggestion by Serge S. Vasiljev
 			if ((value = (String)attributes.remove(ElementTags.NUMBER)) != null){
-				 chapters = Integer.parseInt(value);
+				 this.chapters = Integer.parseInt(value);
 			 }
 			else {
-			   chapters++;
+			   this.chapters++;
 			}
-			Chapter chapter = new Chapter(attributes,chapters);
-			stack.push(chapter);
+			Chapter chapter = new Chapter(attributes,this.chapters);
+			this.stack.push(chapter);
 			return;
 		}
         
@@ -224,11 +224,11 @@ public class SAXiTextHandler extends DefaultHandler {
 				Object current;
 				try {
 					// if there is an element on the stack...
-					current = stack.pop();
+					current = this.stack.pop();
 					// ...and it's a Chapter or a Section, the Image can be added directly
 					if (current instanceof Chapter || current instanceof Section || current instanceof Cell) {
 						((TextElementArray)current).add(img);
-						stack.push(current);
+						this.stack.push(current);
 						return;
 					}
 					// ...if not, the Image is wrapped in a Chunk before it's added
@@ -240,16 +240,16 @@ public class SAXiTextHandler extends DefaultHandler {
 								if (current instanceof Anchor) {
 									img.setAnnotation(new Annotation(0, 0, 0, 0, ((Anchor)current).reference()));
 								}
-								current = stack.pop();
+								current = this.stack.pop();
 							}
 							((TextElementArray)current).add(img);
-							stack.push(current);
+							this.stack.push(current);
 						}
 						catch(EmptyStackException ese) {
-							document.add(img);
+							this.document.add(img);
 						}
 						while (!newStack.empty()) {
-							stack.push(newStack.pop());
+							this.stack.push(newStack.pop());
 						}
 						return;
 					}
@@ -257,7 +257,7 @@ public class SAXiTextHandler extends DefaultHandler {
 				catch(EmptyStackException ese) {
 					// if there is no element on the stack, the Image is added to the document
 					try {
-						document.add(img);
+						this.document.add(img);
 					}
 					catch(DocumentException de) {
 						throw new ExceptionConverter(de);
@@ -276,17 +276,17 @@ public class SAXiTextHandler extends DefaultHandler {
 			TextElementArray current;
 			try {
 				try {
-					current = (TextElementArray) stack.pop();
+					current = (TextElementArray) this.stack.pop();
 					try {
 						current.add(annotation);
 					}
 					catch(Exception e) {
-						document.add(annotation);
+						this.document.add(annotation);
 					}
-					stack.push(current);
+					this.stack.push(current);
 				}
 				catch(EmptyStackException ese) {
-					document.add(annotation);
+					this.document.add(annotation);
 				}
 				return;
 			}
@@ -299,21 +299,21 @@ public class SAXiTextHandler extends DefaultHandler {
 		if (isNewline(name)) {
 			TextElementArray current;
 			try {
-				current = (TextElementArray) stack.pop();
+				current = (TextElementArray) this.stack.pop();
 				current.add(Chunk.NEWLINE);
-				stack.push(current);
+				this.stack.push(current);
 			}
 			catch(EmptyStackException ese) {
-				if (currentChunk == null) {
+				if (this.currentChunk == null) {
 					try {
-						document.add(Chunk.NEWLINE);
+						this.document.add(Chunk.NEWLINE);
 					}
 					catch(DocumentException de) {
 						throw new ExceptionConverter(de);
 					}
 				}
 				else {
-					currentChunk.append("\n");
+					this.currentChunk.append("\n");
 				}
 			}
 			return;
@@ -323,15 +323,15 @@ public class SAXiTextHandler extends DefaultHandler {
 		if (isNewpage(name)) {
 			TextElementArray current;
 			try {
-				current = (TextElementArray) stack.pop();
+				current = (TextElementArray) this.stack.pop();
 				Chunk newPage = new Chunk("");
 				newPage.setNewPage();
 				current.add(newPage);
-				stack.push(current);
+				this.stack.push(current);
 			}
 			catch(EmptyStackException ese) {
 				try {
-					document.newPage();
+					this.document.newPage();
 				}
 				catch(DocumentException de) {
 					throw new ExceptionConverter(de);
@@ -346,13 +346,13 @@ public class SAXiTextHandler extends DefaultHandler {
 			Graphic hr = new Graphic();
 			hr.setHorizontalLine(1.0f, 100.0f);
 			try {
-				current = (TextElementArray) stack.pop();
+				current = (TextElementArray) this.stack.pop();
 				current.add(hr);
-				stack.push(current);
+				this.stack.push(current);
 			}
 			catch(EmptyStackException ese) {
 				try {
-					document.add(hr);
+					this.document.add(hr);
 				}
 				catch(DocumentException de) {
 					throw new ExceptionConverter(de);
@@ -369,13 +369,15 @@ public class SAXiTextHandler extends DefaultHandler {
 				key = (String) i.next();
 				value = attributes.getProperty(key);
 				try {
-					document.add(new Meta(key, value));
+					this.document.add(new Meta(key, value));
 				}
 				catch(DocumentException de) {
 					throw new ExceptionConverter(de);
 				}
 			}
-			if (controlOpenClose) document.open();
+			if (this.controlOpenClose) {
+				this.document.open();
+			}
 		}
 	}
     
@@ -401,7 +403,9 @@ public class SAXiTextHandler extends DefaultHandler {
     
 	public void characters(char[] ch, int start, int length) {
         
-		if (ignore) return;
+		if (this.ignore) {
+			return;
+		}
         
 		String content = new String(ch, start, length);
 		//System.err.println("'" + content + "'");
@@ -436,11 +440,11 @@ public class SAXiTextHandler extends DefaultHandler {
 						buf.append(character);
 			}
 		}
-		if (currentChunk == null) {
-			currentChunk = new Chunk(buf.toString());
+		if (this.currentChunk == null) {
+			this.currentChunk = new Chunk(buf.toString());
 		}
 		else {
-			currentChunk.append(buf.toString());
+			this.currentChunk.append(buf.toString());
 		}
 	}
     
@@ -465,10 +469,12 @@ public class SAXiTextHandler extends DefaultHandler {
 		//System.err.println("Stop: " + name);
         
 		if (ElementTags.IGNORE.equals(name)) {
-			ignore = false;
+			this.ignore = false;
 			return;
 		}
-		if (ignore) return;
+		if (this.ignore) {
+			return;
+		}
 		// tags that don't have any content
 		if (isNewpage(name) || Annotation.isTag(name) || Image.isTag(name) || isNewline(name)) {
 			return;
@@ -477,29 +483,29 @@ public class SAXiTextHandler extends DefaultHandler {
 		try {
 			// titles of sections and chapters
 			if (Section.isTitle(name)) {
-				Paragraph current = (Paragraph) stack.pop();
-				if (currentChunk != null) {
-					current.add(currentChunk);
-					currentChunk = null;
+				Paragraph current = (Paragraph) this.stack.pop();
+				if (this.currentChunk != null) {
+					current.add(this.currentChunk);
+					this.currentChunk = null;
 				}
-				Section previous = (Section) stack.pop();
+				Section previous = (Section) this.stack.pop();
 				previous.setTitle(current);
-				stack.push(previous);
+				this.stack.push(previous);
 				return;
 			}
             
 			// all other endtags
-			if (currentChunk != null) {
+			if (this.currentChunk != null) {
 				TextElementArray current;
 				try {
-					current = (TextElementArray) stack.pop();
+					current = (TextElementArray) this.stack.pop();
 				}
 				catch(EmptyStackException ese) {
 					current = new Paragraph();
 				}
-				current.add(currentChunk);
-				stack.push(current);
-				currentChunk = null;
+				current.add(this.currentChunk);
+				this.stack.push(current);
+				this.currentChunk = null;
 			}
             
 			// chunks
@@ -509,36 +515,36 @@ public class SAXiTextHandler extends DefaultHandler {
             
 			// phrases, anchors, lists, tables
 			if (Phrase.isTag(name) || Anchor.isTag(name) || List.isTag(name) || Paragraph.isTag(name)) {
-				Element current = (Element) stack.pop();
+				Element current = (Element) this.stack.pop();
 				try {
-					TextElementArray previous = (TextElementArray) stack.pop();
+					TextElementArray previous = (TextElementArray) this.stack.pop();
 					previous.add(current);
-					stack.push(previous);
+					this.stack.push(previous);
 				}
 				catch(EmptyStackException ese) {
-					document.add(current);
+					this.document.add(current);
 				}
 				return;
 			}
             
 			// listitems
 			if (ListItem.isTag(name)) {
-				ListItem listItem = (ListItem) stack.pop();
-				List list = (List) stack.pop();
+				ListItem listItem = (ListItem) this.stack.pop();
+				List list = (List) this.stack.pop();
 				list.add(listItem);
-				stack.push(list);
+				this.stack.push(list);
 			}
             
 			// tables
 			if (Table.isTag(name)) {
-				Table table = (Table) stack.pop();           
+				Table table = (Table) this.stack.pop();           
 				try {
-					TextElementArray previous = (TextElementArray) stack.pop(); 
+					TextElementArray previous = (TextElementArray) this.stack.pop(); 
 					previous.add(table);
-					stack.push(previous);
+					this.stack.push(previous);
 				}
 				catch(EmptyStackException ese) {
-					document.add(table);
+					this.document.add(table);
 				}
 				return;
 			}
@@ -550,7 +556,7 @@ public class SAXiTextHandler extends DefaultHandler {
 				Table table;
 				Cell cell;
 				while (true) {
-					Element element = (Element) stack.pop();
+					Element element = (Element) this.stack.pop();
 					if (element.type() == Element.CELL) {
 						cell = (Cell) element;
 						columns += cell.colspan();
@@ -620,7 +626,7 @@ public class SAXiTextHandler extends DefaultHandler {
 					}
 					table.setWidths(cellWidths);
 				}
-				stack.push(table);
+				this.stack.push(table);
 			}
             
 			// cells
@@ -630,13 +636,13 @@ public class SAXiTextHandler extends DefaultHandler {
             
 			// sections
 			if (Section.isTag(name)) {
-				stack.pop();
+				this.stack.pop();
 				return;
 			}
             
 			// chapters
 			if (Chapter.isTag(name)) {
-				document.add((Element) stack.pop());
+				this.document.add((Element) this.stack.pop());
 				return;
 			}
             
@@ -644,21 +650,23 @@ public class SAXiTextHandler extends DefaultHandler {
 			if (isDocumentRoot(name)) {
 				try {
 					while (true) {
-						Element element = (Element) stack.pop();
+						Element element = (Element) this.stack.pop();
 						try {
-							TextElementArray previous = (TextElementArray) stack.pop();
+							TextElementArray previous = (TextElementArray) this.stack.pop();
 							previous.add(element);
-							stack.push(previous);
+							this.stack.push(previous);
 						}
 						catch(EmptyStackException es) {
-							document.add(element);
+							this.document.add(element);
 						}
 					}
 				}
 				catch(EmptyStackException ese) {
 					// empty on purpose
 				}
-				if (controlOpenClose) document.close();
+				if (this.controlOpenClose) {
+					this.document.close();
+				}
 				return;
 			}
 		}
