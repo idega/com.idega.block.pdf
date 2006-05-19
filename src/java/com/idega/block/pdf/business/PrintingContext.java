@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingContext.java,v 1.1 2004/11/04 20:32:46 aron Exp $
+ * $Id: PrintingContext.java,v 1.2 2006/05/19 10:11:23 laddi Exp $
  * Created on 15.10.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -16,10 +16,10 @@ import java.util.Map;
 
 /**
  * 
- *  Last modified: $Date: 2004/11/04 20:32:46 $ by $Author: aron $
+ *  Last modified: $Date: 2006/05/19 10:11:23 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.1 $
+ * @version $Revision: 1.2 $
  */
 public interface PrintingContext {
 
@@ -70,4 +70,15 @@ public interface PrintingContext {
      */
     public void setDocumentStream(OutputStream out);
     
+    /**
+     * Gets the file name of the document created from the printing context
+     * @return
+     */
+    public String getFileName();
+
+    /**
+     * Sets the file name of the document created from the printing context
+     * @param fileName
+     */
+    public void setFileName(String fileName);
 }

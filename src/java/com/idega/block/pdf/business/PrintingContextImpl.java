@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingContextImpl.java,v 1.2 2006/04/09 11:41:28 laddi Exp $
+ * $Id: PrintingContextImpl.java,v 1.3 2006/05/19 10:11:23 laddi Exp $
  * Created on 15.10.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -17,10 +17,10 @@ import java.util.Map;
 
 /**
  * 
- *  Last modified: $Date: 2006/04/09 11:41:28 $ by $Author: laddi $
+ *  Last modified: $Date: 2006/05/19 10:11:23 $ by $Author: laddi $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public class PrintingContextImpl implements PrintingContext {
     
@@ -28,6 +28,7 @@ public class PrintingContextImpl implements PrintingContext {
     private InputStream templateStream;
     private OutputStream documentStream;
     private File resourceDirectory;
+    private String fileName;
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getDocumentProperties()
@@ -89,5 +90,15 @@ public class PrintingContextImpl implements PrintingContext {
     public void setDocumentStream(OutputStream out) {
         this.documentStream = out;
     }
+
+		
+		public String getFileName() {
+			return this.fileName;
+		}
+
+		
+		public void setFileName(String fileName) {
+			this.fileName = fileName;
+		}
 
 }
