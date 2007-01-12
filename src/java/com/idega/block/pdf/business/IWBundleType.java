@@ -1,5 +1,5 @@
 /*
- * $Id: IWBundleType.java,v 1.4 2006/04/09 11:41:28 laddi Exp $
+ * $Id: IWBundleType.java,v 1.1.2.1 2007/01/12 19:31:57 idegaweb Exp $
  * Created on 3.11.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -12,7 +12,6 @@ package com.idega.block.pdf.business;
 import java.util.Map;
 
 import org.ujac.util.exi.BaseExpressionOperation;
-import org.ujac.util.exi.ExpressionContext;
 import org.ujac.util.exi.ExpressionException;
 import org.ujac.util.exi.ExpressionInterpreter;
 import org.ujac.util.exi.ExpressionOperation;
@@ -26,34 +25,18 @@ import com.idega.idegaweb.IWBundle;
 
 /**
  * 
- *  Last modified: $Date: 2006/04/09 11:41:28 $ by $Author: laddi $
+ *  Last modified: $Date: 2007/01/12 19:31:57 $ by $Author: idegaweb $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.1.2.1 $
  */
 public class IWBundleType extends BaseType {
     
-	protected org.ujac.util.exi.ExpressionInterpreter interpreter;
-	
     /**
      * The 'get' operation for ResourceBundles.
      */
     class GetOperation extends BaseExpressionOperation {
-    	
-      public Object evaluate(ExpressionTuple expr, ExpressionContext arg1) throws ExpressionException {
-        Operand operand = expr.getOperand();
-        if (operand == null) {
-          throw new NoOperandException("No operand given for operation: " + expr.getOperation() + " on object " + expr.getObject() + "!");         
-        }
-        // getting operand
-        String operandValue = IWBundleType.this.interpreter.evalStringOperand(operand, arg1);
-
-        IWBundle bundle = (IWBundle) (expr.getObject().getValue());
-        String s =  bundle.getProperty(operandValue);
-        return s;
-			}
-
-			/**
+      /**
        * Evaluates the given values.
        * @param expr The expression tuple to process. 
        * @param params The map holding the parameters.
@@ -70,7 +53,7 @@ public class IWBundleType extends BaseType {
           throw new NoOperandException("No operand given for operation: " + expr.getOperation() + " on object " + expr.getObject() + "!");         
         }
         // getting operand
-        String operandValue = IWBundleType.this.interpreter.evalStringOperand(operand, new ExpressionContext(params, bean, formatHelper));
+        String operandValue = IWBundleType.this.interpreter.evalStringOperand(operand, params, bean, formatHelper);
 
         IWBundle bundle = (IWBundle) (expr.getObject().getValue());
         String s =  bundle.getProperty(operandValue);
@@ -92,7 +75,6 @@ public class IWBundleType extends BaseType {
      */
     public IWBundleType(ExpressionInterpreter interpreter) {
         super(interpreter);
-        this.interpreter = interpreter;
         ExpressionOperation op = new GetOperation();
         addOperation(".", op);
         addOperation("[]", op);

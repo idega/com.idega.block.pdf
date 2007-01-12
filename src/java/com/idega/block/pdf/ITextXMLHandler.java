@@ -217,8 +217,8 @@ public class ITextXMLHandler {
 			StringWriter out =  new StringWriter(buffer.length());
 			int c;
 	   		while ((c = in.read()) != -1) {
-					out.write(c);
-				}
+				out.write(c);
+			}
 	   		in.close();
 	   		out.close();
 			return out.toString();
