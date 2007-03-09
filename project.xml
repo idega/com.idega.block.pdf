@@ -1,111 +1,117 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project>
-	<extend>${base.project.dir}/block-dependencies.xml</extend>
-	<pomVersion>3</pomVersion>
-	<name>idegaWeb Pdf Block</name>
-	<artifactId>com.idega.block.pdf</artifactId>
-	<currentVersion>3.1.1</currentVersion>
-	<inceptionYear>2000</inceptionYear>
-	<shortDescription>Pdf</shortDescription>
-	<versions>
-		<version>
-			<id>3.1.0</id>
-			<name>3.1.0</name>
-			<tag>PDF_1_0_1</tag>
-		</version>
-	</versions>
-	<branches />
-	<developers>
-		<developer>
-			<name>Tryggvi Larusson</name>
-			<id>tryggvil</id>
-			<email>tryggvi@idega.is</email>
-			<organization>idega software</organization>
-			<roles />
-		</developer>
-		<developer>
-			<name>Pall Helgason</name>
-			<id>palli</id>
-			<email>palli@idega.is</email>
-			<organization>idega software</organization>
-			<roles />
-		</developer>
-		<developer>
-			<name>Eirikur Sveinn Hrafnsson</name>
-			<id>eiki</id>
-			<email>eiki@idega.is</email>
-			<organization>idega software</organization>
-			<roles />
-		</developer>
-		<developer>
-			<name>Thorhallur Helgason</name>
-			<id>laddi</id>
-			<email>laddi@idega.is</email>
-			<organization>idega software</organization>
-			<roles />
-		</developer>
-		<developer>
-			<name>Aron Birkir</name>
-			<id>aron</id>
-			<email>aron@idega.is</email>
-			<organization>idega software</organization>
-			<roles />
-		</developer>
-	</developers>
-	<dependencies>
-		<dependency>
-			<groupId>itext</groupId>
-			<artifactId>itext-xml</artifactId>
-			<version>1.02</version>
-			<type>jar</type>
-			<url>http://itext.sourceforge.net/</url>
-			<properties>
-				<idegaweb.bundle.include>true</idegaweb.bundle.include>
-			</properties>
-		</dependency>
-		<dependency>
-			<groupId>ujac</groupId>
-			<artifactId>ujac</artifactId>
-			<version>0.9.25</version>
-			<type>jar</type>
-			<url>http://ujac.sourceforge.net/</url>
-			<properties>
-				<idegaweb.bundle.include>true</idegaweb.bundle.include>
-			</properties>
-		</dependency>
-		<dependency>
-			<!-- This is needed because of the IBMainServlet reference -->
-			<groupId>jspapi</groupId>
-			<artifactId>jsp-api</artifactId>
-			<version>2.0</version>
-			<type>jar</type>
-			<url>http://jakarta.apache.org/</url>
-			<properties />
-		</dependency>
-		<dependency>
-			<groupId>bundles</groupId>
-			<artifactId>com.idega.core</artifactId>
-			<version>3.1.39</version>
-			<type>jar</type>
-			<url>http://www.idega.com/</url>
-		</dependency>
-		<dependency>
-			<groupId>bundles</groupId>
-			<artifactId>com.idega.builder</artifactId>
-			<version>3.1.2</version>
-			<type>jar</type>
-			<url>http://www.idega.com/</url>
-		</dependency>
-	</dependencies>
-	<build>
-		<sourceDirectory>src/java</sourceDirectory>
-		<unitTestSourceDirectory>src/test</unitTestSourceDirectory>
-		<unitTest>
-			<includes>
-				<include>**/*Test.java</include>
-			</includes>
-		</unitTest>
-	</build>
-	<properties />
+  <extend>${base.project.dir}/block-dependencies.xml</extend>
+  <pomVersion>3</pomVersion>
+  <name>idegaWeb Pdf Block</name>
+  <artifactId>com.idega.block.pdf</artifactId>
+  <currentVersion>3.1.1</currentVersion>
+  <inceptionYear>2000</inceptionYear>
+  <shortDescription>Pdf</shortDescription>
+  <versions>
+    <version>
+      <id>3.1.0</id>
+      <name>3.1.0</name>
+      <tag>PDF_1_0_1</tag>
+    </version>
+    <version>
+      <id>3.1.1</id>
+      <name>3.1.1</name>
+      <tag>PDF_3_1_1</tag>
+    </version>
+  </versions>
+  <branches/>
+  <developers>
+    <developer>
+      <name>Tryggvi Larusson</name>
+      <id>tryggvil</id>
+      <email>tryggvi@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Pall Helgason</name>
+      <id>palli</id>
+      <email>palli@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Eirikur Sveinn Hrafnsson</name>
+      <id>eiki</id>
+      <email>eiki@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Thorhallur Helgason</name>
+      <id>laddi</id>
+      <email>laddi@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+    <developer>
+      <name>Aron Birkir</name>
+      <id>aron</id>
+      <email>aron@idega.is</email>
+      <organization>idega software</organization>
+      <roles/>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>itext</groupId>
+      <artifactId>itext-xml</artifactId>
+      <version>1.02</version>
+      <type>jar</type>
+      <url>http://itext.sourceforge.net/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
+      <groupId>ujac</groupId>
+      <artifactId>ujac</artifactId>
+      <version>0.9.25</version>
+      <type>jar</type>
+      <url>http://ujac.sourceforge.net/</url>
+      <properties>
+        <idegaweb.bundle.include>true</idegaweb.bundle.include>
+      </properties>
+    </dependency>
+    <dependency>
+      <!-- This is needed because of the IBMainServlet reference -->
+
+      <groupId>jspapi</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>2.0</version>
+      <type>jar</type>
+      <url>http://jakarta.apache.org/</url>
+      <properties/>
+    </dependency>
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>com.idega.core</artifactId>
+      <version>3.1.39</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+    </dependency>
+    <dependency>
+      <groupId>bundles</groupId>
+      <artifactId>com.idega.builder</artifactId>
+      <version>3.1.2</version>
+      <type>jar</type>
+      <url>http://www.idega.com/</url>
+    </dependency>
+  </dependencies>
+  <build>
+    <sourceDirectory>src/java</sourceDirectory>
+    <unitTestSourceDirectory>src/test</unitTestSourceDirectory>
+    <unitTest>
+      <includes>
+        <include>**/*Test.java</include>
+      </includes>
+    </unitTest>
+  </build>
+  <properties/>
 </project>
