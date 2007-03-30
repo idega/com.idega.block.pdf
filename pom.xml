@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: pom.xml,v 1.1 2006/11/29 13:40:33 civilis Exp $ -->
+<!-- $Id: pom.xml,v 1.2 2007/03/30 13:32:06 civilis Exp $ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -59,11 +59,11 @@
       <artifactId>com.idega.core</artifactId>
       <version>3.5.0</version>
       <type>jar</type>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>itext</groupId>
-      <artifactId>itext-xml</artifactId>
-      <version>1.02</version>
+      <artifactId>itext</artifactId>
+      <version>1.3.1</version>
       <type>jar</type>
     </dependency>
     <dependency>
