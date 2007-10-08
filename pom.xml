@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: pom.xml,v 1.5 2007/08/16 14:37:10 valdas Exp $ -->
+<!-- $Id: pom.xml,v 1.6 2007/10/08 05:25:25 civilis Exp $ -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -8,7 +8,7 @@
   <groupId>com.idega.block.addon</groupId>
   <artifactId>com.idega.block.pdf</artifactId>
   <packaging>jar</packaging>
-  <version>4.0-SNAPSHOT</version>
+  <version>${com.idega.block.addon-com.idega.block.pdf-version}</version>
   <inceptionYear>2000</inceptionYear>
   <description>Pdf</description>
   <parent>
@@ -61,40 +61,37 @@
     <dependency>
       <groupId>com.idega.block.platform</groupId>
       <artifactId>com.idega.core</artifactId>
-      <version>4.0-SNAPSHOT</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>itextpdf</groupId>
       <artifactId>itext-paulo</artifactId>
-      <version>139</version>
+      <version>${itextpdf-itext-paulo-version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>itext</groupId>
       <artifactId>itext-xml</artifactId>
-      <version>1.02</version>
+      <version>${itext-itext-xml-version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
       <groupId>ujac</groupId>
       <artifactId>ujac</artifactId>
-      <version>0.9.25</version>
+      <version>${ujac-ujac-version}</version>
       <type>jar</type>
     </dependency>
-    <dependency>
+    <!--  <dependency>-->
       <!-- This is needed because of the IBMainServlet reference -->
-      <groupId>javax.servlet.jsp</groupId>
+      <!--  <groupId>javax.servlet.jsp</groupId>
       <artifactId>jsp-api</artifactId>
       <version>2.1</version>
       <type>jar</type>
       <scope>provided</scope>
     </dependency>
+    -->
     <dependency>
       <groupId>com.idega.block.platform</groupId>
       <artifactId>com.idega.builder</artifactId>
-      <version>4.0-SNAPSHOT</version>
-      <type>jar</type>
     </dependency>
   </dependencies>
 </project>
