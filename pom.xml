@@ -20,6 +20,7 @@
      -->
     <connection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.addon/com.idega.block.pdf/</connection>
     <developerConnection>scm:cvs:ext:civilis@code.idega.com:/idega/cvs:com.idega.block.addon/com.idega.block.pdf/</developerConnection>
+    <tag>com_idega_block_addon_super-4_0_0</tag>
   </scm>
   <developers>
     <developer>
