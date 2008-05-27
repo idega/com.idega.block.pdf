@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.9 2008/05/27 10:41:40 alexis Exp $ Created
+ * $Id: PrintingServiceBean.java,v 1.10 2008/05/27 12:46:36 alexis Exp $ Created
  * on 15.10.2004
  * 
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -14,21 +14,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.logging.Logger;
+
 import org.ujac.print.DocumentHandlerException;
 import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
+
 import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
 
 
 /**
  * 
- * Last modified: $Date: 2008/05/27 10:41:40 $ by $Author: alexis $
+ * Last modified: $Date: 2008/05/27 12:46:36 $ by $Author: alexis $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.9 $
+ * @version $Revision: 1.10 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
+	
+	private Logger logger = Logger.getLogger(PrintingServiceBean.class.getName());
 
 	/*
 	 * // defining the document properties, this map is used for dynamical content
@@ -79,8 +84,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			throw new IBORuntimeException(e);
 		}
 		catch (IOException e) {
-			System.out.println("Exception data: " + e.getMessage());
-			System.out.println("Exception data: " + e.getCause().getMessage());
+			logger.severe("Failed to print the certificate file: " + e.getMessage() + "\n because: " + e.getCause().getMessage());
 			throw new IBORuntimeException(e);
 		}
 	}
