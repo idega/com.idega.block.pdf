@@ -19,6 +19,11 @@
       <name>3.1.1</name>
       <tag>PDF_3_1_1</tag>
     </version>
+    <version>
+      <id>3.1.2</id>
+      <name>3.1.2</name>
+      <tag>PDF_3_1_2</tag>
+    </version>
   </versions>
   <branches/>
   <developers>
@@ -59,7 +64,7 @@
     </developer>
   </developers>
   <dependencies>
-	<dependency>
+    <dependency>
       <groupId>itextpdf</groupId>
       <artifactId>itext-paulo</artifactId>
       <version>139</version>
