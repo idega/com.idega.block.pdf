@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.8 2006/04/08 12:12:53 laddi Exp $ Created
+ * $Id: PrintingServiceBean.java,v 1.9 2008/05/27 10:41:40 alexis Exp $ Created
  * on 15.10.2004
  * 
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -23,10 +23,10 @@ import com.idega.business.IBOServiceBean;
 
 /**
  * 
- * Last modified: $Date: 2006/04/08 12:12:53 $ by $Author: laddi $
+ * Last modified: $Date: 2008/05/27 10:41:40 $ by $Author: alexis $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.8 $
+ * @version $Revision: 1.9 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
 
@@ -79,6 +79,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			throw new IBORuntimeException(e);
 		}
 		catch (IOException e) {
+			System.out.println("Exception data: " + e.getMessage());
+			System.out.println("Exception data: " + e.getCause().getMessage());
 			throw new IBORuntimeException(e);
 		}
 	}
