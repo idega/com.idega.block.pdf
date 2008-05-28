@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.10 2008/05/27 12:46:36 alexis Exp $ Created
+ * $Id: PrintingServiceBean.java,v 1.11 2008/05/28 06:01:09 alexis Exp $ Created
  * on 15.10.2004
  * 
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -26,10 +26,10 @@ import com.idega.business.IBOServiceBean;
 
 /**
  * 
- * Last modified: $Date: 2008/05/27 12:46:36 $ by $Author: alexis $
+ * Last modified: $Date: 2008/05/28 06:01:09 $ by $Author: alexis $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.10 $
+ * @version $Revision: 1.11 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
 	
@@ -85,6 +85,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		}
 		catch (IOException e) {
 			logger.severe("Failed to print the certificate file: " + e.getMessage() + "\n because: " + e.getCause().getMessage());
+			System.out.println("Printing exception " + e.getMessage());
+			System.out.println("Printing exception cause " + e.getCause().getMessage());
 			throw new IBORuntimeException(e);
 		}
 	}
