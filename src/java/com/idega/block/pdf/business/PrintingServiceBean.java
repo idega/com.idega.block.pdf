@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingServiceBean.java,v 1.12 2008/05/29 07:38:01 alexis Exp $ Created
+ * $Id: PrintingServiceBean.java,v 1.13 2008/10/23 12:28:06 valdas Exp $ Created
  * on 15.10.2004
  * 
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -14,26 +14,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.logging.Logger;
-
 import org.ujac.print.DocumentHandlerException;
 import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
 
 import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
+import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.servlet.filter.IWBundleResourceFilter;
 
 
 /**
  * 
- * Last modified: $Date: 2008/05/29 07:38:01 $ by $Author: alexis $
+ * Last modified: $Date: 2008/10/23 12:28:06 $ by $Author: valdas $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.12 $
+ * @version $Revision: 1.13 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
 	
-	private Logger logger = Logger.getLogger(PrintingServiceBean.class.getName());
+	private static final long serialVersionUID = 5645957534865246451L;
 
 	/*
 	 * // defining the document properties, this map is used for dynamical content
@@ -56,9 +57,16 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 * Creates a pdf by transforming an xml template. The given PrintingContext
 	 * supplies the necessary resources for the generation
 	 */
+	@SuppressWarnings("unchecked")
 	public DocumentPrinter printDocument(PrintingContext pcx) {
 		try {
 			Map documentProperties = pcx.getDocumentProperties();
+			if (pcx.getBundle() == null) {
+				Object o = documentProperties.get(PrintingContext.IW_BUNDLE_ROPERTY_NAME);
+				if (o instanceof IWBundle) {
+					pcx.setBundle((IWBundle) o);
+				}
+			}
 			
 			InputStream is = pcx.getTemplateStream();
 			
@@ -72,6 +80,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			File resourceDirectory = pcx.getResourceDirectory();
 			if (resourceDirectory != null) {
 				documentPrinter.setResourceLoader(new FileResourceLoader(resourceDirectory));
+				
+				loadAllResources(pcx.getBundle(), resourceDirectory);
 			}
 			
 			OutputStream os = pcx.getDocumentStream();
@@ -95,5 +105,23 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 */
 	public PrintingContext createPrintingContext() {
 		return new PrintingContextImpl();
+	}
+	
+	private boolean loadAllResources(IWBundle bundle, File resourceDirectory) {
+		if (bundle == null || resourceDirectory == null || !resourceDirectory.exists() || !resourceDirectory.isDirectory()) {
+			return false;
+		}
+		
+		String pathInBundle = resourceDirectory.getAbsolutePath();
+		int bundleIdentifierIndex = pathInBundle.indexOf(bundle.getBundleIdentifier());
+		if (bundleIdentifierIndex == -1) {
+			return false;
+		}
+		pathInBundle = new StringBuilder(pathInBundle.substring(bundleIdentifierIndex + bundle.getBundleIdentifier().length() + 1)).append(File.separator)
+						.toString();
+		
+		IWBundleResourceFilter.copyAllFilesFromJarDirectory(IWMainApplication.getDefaultIWMainApplication(), bundle, pathInBundle);
+		
+		return true;
 	}
 }
