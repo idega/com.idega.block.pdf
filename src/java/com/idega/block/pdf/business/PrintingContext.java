@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingContext.java,v 1.2 2006/05/19 10:11:23 laddi Exp $
+ * $Id: PrintingContext.java,v 1.3 2008/10/23 12:25:07 valdas Exp $
  * Created on 15.10.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -14,15 +14,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import com.idega.idegaweb.IWBundle;
+
 /**
  * 
- *  Last modified: $Date: 2006/05/19 10:11:23 $ by $Author: laddi $
+ *  Last modified: $Date: 2008/10/23 12:25:07 $ by $Author: valdas $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.2 $
+ * @version $Revision: 1.3 $
  */
 public interface PrintingContext {
 
+	public static final String IW_BUNDLE_ROPERTY_NAME = "iwb";
+	
     /**
      * Gets the document properties
      * @return
@@ -81,4 +85,8 @@ public interface PrintingContext {
      * @param fileName
      */
     public void setFileName(String fileName);
+    
+    public void setBundle(IWBundle bundle);
+    
+    public IWBundle getBundle();
 }
