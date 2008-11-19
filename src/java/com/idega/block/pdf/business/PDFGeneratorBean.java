@@ -463,10 +463,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 			expectedValues = ListUtil.convertStringArrayToList(new String[] {"deselected-case"});
 			List<String> buttonAreaClassValue = ListUtil.convertStringArrayToList(new String[] {"fbc_button_area"});
 			for (Element div: divs) {
-				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, expectedValues)) {
-					setCustomAttribute(div, ATTRIBUTE_STYLE, "display: block;");
-				}
-				
 				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, buttonAreaClassValue)) {
 					setCustomAttribute(div, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
 				}
