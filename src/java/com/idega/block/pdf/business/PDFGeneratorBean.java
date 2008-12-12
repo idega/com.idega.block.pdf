@@ -150,7 +150,11 @@ public class PDFGeneratorBean implements PDFGenerator {
 			return;
 		}
 		
-		XMLOutputter output = new XMLOutputter(Format.getPrettyFormat());
+		String htmlContent = getBuilderService(iwc).getCleanedHtmlContent(outputter.outputString(doc), false, false, true);
+		if (StringUtil.isEmpty(htmlContent)) {
+			LOGGER.log(Level.WARNING, "Document converted to HTML is empty!");
+			return;
+		}
 		
 		IWSlideService slide = null;
 		try {
@@ -163,7 +167,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 		}
 		LOGGER.log(Level.WARNING, "Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
 		try {
-			slide.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", output.outputString(doc), "text/html", true);
+			slide.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html", true);
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -488,6 +492,34 @@ public class PDFGeneratorBean implements PDFGenerator {
 				if (doElementHasAttribute(span, ATTRIBUTE_CLASS, expectedValues)) {
 					setCustomAttribute(span, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
 				}
+			}
+		}
+		
+		//	<textarea>
+		List<Element> textareas = getDocumentElements("textarea", document);
+		if (!ListUtil.isEmpty(textareas)) {
+			for (Element textarea: textareas) {
+				if (ListUtil.isEmpty(textarea.getChildren())) {
+					Element emptyDiv = new Element(TAG_DIV);
+					setCustomAttribute(emptyDiv, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
+					textarea.addContent(emptyDiv);
+				}
+			}
+		}
+		
+		//	<iframes>
+		List<Element> frames = getDocumentElements("iframe", document);
+		if (!ListUtil.isEmpty(frames)) {
+			List<Element> needless = new ArrayList<Element>();
+			
+			for (Element frame: frames) {
+				if (ListUtil.isEmpty(frame.getChildren())) {
+					needless.add(frame);
+				}
+			}
+			
+			for (Iterator<Element> needlessIter = needless.iterator(); needlessIter.hasNext();) {
+				needlessIter.next().detach();
 			}
 		}
 		
