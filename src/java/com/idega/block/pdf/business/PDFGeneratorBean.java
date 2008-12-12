@@ -461,14 +461,24 @@ public class PDFGeneratorBean implements PDFGenerator {
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
 		
+		List<Element> needless = new ArrayList<Element>();
+		
 		//	<div>
 		List<Element> divs = getDocumentElements(TAG_DIV, document);
 		if (!ListUtil.isEmpty(divs)) {
 			expectedValues = ListUtil.convertStringArrayToList(new String[] {"deselected-case"});
 			List<String> buttonAreaClassValue = ListUtil.convertStringArrayToList(new String[] {"fbc_button_area"});
+			List<String> errorsClassValue = ListUtil.convertStringArrayToList(new String[] {"xformErrors"});
+			List<String> displayNoneAttributeValue = ListUtil.convertStringArrayToList(new String[] {ATTRIBUTE_VALUE_DISPLAY_NONE});	
 			for (Element div: divs) {
 				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, buttonAreaClassValue)) {
 					setCustomAttribute(div, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
+				}
+				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, errorsClassValue)) {
+					needless.add(div);
+				}
+				if (doElementHasAttribute(div, ATTRIBUTE_STYLE, displayNoneAttributeValue)) {
+					needless.add(div);
 				}
 			}
 		}
@@ -510,17 +520,15 @@ public class PDFGeneratorBean implements PDFGenerator {
 		//	<iframes>
 		List<Element> frames = getDocumentElements("iframe", document);
 		if (!ListUtil.isEmpty(frames)) {
-			List<Element> needless = new ArrayList<Element>();
-			
 			for (Element frame: frames) {
 				if (ListUtil.isEmpty(frame.getChildren())) {
 					needless.add(frame);
 				}
 			}
-			
-			for (Iterator<Element> needlessIter = needless.iterator(); needlessIter.hasNext();) {
-				needlessIter.next().detach();
-			}
+		}
+		
+		for (Iterator<Element> needlessIter = needless.iterator(); needlessIter.hasNext();) {
+			needlessIter.next().detach();
 		}
 		
 		return document;
