@@ -509,11 +509,8 @@ public class PDFGeneratorBean implements PDFGenerator {
 		List<Element> textareas = getDocumentElements("textarea", document);
 		if (!ListUtil.isEmpty(textareas)) {
 			for (Element textarea: textareas) {
-				if (ListUtil.isEmpty(textarea.getChildren())) {
-					Element emptyDiv = new Element(TAG_DIV);
-					setCustomAttribute(emptyDiv, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
-					textarea.addContent(emptyDiv);
-				}
+				textarea.setName(TAG_DIV);
+				textarea.setAttribute(new Attribute(ATTRIBUTE_CLASS, "textAreaReplacementForPDFDocument"));
 			}
 		}
 		
