@@ -10,8 +10,11 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,6 +39,8 @@ import com.idega.core.builder.business.BuilderServiceFactory;
 import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.graphics.generator.business.PDFGenerator;
 import com.idega.idegaweb.IWApplicationContext;
+import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Page;
 import com.idega.slide.business.IWSlideService;
@@ -380,41 +385,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 			}
 		}
 		
-		//	<select>
-		List<Element> selects = getDocumentElements("select", document);
-		String multipleAtrrName = "multiple";
-		String selectAttrName = "selected";
-		String singleSelectClass = "replaceForSelectSingle";
-		String multiSelectClass = "replaceForSelectMulti";
-		String listTag = "ul";
-		String listItemTag = "li";
-		String optionTag = "option";
-		
-		List<String> multipleAttrValues = ListUtil.convertStringArrayToList(new String[] {Boolean.TRUE.toString(), multipleAtrrName});
-		List<String> selectedAttrValues = ListUtil.convertStringArrayToList(new String[] {Boolean.TRUE.toString(), selectAttrName});
-		for (Element select: selects) {
-			if (doElementHasAttribute(select, multipleAtrrName, multipleAttrValues)) {	//	Is multiple?
-				//	Will create list: <ul><li></li>...</ul>
-				select.setName(listTag);
-				setCustomAttribute(select, ATTRIBUTE_CLASS, multiSelectClass);
-				
-				List<Element> options = getDocumentElements(optionTag, select);
-				for (Element option: options) {
-					if (doElementHasAttribute(option, selectAttrName, selectedAttrValues)) {
-						option.setName(listItemTag);
-					}
-					else {
-						needlessElements.add(option);
-					}
-				}
-			}
-			else {
-				//	Will convert to <div>
-				select.setName(TAG_DIV);
-				setCustomAttribute(select, ATTRIBUTE_CLASS, singleSelectClass);
-			}
-		}
-		
 		//	Removing needless elements
 		for (Iterator<Element> it = needlessElements.iterator(); it.hasNext();) {
 			it.next().detach();
@@ -458,6 +428,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
 		
@@ -522,6 +493,69 @@ public class PDFGeneratorBean implements PDFGenerator {
 					needless.add(frame);
 				}
 			}
+		}
+
+		//	<select>
+		List<Element> selects = getDocumentElements("select", document);
+		if (!ListUtil.isEmpty(selects)) {
+			Locale locale = null;
+			IWContext iwc = CoreUtil.getIWContext();
+			if (iwc != null) {
+				locale = iwc.getCurrentLocale();
+			}
+			if (locale == null) {
+				locale = Locale.ENGLISH;
+			}
+			IWResourceBundle iwrb = null;
+			try {
+				iwrb = IWMainApplication.getDefaultIWMainApplication().getBundle(CoreConstants.CORE_IW_BUNDLE_IDENTIFIER).getResourceBundle(locale);
+			} catch(Exception e) {
+				LOGGER.log(Level.WARNING, "Error getting resources bundle by locale: " + locale, e);
+			}
+			String defaultLabel = "None of the options selected";
+			
+			for (Element select: selects) {
+				List<Element> optionsGroup = select.getChildren("optgroup");
+				if (!ListUtil.isEmpty(optionsGroup)) {
+					List<Element> options = optionsGroup.get(0).getChildren("option");
+					if (!ListUtil.isEmpty(options)) {
+						//	Getting values for selected options
+						Element option = null;
+						List<String> selectedOptionsValues = new ArrayList<String>();
+						for (Iterator<Element> optionsIter = options.iterator(); optionsIter.hasNext();) {
+							option = optionsIter.next();
+							if (doElementHasAttribute(option, "selected", Arrays.asList("selected"))) {
+								selectedOptionsValues.add(option.getTextNormalize());
+							}
+						}
+						
+						if (ListUtil.isEmpty(selectedOptionsValues)) {
+							selectedOptionsValues.add(iwrb == null ? defaultLabel :
+																	iwrb.getLocalizedString("pdf_generator.none_of_options_selected", defaultLabel));
+						}
+						
+						select.setName(TAG_DIV);
+						select.setAttribute(new Attribute(ATTRIBUTE_CLASS, "selectDropdownReplacementForPDFDocument"));
+						if (doElementHasAttribute(select, ATTRIBUTE_STYLE, Arrays.asList(ATTRIBUTE_VALUE_DISPLAY_NONE))) {
+							select.removeAttribute(ATTRIBUTE_STYLE);
+						}
+						Element list = new Element("ul");
+						select.setContent(Arrays.asList(list));
+						Collection<Element> listItems = new ArrayList<Element>(selectedOptionsValues.size());
+						for (String value: selectedOptionsValues) {
+							Element listItem = new Element("li");
+							listItem.setText(value);
+							listItems.add(listItem);
+						}
+						list.setContent(listItems);
+					}
+				}
+			}
+		}
+		selects = getDocumentElements("select", document);
+		if (!ListUtil.isEmpty(selects)) {
+			//	Removing empty selects
+			needless.addAll(selects);
 		}
 		
 		for (Iterator<Element> needlessIter = needless.iterator(); needlessIter.hasNext();) {
