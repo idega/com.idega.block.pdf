@@ -12,9 +12,11 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -429,7 +431,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
 		
@@ -541,39 +542,42 @@ public class PDFGeneratorBean implements PDFGenerator {
 			String defaultLabel = "None of the options selected";
 			
 			for (Element select: selects) {
-				List<Element> optionsGroup = select.getChildren("optgroup");
-				if (!ListUtil.isEmpty(optionsGroup)) {
-					List<Element> options = optionsGroup.get(0).getChildren("option");
-					if (!ListUtil.isEmpty(options)) {
-						//	Getting values for selected options
-						Element option = null;
-						List<String> selectedOptionsValues = new ArrayList<String>();
-						for (Iterator<Element> optionsIter = options.iterator(); optionsIter.hasNext();) {
-							option = optionsIter.next();
-							if (doElementHasAttribute(option, "selected", Arrays.asList("selected"))) {
-								selectedOptionsValues.add(option.getTextNormalize());
+				if (doElementHasAttribute(select, ATTRIBUTE_CLASS, Arrays.asList("selector-prototype"))) {
+					needless.add(select);
+				} else {
+					Map<String, List<Element>> allOptions = getSelectOptions(select);
+					if (allOptions != null && !ListUtil.isEmpty(allOptions.values())) {
+						for (List<Element> options: allOptions.values()) {
+							//	Getting values for selected options
+							Element option = null;
+							List<String> selectedOptionsValues = new ArrayList<String>();
+							for (Iterator<Element> optionsIter = options.iterator(); optionsIter.hasNext();) {
+								option = optionsIter.next();
+								if (doElementHasAttribute(option, "selected", Arrays.asList("selected"))) {
+									selectedOptionsValues.add(option.getTextNormalize());
+								}
 							}
+							
+							if (ListUtil.isEmpty(selectedOptionsValues)) {
+								selectedOptionsValues.add(iwrb == null ? defaultLabel :
+																		iwrb.getLocalizedString("pdf_generator.none_of_options_selected", defaultLabel));
+							}
+							
+							select.setName(TAG_DIV);
+							select.setAttribute(new Attribute(ATTRIBUTE_CLASS, "selectDropdownReplacementForPDFDocument"));
+							if (doElementHasAttribute(select, ATTRIBUTE_STYLE, Arrays.asList(ATTRIBUTE_VALUE_DISPLAY_NONE))) {
+								select.removeAttribute(ATTRIBUTE_STYLE);
+							}
+							Element list = new Element("ul");
+							select.setContent(Arrays.asList(list));
+							Collection<Element> listItems = new ArrayList<Element>(selectedOptionsValues.size());
+							for (String value: selectedOptionsValues) {
+								Element listItem = new Element("li");
+								listItem.setText(value);
+								listItems.add(listItem);
+							}
+							list.setContent(listItems);
 						}
-						
-						if (ListUtil.isEmpty(selectedOptionsValues)) {
-							selectedOptionsValues.add(iwrb == null ? defaultLabel :
-																	iwrb.getLocalizedString("pdf_generator.none_of_options_selected", defaultLabel));
-						}
-						
-						select.setName(TAG_DIV);
-						select.setAttribute(new Attribute(ATTRIBUTE_CLASS, "selectDropdownReplacementForPDFDocument"));
-						if (doElementHasAttribute(select, ATTRIBUTE_STYLE, Arrays.asList(ATTRIBUTE_VALUE_DISPLAY_NONE))) {
-							select.removeAttribute(ATTRIBUTE_STYLE);
-						}
-						Element list = new Element("ul");
-						select.setContent(Arrays.asList(list));
-						Collection<Element> listItems = new ArrayList<Element>(selectedOptionsValues.size());
-						for (String value: selectedOptionsValues) {
-							Element listItem = new Element("li");
-							listItem.setText(value);
-							listItems.add(listItem);
-						}
-						list.setContent(listItems);
 					}
 				}
 			}
@@ -589,6 +593,33 @@ public class PDFGeneratorBean implements PDFGenerator {
 		}
 		
 		return document;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private Map<String, List<Element>> getSelectOptions(Element select) {
+		List<Element> options = null;
+		List<Element> optionsGroups = select.getChildren("optgroup");
+		if (ListUtil.isEmpty(optionsGroups)) {
+			options = select.getChildren("option");
+			if (ListUtil.isEmpty(options)) {
+				return null;
+			}
+			Map<String, List<Element>> allOptions = new HashMap<String, List<Element>>();
+			allOptions.put("allOptions", options);
+			return allOptions;
+		}
+		
+		int index = 0;
+		Map<String, List<Element>> groupedOptions = new HashMap<String, List<Element>>();
+		for (Element optionsGroup: optionsGroups) {
+			options = optionsGroup.getChildren("option");
+			if (!ListUtil.isEmpty(options)) {
+				groupedOptions.put(String.valueOf(index), options);
+				index++;
+			}
+		}
+		
+		return groupedOptions;
 	}
 	
 	private boolean doElementHasAttribute(Element e, String attrName, List<String> expectedValues) {
