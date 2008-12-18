@@ -358,22 +358,23 @@ public class PDFGeneratorBean implements PDFGenerator {
 		String value = null;
 		boolean needReplace = true;
 		//	Inputs we don't want to be replaced
-		List<String> typeAttrValues = ListUtil.convertStringArrayToList(new String[] {"button", "hidden", "image", "password", "reset", "submit"});
+		List<String> typeAttrValues = ListUtil.convertStringArrayToList(new String[] {"button", "image", "password", "reset", "submit"});
 		List<String> textTypeValue = ListUtil.convertStringArrayToList(new String[] {"text"});
 		List<String> checkedAttrValues = ListUtil.convertStringArrayToList(new String[] {"checked", Boolean.TRUE.toString(), CoreConstants.EMPTY});
 		for (Element input: inputs) {
 			needReplace = !doElementHasAttribute(input, typeAttrName, typeAttrValues);
 			
-			if (needReplace) {
+			if (doElementHasAttribute(input, typeAttrName, Arrays.asList("hidden"))) {
+				needlessElements.add(input);
+			} else if (needReplace) {
 				if (doElementHasAttribute(input, typeAttrName, textTypeValue)) {
 					//	Text inputs
 					valueAttr = input.getAttribute(valueAttrName);
 					value = valueAttr == null ? null : valueAttr.getValue();
-					if (value != null) {
-						input.setText(value);
-						input.setName(TAG_DIV);
-						setCustomAttribute(input, ATTRIBUTE_CLASS, className);
-					}
+					value = StringUtil.isEmpty(value) ? CoreConstants.MINUS : value;
+					input.setText(value);
+					input.setName(TAG_DIV);
+					setCustomAttribute(input, ATTRIBUTE_CLASS, className);
 				}
 				else {
 					//	Radio button or check box
@@ -443,7 +444,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 			List<String> displayNoneAttributeValue = ListUtil.convertStringArrayToList(new String[] {ATTRIBUTE_VALUE_DISPLAY_NONE});	
 			for (Element div: divs) {
 				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, buttonAreaClassValue)) {
-					setCustomAttribute(div, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
+					needless.add(div);
 				}
 				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, errorsClassValue)) {
 					needless.add(div);
@@ -460,7 +461,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 			expectedValues = ListUtil.convertStringArrayToList(new String[] {"label"});
 			for (Element legend: legends) {
 				if (doElementHasAttribute(legend, ATTRIBUTE_CLASS, expectedValues)) {
-					setCustomAttribute(legend, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
+					needless.add(legend);
 				}
 			}
 		}
@@ -471,7 +472,11 @@ public class PDFGeneratorBean implements PDFGenerator {
 			expectedValues = ListUtil.convertStringArrayToList(new String[] {"help-text"});
 			for (Element span: spans) {
 				if (doElementHasAttribute(span, ATTRIBUTE_CLASS, expectedValues)) {
-					setCustomAttribute(span, ATTRIBUTE_STYLE, ATTRIBUTE_VALUE_DISPLAY_NONE);
+					needless.add(span);
+				} else if (doElementHasAttribute(span, ATTRIBUTE_CLASS, Arrays.asList("selector-prototype"))) {
+					needless.add(span);
+				} else if (doElementHasAttribute(span, ATTRIBUTE_CLASS, Arrays.asList("alert"))) {
+					needless.add(span);
 				}
 			}
 		}
@@ -482,7 +487,28 @@ public class PDFGeneratorBean implements PDFGenerator {
 			for (Element textarea: textareas) {
 				textarea.setName(TAG_DIV);
 				textarea.setAttribute(new Attribute(ATTRIBUTE_CLASS, "textAreaReplacementForPDFDocument"));
+				if (StringUtil.isEmpty(textarea.getTextNormalize())) {
+					textarea.setText(CoreConstants.MINUS);
+				}
 			}
+		}
+		
+		//	Links
+		List<Element> links = getDocumentElements("a", document);
+		if (!ListUtil.isEmpty(links)) {
+			for (Element link: links) {
+				if (doElementHasAttribute(link, "name", Arrays.asList("chibaform-head")) && ListUtil.isEmpty(link.getChildren())) {
+					needless.add(link);
+				} else if (doElementHasAttribute(link, ATTRIBUTE_CLASS, Arrays.asList("help-icon"))) {
+					needless.add(link);
+				}
+			}
+		}
+		
+		//	Scripts
+		List<Element> scripts = getDocumentElements("script", document);
+		if (!ListUtil.isEmpty(scripts)) {
+			needless.addAll(scripts);
 		}
 		
 		//	<iframes>
