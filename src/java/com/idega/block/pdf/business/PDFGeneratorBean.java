@@ -327,12 +327,17 @@ public class PDFGeneratorBean implements PDFGenerator {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
 			String mediaAttrName = "media";
-			String mediaAttrValue = "all";
+			String mediaAttrValueAll = "all";
+			String mediaAttrValuePrint = "print";
 			String typeAttrName = "type";
+			String hrefAttrName = "href";
+			Attribute href = null;
 			List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
 			for (Element style: styles) {
 				if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
-					setCustomAttribute(style, mediaAttrName, mediaAttrValue);
+					href = style.getAttribute(hrefAttrName);
+					setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll :
+																			href.getValue().endsWith("pdf.css") ? mediaAttrValuePrint : mediaAttrValueAll);
 				}
 			}
 		}
