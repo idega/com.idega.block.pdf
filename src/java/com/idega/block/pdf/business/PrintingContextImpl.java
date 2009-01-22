@@ -1,5 +1,5 @@
 /*
- * $Id: PrintingContextImpl.java,v 1.4 2008/10/23 12:25:07 valdas Exp $
+ * $Id: PrintingContextImpl.java,v 1.5 2009/01/22 17:30:04 anton Exp $
  * Created on 15.10.2004
  *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
@@ -13,17 +13,16 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import com.idega.idegaweb.IWBundle;
 
 /**
  * 
- *  Last modified: $Date: 2008/10/23 12:25:07 $ by $Author: valdas $
+ *  Last modified: $Date: 2009/01/22 17:30:04 $ by $Author: anton $
  * 
  * @author <a href="mailto:aron@idega.com">aron</a>
- * @version $Revision: 1.4 $
+ * @version $Revision: 1.5 $
  */
 public class PrintingContextImpl implements PrintingContext {
     
