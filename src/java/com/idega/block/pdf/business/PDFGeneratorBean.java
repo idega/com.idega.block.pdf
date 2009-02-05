@@ -89,7 +89,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 			return null;
 		}
 		
-		//	TODO: remove this when CSS for PDF is made
 		uploadSourceToSlide(iwc, doc);
 		
 		//	Rendering PDF
@@ -151,6 +150,10 @@ public class PDFGeneratorBean implements PDFGenerator {
 	}
 	
 	private void uploadSourceToSlide(IWContext iwc, Document document) {
+		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE)) {
+			return;
+		}
+		
 		org.jdom.Document doc = XmlUtil.getJDOMXMLDocument(document);
 		if (doc == null) {
 			LOGGER.log(Level.WARNING, "Document is null!");
