@@ -52,7 +52,7 @@ import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.xml.XmlUtil;
 
-@Scope("session")
+@Scope("singleton")
 @Service(PDFGenerator.SPRING_BEAN_NAME_PDF_GENERATOR)
 public class PDFGeneratorBean implements PDFGenerator {
 
