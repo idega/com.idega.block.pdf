@@ -40,7 +40,7 @@ public class PDFWriter extends DownloadWriter{
 		
 		IWSlideService slide = null;
 		try {
-			slide = (IWSlideService) IBOLookup.getServiceInstance(iwc, IWSlideService.class);
+			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
 		} catch (IBOLookupException e) {
 			logger.log(Level.SEVERE, "Error getting IWSlideService!", e);
 		}

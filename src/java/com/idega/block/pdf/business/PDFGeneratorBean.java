@@ -168,7 +168,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 		
 		IWSlideService slide = null;
 		try {
-			slide = (IWSlideService) IBOLookup.getServiceInstance(iwc, IWSlideService.class);
+			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
 		} catch (IBOLookupException e) {
 			e.printStackTrace();
 		}
@@ -318,7 +318,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 	private IWSlideService getSlideService(IWApplicationContext iwac) {
 		if (slide == null) {
 			try {
-				slide = (IWSlideService) IBOLookup.getServiceInstance(iwac, IWSlideService.class);
+				slide = IBOLookup.getServiceInstance(iwac, IWSlideService.class);
 			} catch (IBOLookupException e) {
 				e.printStackTrace();
 			}
