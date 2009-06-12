@@ -22,8 +22,6 @@ import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
 
-import org.jaxen.JaxenException;
-import org.jaxen.jdom.JDOMXPath;
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.Format;
@@ -64,8 +62,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 	private ITextRenderer renderer = null;
 	private XMLOutputter outputter = null;
 	
-	private static final String XMLNS_NAME_SPACE_ID = "xmlns";
-	private static final String XHTML_NAME_SPACE = "http://www.w3.org/1999/xhtml";
 	private static final String TAG_DIV = "div";
 	private static final String ATTRIBUTE_CLASS = "class";
 	private static final String ATTRIBUTE_STYLE = "style";
@@ -673,26 +669,8 @@ public class PDFGeneratorBean implements PDFGenerator {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private List<Element> getDocumentElements(String tagName, Object node) {
-		String xpathExprStart = "//";
-		String xpathExprNameSpacePart = XMLNS_NAME_SPACE_ID + ":";
-		
-		JDOMXPath xp = null;
-		List<Element> elements = null;
-		try {
-			xp = new JDOMXPath(new StringBuilder(xpathExprStart).append(xpathExprNameSpacePart).append(tagName).toString());
-			xp.addNamespace(XMLNS_NAME_SPACE_ID, XHTML_NAME_SPACE);
-			elements = xp.selectNodes(node);
-			if (ListUtil.isEmpty(elements)) {
-				xp = new JDOMXPath(new StringBuilder(xpathExprStart).append(tagName).toString());
-				xp.addNamespace(XMLNS_NAME_SPACE_ID, XHTML_NAME_SPACE);
-				elements = xp.selectNodes(node);
-			}
-		} catch (JaxenException e) {
-			e.printStackTrace();
-		}
-		
+	private List<Element> getDocumentElements(String tagName, org.jdom.Document document) {
+		List<Element> elements = XmlUtil.getElementsByXPath(document, tagName, XmlUtil.XHTML_NAMESPACE_ID);
 		return ListUtil.isEmpty(elements) ? new ArrayList<Element>(0) : elements;
 	}
 
