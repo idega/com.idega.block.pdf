@@ -26,6 +26,7 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
@@ -47,10 +48,11 @@ import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.xml.XmlUtil;
 
-@Scope("singleton")
+@Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(PDFGenerator.SPRING_BEAN_NAME_PDF_GENERATOR)
 public class PDFGeneratorBean implements PDFGenerator {
 
@@ -435,6 +437,7 @@ public class PDFGeneratorBean implements PDFGenerator {
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
 		
@@ -492,8 +495,25 @@ public class PDFGeneratorBean implements PDFGenerator {
 			for (Element textarea: textareas) {
 				textarea.setName(TAG_DIV);
 				textarea.setAttribute(new Attribute(ATTRIBUTE_CLASS, "textAreaReplacementForPDFDocument"));
-				if (StringUtil.isEmpty(textarea.getTextNormalize())) {
+				String originalText = textarea.getTextNormalize();
+				if (StringUtil.isEmpty(originalText)) {
 					textarea.setText(CoreConstants.MINUS);
+				} else {
+					String text = new StringBuilder("<p>").append(originalText).append("</p>").toString();
+					while (text.indexOf("src=\"../") != -1) {
+						text = StringHandler.replace(text, "../", CoreConstants.EMPTY);
+					}
+					org.jdom.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
+					if (textAreaContent != null) {
+						try {
+							List clonedContent = textAreaContent.cloneContent();
+							textarea.removeContent();
+							textarea.setContent(clonedContent);
+						} catch (Exception e) {
+							LOGGER.log(Level.WARNING, "Error setting new content for ex-textarea element: " + text, e);
+							textarea.setText(originalText);
+						}
+					}
 				}
 			}
 		}
