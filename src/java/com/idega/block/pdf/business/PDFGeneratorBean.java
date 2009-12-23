@@ -26,18 +26,19 @@ import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xml.sax.InputSource;
 
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.core.builder.business.BuilderService;
-import com.idega.core.builder.business.BuilderServiceFactory;
+import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.file.util.MimeTypeUtil;
+import com.idega.event.PDFGeneratedEvent;
 import com.idega.graphics.generator.business.PDFGenerator;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
@@ -54,15 +55,15 @@ import com.idega.util.xml.XmlUtil;
 
 @Scope(BeanDefinition.SCOPE_SINGLETON)
 @Service(PDFGenerator.SPRING_BEAN_NAME_PDF_GENERATOR)
-public class PDFGeneratorBean implements PDFGenerator {
+public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator {
 
 	private static final Logger LOGGER = Logger.getLogger(PDFGeneratorBean.class.getName());
 	
-	private IWSlideService slide = null;
-	private BuilderService builder = null;
-	
 	private ITextRenderer renderer = null;
 	private XMLOutputter outputter = null;
+	
+	@Autowired
+	private ApplicationContext applicationContext;
 	
 	private static final String TAG_DIV = "div";
 	private static final String ATTRIBUTE_CLASS = "class";
@@ -79,7 +80,12 @@ public class PDFGeneratorBean implements PDFGenerator {
 	}
 	
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
-		return upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath);
+		if (upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath)) {
+			getApplicationContext().publishEvent(new PDFGeneratedEvent(this, doc));
+			return true;
+		}
+		
+		return false;
 	}
 	
 	private byte[] getPDFBytes(IWContext iwc, Document doc) {
@@ -164,16 +170,12 @@ public class PDFGeneratorBean implements PDFGenerator {
 			return;
 		}
 		
-		IWSlideService slide = null;
-		try {
-			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
-		} catch (IBOLookupException e) {
-			e.printStackTrace();
-		}
+		IWSlideService slide = getSlideService(iwc);
 		if (slide == null) {
 			return;
 		}
-		LOGGER.log(Level.WARNING, "Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
+		
+		LOGGER.warning("Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
 		try {
 			slide.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html", true);
 		} catch (RemoteException e) {
@@ -300,28 +302,6 @@ public class PDFGeneratorBean implements PDFGenerator {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private BuilderService getBuilderService(IWApplicationContext iwac) {
-		if (builder == null) {
-			try {
-				builder = BuilderServiceFactory.getBuilderService(iwac);
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-		}
-		return builder;
-	}
-	
-	private IWSlideService getSlideService(IWApplicationContext iwac) {
-		if (slide == null) {
-			try {
-				slide = IBOLookup.getServiceInstance(iwac, IWSlideService.class);
-			} catch (IBOLookupException e) {
-				e.printStackTrace();
-			}
-		}
-		return slide;
 	}
 	
 	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom.Document document) {
@@ -703,4 +683,19 @@ public class PDFGeneratorBean implements PDFGenerator {
 		return new ByteArrayInputStream(pdfMemory);
 	}
 
+	public ApplicationContext getApplicationContext() {
+		return applicationContext;
+	}
+
+	public void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
+	}
+	
+	private IWSlideService getSlideService(IWApplicationContext iwac) {
+		return getServiceInstance(iwac, IWSlideService.class);
+	}
+	
+	private BuilderService getBuilderService(IWApplicationContext iwac) {
+		return getServiceInstance(iwac, BuilderService.class);
+	}
 }
