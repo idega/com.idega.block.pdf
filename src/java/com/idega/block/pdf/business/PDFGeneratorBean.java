@@ -2,10 +2,8 @@ package com.idega.block.pdf.business;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
@@ -48,6 +46,7 @@ import com.idega.presentation.Page;
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
+import com.idega.util.IOUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
@@ -74,18 +73,13 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		try {
 			renderer = new ITextRenderer();
 		} catch(Exception e) {
-			LOGGER.log(Level.SEVERE, "Error creating bean!", e);
+			LOGGER.log(Level.SEVERE, "Error creating PDF generator!", e);
 		}
 		outputter = new XMLOutputter(Format.getPrettyFormat());
 	}
 	
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
-		if (upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath)) {
-			getApplicationContext().publishEvent(new PDFGeneratedEvent(this, doc));
-			return true;
-		}
-		
-		return false;
+		return upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath);
 	}
 	
 	private byte[] getPDFBytes(IWContext iwc, Document doc) {
@@ -108,9 +102,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			e.printStackTrace();
 			return null;
 		} finally {
-			closeOutputStream(os);
+			IOUtil.close(os);
 		}
 		
+		getApplicationContext().publishEvent(new PDFGeneratedEvent(this, doc));
 		return memory;
 	}
 	
@@ -139,7 +134,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
-			closeInputStream(is);
+			IOUtil.close(is);
 		}
 		return false;
 	}
@@ -221,8 +216,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			e.printStackTrace();
 			return null;
 		} finally {
-			closeInputStream(stream);
-			closeReader(reader);
+			IOUtil.close(stream);
+			IOUtil.closeReader(reader);
 		}
 		
 		return document;
@@ -266,42 +261,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 		
 		return generatePDF(iwc, page, fileName, uploadPath, replaceInputs, checkCustomTags);
-	}
-	
-	private void closeInputStream(InputStream is) {
-		if (is == null) {
-			return;
-		}
-		
-		try {
-			is.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void closeReader(Reader reader) {
-		if (reader == null) {
-			return;
-		}
-		
-		try {
-			reader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void closeOutputStream(OutputStream os) {
-		if (os == null) {
-			return;
-		}
-		
-		try {
-			os.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom.Document document) {
