@@ -2,10 +2,13 @@ package com.idega.block.pdf.business;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +22,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
-
 import org.jdom.Attribute;
 import org.jdom.Element;
 import org.jdom.output.Format;
@@ -43,6 +45,7 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Page;
+import com.idega.servlet.filter.IWBundleResourceFilter;
 import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
@@ -266,6 +269,11 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom.Document document) {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
+			Element head = getDocumentElements("head", document).get(0);
+			Element inlineStyles = null;
+			StringBuffer stylesBuffer = null;
+			List<Element> needless = new ArrayList<Element>();
+			
 			String mediaAttrName = "media";
 			String mediaAttrValueAll = "all";
 			String mediaAttrValuePrint = "print";
@@ -276,9 +284,53 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			for (Element style: styles) {
 				if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
 					href = style.getAttribute(hrefAttrName);
-					setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll :
-																			href.getValue().endsWith("pdf.css") ? mediaAttrValuePrint : mediaAttrValueAll);
+					String hrefValue = href.getValue();
+					
+					String cssContent = null;
+					InputStream streamToContent = null;
+					try {
+						if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+							streamToContent = getSlideService(iwac).getInputStream(hrefValue);
+						} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
+							File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
+							streamToContent = new FileInputStream(file);
+						} else {
+							URL url = new URL(hrefValue);
+							streamToContent = url.openStream();
+						}
+						
+						cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
+					} catch (Exception e) {
+						LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
+					} finally {
+						IOUtil.close(streamToContent);
+					}
+					
+					if (StringUtil.isEmpty(cssContent)) {
+						setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
+																									mediaAttrValuePrint : mediaAttrValueAll);
+					} else {
+						if (inlineStyles == null) {
+							inlineStyles = new Element("style");
+							head.addContent(inlineStyles);
+						}
+						if (stylesBuffer == null) {
+							stylesBuffer = new StringBuffer();
+						}
+						
+						stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
+						
+						needless.add(style);
+					}
 				}
+			}
+			
+			if (stylesBuffer != null && inlineStyles != null) {
+				inlineStyles.setText(stylesBuffer.toString());
+			}
+			
+			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
+				needlessStyles.next().detach();
 			}
 		}
 		
