@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
 import org.jdom.Attribute;
+import org.jdom.Content;
 import org.jdom.Element;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
@@ -428,7 +429,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
 		
@@ -497,7 +497,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 					org.jdom.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
 					if (textAreaContent != null) {
 						try {
-							List clonedContent = textAreaContent.cloneContent();
+							@SuppressWarnings("unchecked")
+							List<Content> clonedContent = textAreaContent.cloneContent();
 							textarea.removeContent();
 							textarea.setContent(clonedContent);
 						} catch (Exception e) {
