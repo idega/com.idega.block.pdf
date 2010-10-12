@@ -30,6 +30,7 @@ public class PrintingContextImpl implements PrintingContext {
     private InputStream templateStream;
     private OutputStream documentStream;
     private File resourceDirectory;
+    private String resourceURL;
     private String fileName;
     private IWBundle bundle;
     
@@ -78,6 +79,20 @@ public class PrintingContextImpl implements PrintingContext {
      */
     public void setResourceDirectory(File directory) {
         this.resourceDirectory = directory;
+    }
+
+    /* (non-Javadoc)
+     * @see com.idega.block.pdf.business.PrintingContext#getResourceURL()
+     */
+    public String getResourceURL() {
+        return this.resourceURL;
+    }
+
+    /* (non-Javadoc)
+     * @see com.idega.block.pdf.business.PrintingContext#setResourceURL(java.lang.String)
+     */
+    public void setResourceURL(String url) {
+        this.resourceURL = url;
     }
 
     /* (non-Javadoc)

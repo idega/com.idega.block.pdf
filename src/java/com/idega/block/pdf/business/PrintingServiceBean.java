@@ -14,9 +14,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+
 import org.ujac.print.DocumentHandlerException;
 import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
+import org.ujac.util.io.HttpResourceLoader;
 
 import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
@@ -82,6 +84,11 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				documentPrinter.setResourceLoader(new FileResourceLoader(resourceDirectory));
 				
 				loadAllResources(pcx.getBundle(), resourceDirectory);
+			}
+			
+			String resourceURL = pcx.getResourceURL();
+			if (resourceURL != null) {
+				documentPrinter.setResourceLoader(new HttpResourceLoader(resourceURL));
 			}
 			
 			OutputStream os = pcx.getDocumentStream();

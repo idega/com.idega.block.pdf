@@ -62,6 +62,19 @@ public interface PrintingContext {
      * @param directory
      */
     public void setResourceDirectory(File directory);
+
+    /**
+     * Gets an url where extra resources will be loaded from
+     * @return
+     */
+    public String getResourceURL();
+
+    /**
+     * Sets the url where extra resources can be found
+     * @param directory
+     */
+    public void setResourceURL(String url);
+
     /**
      * Gets a Outputstream for the document to be written to.
      * @return
