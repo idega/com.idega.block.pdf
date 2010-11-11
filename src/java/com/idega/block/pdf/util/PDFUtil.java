@@ -1,11 +1,11 @@
 package com.idega.block.pdf.util;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import com.idega.util.IOUtil;
 import com.lowagie.text.Document;
 import com.lowagie.text.pdf.BaseFont;
 import com.lowagie.text.pdf.PdfContentByte;
@@ -17,7 +17,7 @@ public class PDFUtil {
 
 
 	/**
-	 * Merges PDF's
+	 * Merges PDFs
 	 *  
 	 * @param streamOfPDFFiles - PDF's to be merged
 	 * @param outputStream - new merged PDF
@@ -30,10 +30,9 @@ public class PDFUtil {
 	      List<byte[]> pdfs = streamOfPDFFiles;
 	      List<PdfReader> readers = new ArrayList<PdfReader>();
 	      int totalPages = 0;
-	      Iterator<byte[]> iteratorPDFs = pdfs.iterator();
 
 	      // Create Readers for the pdfs.
-	      while (iteratorPDFs.hasNext()) {
+	      for (Iterator<byte[]> iteratorPDFs = pdfs.iterator(); iteratorPDFs.hasNext();) {
 		      byte[] pdf = iteratorPDFs.next();
 		      PdfReader pdfReader = new PdfReader(pdf);
 		      readers.add(pdfReader);
@@ -50,10 +49,9 @@ public class PDFUtil {
 	      PdfImportedPage page;
 	      int currentPageNumber = 0;
 	      int pageOfCurrentReaderPDF = 0;
-	      Iterator<PdfReader> iteratorPDFReader = readers.iterator();
 
 	      // Loop through the PDF files and add to the output.
-	      while (iteratorPDFReader.hasNext()) {
+	      for (Iterator<PdfReader> iteratorPDFReader = readers.iterator(); iteratorPDFReader.hasNext();) {
 	    	  PdfReader pdfReader = iteratorPDFReader.next();
 	
 		        // Create a new page in the target for each source page.
@@ -82,13 +80,7 @@ public class PDFUtil {
 	    } finally {
 	    	if (document.isOpen())
 	    		document.close();
-		    	try {
-		    		if (outputStream != null)
-		    			outputStream.close();
-		    	} catch (IOException ioe) {
-		    		ioe.printStackTrace();
-		    	}
 	    	}
+	    	IOUtil.close(outputStream);
 	  }
-	
 }
