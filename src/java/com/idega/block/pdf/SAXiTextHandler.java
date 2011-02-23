@@ -24,6 +24,7 @@ import java.util.Stack;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.Attributes;
 import com.lowagie.text.*;
+import com.lowagie.text.factories.ElementFactory;
 /**
  * The <CODE>Tags</CODE>-class maps several XHTML-tags to iText-objects.
  */
@@ -117,8 +118,8 @@ public class SAXiTextHandler extends DefaultHandler {
 		}
         
 		// chunks
-		if (Chunk.isTag(name)) {
-			this.currentChunk = new Chunk(attributes);
+		if (ElementTags.CHUNK.equals(name)) {
+			this.currentChunk = ElementFactory.getChunk(attributes);
 			return;
 		}
         
@@ -127,50 +128,50 @@ public class SAXiTextHandler extends DefaultHandler {
 			Font f = new Font();
 			if (this.currentChunk != null) {
 				handleEndingTags(ElementTags.CHUNK);
-				f = this.currentChunk.font();
+				f = this.currentChunk.getFont();
 			}
 			this.currentChunk = Entities.get(attributes.getProperty(ElementTags.ID), f);
 			return;
 		}
 		// phrases
-		if (Phrase.isTag(name)) {
-			this.stack.push(new Phrase(attributes));
+		if (ElementTags.PHRASE.equals(name)) {
+			this.stack.push(ElementFactory.getPhrase(attributes));
 			return;
 		}
         
 		// anchors
-		if (Anchor.isTag(name)) {
-			this.stack.push(new Anchor(attributes));
+		if (ElementTags.ANCHOR.equals(name)) {
+			this.stack.push(ElementFactory.getAnchor(attributes));
 			return;
 		}
         
 		// paragraphs and titles
-		if (Paragraph.isTag(name) || Section.isTitle(name)) {
-			this.stack.push(new Paragraph(attributes));
+		if (ElementTags.PARAGRAPH.equals(name) || ElementTags.TITLE.equals(name)) {
+			this.stack.push(ElementFactory.getParagraph(attributes));
 			return;
 		}
         
 		// lists
-		if (List.isTag(name)) {
-			this.stack.push(new List(attributes));
+		if (ElementTags.LIST.equals(name)) {
+			this.stack.push(ElementFactory.getList(attributes));
 			return;
 		}
         
 		// listitems
-		if (ListItem.isTag(name)) {
-			this.stack.push(new ListItem(attributes));
+		if (ElementTags.LISTITEM.equals(name)) {
+			this.stack.push(ElementFactory.getListItem(attributes));
 			return;
 		}
         
 		// cells
-		if (Cell.isTag(name)) {
-			this.stack.push(new Cell(attributes));
+		if (ElementTags.CELL.equals(name)) {
+			this.stack.push(ElementFactory.getCell(attributes));
 			return;
 		}
         
 		// tables
-		if (Table.isTag(name)) {
-			Table table = new Table(attributes);
+		if (ElementTags.TABLE.equals(name)) {
+			Table table = ElementFactory.getTable(attributes);
 			float widths[] = table.getProportionalWidths();
 			for (int i = 0; i < widths.length; i++) {
 				if (widths[i] == 0) {
@@ -189,11 +190,11 @@ public class SAXiTextHandler extends DefaultHandler {
 		}
         
 		// sections
-		if (Section.isTag(name)) {
+		if (ElementTags.SECTION.equals(name)) {
 			Element previous = (Element) this.stack.pop();
 			Section section;
 			try {
-				section = ((Section)previous).addSection(attributes);
+				section = ((Section)previous).addSection(ElementFactory.getParagraph(attributes));
 			}
 			catch(ClassCastException cce) {
 				throw new ExceptionConverter(cce);
@@ -204,7 +205,7 @@ public class SAXiTextHandler extends DefaultHandler {
 		}
         
 		// chapters
-		if (Chapter.isTag(name)) {
+		if (ElementTags.CHAPTER.equals(name)) {
 			String value; // changed after a suggestion by Serge S. Vasiljev
 			if ((value = (String)attributes.remove(ElementTags.NUMBER)) != null){
 				 this.chapters = Integer.parseInt(value);
@@ -212,15 +213,15 @@ public class SAXiTextHandler extends DefaultHandler {
 			else {
 			   this.chapters++;
 			}
-			Chapter chapter = new Chapter(attributes,this.chapters);
+			Chapter chapter = new Chapter(ElementFactory.getParagraph(attributes),this.chapters);
 			this.stack.push(chapter);
 			return;
 		}
         
 		// images
-		if (Image.isTag(name)) {
+		if (ElementTags.IMAGE.equals(name)) {
 			try {
-				Image img = Image.getInstance(attributes);
+				Image img = ElementFactory.getImage(attributes);
 				Object current;
 				try {
 					// if there is an element on the stack...
@@ -238,7 +239,7 @@ public class SAXiTextHandler extends DefaultHandler {
 							while (! (current instanceof Chapter || current instanceof Section || current instanceof Cell)) {
 								newStack.push(current);
 								if (current instanceof Anchor) {
-									img.setAnnotation(new Annotation(0, 0, 0, 0, ((Anchor)current).reference()));
+									img.setAnnotation(new Annotation(0, 0, 0, 0, ((Anchor)current).getReference()));
 								}
 								current = this.stack.pop();
 							}
@@ -271,8 +272,8 @@ public class SAXiTextHandler extends DefaultHandler {
 		}
         
 		// annotations
-		if (Annotation.isTag(name)) {
-			Annotation annotation = new Annotation(attributes);
+		if (ElementTags.ANNOTATION.equals(name)) {
+			Annotation annotation = ElementFactory.getAnnotation(attributes);
 			TextElementArray current;
 			try {
 				try {
@@ -330,12 +331,7 @@ public class SAXiTextHandler extends DefaultHandler {
 				this.stack.push(current);
 			}
 			catch(EmptyStackException ese) {
-				try {
-					this.document.newPage();
-				}
-				catch(DocumentException de) {
-					throw new ExceptionConverter(de);
-				}
+				this.document.newPage();
 			}
 			return;
 		}
@@ -476,13 +472,13 @@ public class SAXiTextHandler extends DefaultHandler {
 			return;
 		}
 		// tags that don't have any content
-		if (isNewpage(name) || Annotation.isTag(name) || Image.isTag(name) || isNewline(name)) {
+		if (isNewpage(name) || ElementTags.ANNOTATION.equals(name) || ElementTags.IMAGE.equals(name) || isNewline(name)) {
 			return;
 		}
         
 		try {
 			// titles of sections and chapters
-			if (Section.isTitle(name)) {
+			if (ElementTags.TITLE.equals(name)) {
 				Paragraph current = (Paragraph) this.stack.pop();
 				if (this.currentChunk != null) {
 					current.add(this.currentChunk);
@@ -509,12 +505,12 @@ public class SAXiTextHandler extends DefaultHandler {
 			}
             
 			// chunks
-			if (Chunk.isTag(name)) {
+			if (ElementTags.CHUNK.equals(name)) {
 				return;
 			}
             
 			// phrases, anchors, lists, tables
-			if (Phrase.isTag(name) || Anchor.isTag(name) || List.isTag(name) || Paragraph.isTag(name)) {
+			if (ElementTags.PHRASE.equals(name) || ElementTags.ANCHOR.equals(name) || ElementTags.LIST.equals(name) || ElementTags.PARAGRAPH.equals(name)) {
 				Element current = (Element) this.stack.pop();
 				try {
 					TextElementArray previous = (TextElementArray) this.stack.pop();
@@ -528,7 +524,7 @@ public class SAXiTextHandler extends DefaultHandler {
 			}
             
 			// listitems
-			if (ListItem.isTag(name)) {
+			if (ElementTags.LISTITEM.equals(name)) {
 				ListItem listItem = (ListItem) this.stack.pop();
 				List list = (List) this.stack.pop();
 				list.add(listItem);
@@ -536,7 +532,7 @@ public class SAXiTextHandler extends DefaultHandler {
 			}
             
 			// tables
-			if (Table.isTag(name)) {
+			if (ElementTags.TABLE.equals(name)) {
 				Table table = (Table) this.stack.pop();           
 				try {
 					TextElementArray previous = (TextElementArray) this.stack.pop(); 
@@ -550,7 +546,7 @@ public class SAXiTextHandler extends DefaultHandler {
 			}
             
 			// rows
-			if (Row.isTag(name)) {
+			if (ElementTags.ROW.equals(name)) {
 				ArrayList cells = new ArrayList();
 				int columns = 0;
 				Table table;
@@ -559,7 +555,7 @@ public class SAXiTextHandler extends DefaultHandler {
 					Element element = (Element) this.stack.pop();
 					if (element.type() == Element.CELL) {
 						cell = (Cell) element;
-						columns += cell.colspan();
+						columns += cell.getColspan();
 						cells.add(cell);
 					}
 					else {
@@ -567,8 +563,8 @@ public class SAXiTextHandler extends DefaultHandler {
 						break;
 					}
 				}
-				if (table.columns() < columns) {
-					table.addColumns(columns - table.columns());
+				if (table.getColumns() < columns) {
+					table.addColumns(columns - table.getColumns());
 				}
 				Collections.reverse(cells);
 				String width;
@@ -582,8 +578,8 @@ public class SAXiTextHandler extends DefaultHandler {
 				int j = 0;
 				for (Iterator i = cells.iterator(); i.hasNext(); ) {
 					cell = (Cell) i.next();
-					if ((width = cell.cellWidth()) == null) {
-						if (cell.colspan() == 1 && cellWidths[j] == 0) {
+					if ((width = cell.getWidthAsString()) == null) {
+						if (cell.getColspan() == 1 && cellWidths[j] == 0) {
 							try {
 								cellWidths[j] = 100f / columns;
 								total += cellWidths[j];
@@ -592,11 +588,11 @@ public class SAXiTextHandler extends DefaultHandler {
 								// empty on purpose
 							}
 						}
-						else if (cell.colspan() == 1) {
+						else if (cell.getColspan() == 1) {
 							cellNulls[j] = false;
 						}
 					}
-					else if (cell.colspan() == 1 && width.endsWith("%")) {
+					else if (cell.getColspan() == 1 && width.endsWith("%")) {
 						try {
 							cellWidths[j] = Float.valueOf(width.substring(0, width.length() - 1) + "f").floatValue();
 							total += cellWidths[j];
@@ -605,7 +601,7 @@ public class SAXiTextHandler extends DefaultHandler {
 							// empty on purpose
 						}
 					}
-					j += cell.colspan();
+					j += cell.getColspan();
 					table.addCell(cell);
 				}
 				float widths[] = table.getProportionalWidths();
@@ -630,18 +626,18 @@ public class SAXiTextHandler extends DefaultHandler {
 			}
             
 			// cells
-			if (Cell.isTag(name)) {
+			if (ElementTags.CELL.equals(name)) {
 				return;
 			}
             
 			// sections
-			if (Section.isTag(name)) {
+			if (ElementTags.SECTION.equals(name)) {
 				this.stack.pop();
 				return;
 			}
             
 			// chapters
-			if (Chapter.isTag(name)) {
+			if (ElementTags.CHAPTER.equals(name)) {
 				this.document.add((Element) this.stack.pop());
 				return;
 			}

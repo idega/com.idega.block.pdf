@@ -70,20 +70,14 @@
     <dependency>
       <groupId>itextpdf</groupId>
       <artifactId>itext-paulo</artifactId>
-      <version>${itextpdf-itext-paulo-version}</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>itext</groupId>
       <artifactId>itext-xml</artifactId>
-      <version>${itext-itext-xml-version}</version>
-      <type>jar</type>
     </dependency>
     <dependency>
-      <groupId>ujac</groupId>
+      <groupId>net.sf.ujac</groupId>
       <artifactId>ujac</artifactId>
-      <version>${ujac-ujac-version}</version>
-      <type>jar</type>
     </dependency>
     <dependency>
       <groupId>flyingsaucer</groupId>

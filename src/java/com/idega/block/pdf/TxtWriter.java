@@ -101,7 +101,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 						return;
 					}
 					// contents
-					write((chunk.content()));
+					write((chunk.getContent()));
 					return;
 				}
 			case Element.PHRASE :
@@ -144,8 +144,8 @@ public class TxtWriter extends DocWriter implements DocListener {
 			case Element.CHAPTER :
 				{
 					Section section = (Section) element;
-					if (section.title() != null) {
-						for (Iterator i = section.title().iterator(); i.hasNext();) {
+					if (section.getTitle() != null) {
+						for (Iterator i = section.getTitle().iterator(); i.hasNext();) {
 							write((Element) i.next());
 						}
 					}
@@ -194,7 +194,7 @@ public class TxtWriter extends DocWriter implements DocListener {
 					Row row = (Row) element;
 					// start tag
 					Element cell;
-					for (int i = 0; i < row.columns(); i++) {
+					for (int i = 0; i < row.getColumns(); i++) {
 						if ((cell = (Element) row.getCell(i)) != null) {
 							write(cell);
 						}
