@@ -76,7 +76,7 @@
       <artifactId>itext-xml</artifactId>
     </dependency>
     <dependency>
-      <groupId>net.sf.ujac</groupId>
+      <groupId>ujac</groupId>
       <artifactId>ujac</artifactId>
     </dependency>
     <dependency>
