@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
+
 import org.jdom.Attribute;
 import org.jdom.Content;
 import org.jdom.Element;
@@ -61,18 +62,18 @@ import com.idega.util.xml.XmlUtil;
 public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator {
 
 	private static final Logger LOGGER = Logger.getLogger(PDFGeneratorBean.class.getName());
-	
+
 	private ITextRenderer renderer = null;
 	private XMLOutputter outputter = null;
-	
+
 	@Autowired
 	private ApplicationContext applicationContext;
-	
+
 	private static final String TAG_DIV = "div";
 	private static final String ATTRIBUTE_CLASS = "class";
 	private static final String ATTRIBUTE_STYLE = "style";
 	private static final String ATTRIBUTE_VALUE_DISPLAY_NONE = "display: none;";
-	
+
 	public PDFGeneratorBean() {
 		try {
 			renderer = new ITextRenderer();
@@ -81,20 +82,20 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 		outputter = new XMLOutputter(Format.getPrettyFormat());
 	}
-	
+
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
 		return upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath);
 	}
-	
+
 	private synchronized byte[] getPDFBytes(IWContext iwc, Document doc) {
 		if (renderer == null || doc == null) {
 			return null;
 		}
-		
+
 		uploadSourceToSlide(iwc, doc);
-		
+
 		//	Rendering PDF
-		byte[] memory = null;		
+		byte[] memory = null;
 		ByteArrayOutputStream os = null;
 		try {
 			os = new ByteArrayOutputStream();
@@ -108,17 +109,17 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		} finally {
 			IOUtil.close(os);
 		}
-		
+
 		getApplicationContext().publishEvent(new PDFGeneratedEvent(this, doc));
 		return memory;
 	}
-	
+
 	private boolean upload(IWContext iwc, byte[] memory, String fileName, String uploadPath) {
 		//	Checking result of rendering process
 		if (memory == null || StringUtil.isEmpty(fileName) || StringUtil.isEmpty(uploadPath)) {
 			return false;
 		}
-		
+
 		//	Checking file name and upload path
 		if (!fileName.toLowerCase().endsWith(".pdf")) {
 			fileName += ".pdf";
@@ -129,7 +130,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		if (!uploadPath.endsWith(CoreConstants.SLASH)) {
 			uploadPath = uploadPath + CoreConstants.SLASH;
 		}
-		
+
 		//	Uploading PDF
 		InputStream is = null;
 		try {
@@ -142,38 +143,39 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 		return false;
 	}
-	
+
+	@Override
 	public boolean generatePDF(IWContext iwc, UIComponent component, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
 		Document document = getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags);
 		if (document == null) {
 			return false;
 		}
-		
+
 		return generatePDF(iwc, document, fileName, uploadPath);
 	}
-	
+
 	private void uploadSourceToSlide(IWContext iwc, Document document) {
 		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE)) {
 			return;
 		}
-		
+
 		org.jdom.Document doc = XmlUtil.getJDOMXMLDocument(document);
 		if (doc == null) {
 			LOGGER.log(Level.WARNING, "Document is null!");
 			return;
 		}
-		
+
 		String htmlContent = getBuilderService(iwc).getCleanedHtmlContent(outputter.outputString(doc), false, false, true);
 		if (StringUtil.isEmpty(htmlContent)) {
 			LOGGER.log(Level.WARNING, "Document converted to HTML is empty!");
 			return;
 		}
-		
+
 		IWSlideService slide = getSlideService(iwc);
 		if (slide == null) {
 			return;
 		}
-		
+
 		LOGGER.warning("Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
 		try {
 			slide.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html", true);
@@ -181,34 +183,34 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			e.printStackTrace();
 		}
 	}
-	
+
 	private Document getDocumentToConvertToPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
 		if (component == null) {
 			return null;
 		}
-		
+
 		BuilderService builder = getBuilderService(iwc);
 		if (builder == null) {
 			return null;
 		}
-		
+
 		org.jdom.Document doc = builder.getRenderedComponent(iwc, component, true, false, false);
 		if (doc == null) {
 			return null;
 		}
-		
+
 		if (replaceInputs) {
 			doc = getDocumentWithoutInputs(doc);
 		}
 		if (checkCustomTags) {
 			doc = getDocumentWithModifiedTags(doc);
 		}
-		
+
 		byte[] memory = getDocumentWithFixedMediaType(iwc, doc);
 		if (memory == null) {
 			return null;
 		}
-		
+
 		Document document = null;
 		InputStream stream = null;
 		Reader reader = null;
@@ -223,39 +225,41 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			IOUtil.close(stream);
 			IOUtil.closeReader(reader);
 		}
-		
+
 		return document;
 	}
 
+	@Override
 	public boolean generatePDFFromComponent(String componentUUID, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
 		if (componentUUID == null) {
 			return false;
 		}
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return false;
 		}
-		
+
 		BuilderService builder = getBuilderService(iwc);
 		if (builder == null) {
 			return false;
 		}
-		
+
 		UIComponent component = builder.findComponentInPage(iwc, String.valueOf(iwc.getCurrentIBPageID()), componentUUID);
 		return generatePDF(iwc, component, fileName, uploadPath, replaceInputs, checkCustomTags);
 	}
 
-	public boolean generatePDFFromPage(String pageUri, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {		
+	@Override
+	public boolean generatePDFFromPage(String pageUri, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
 		if (pageUri == null) {
 			return false;
 		}
-		
+
 		IWContext iwc = CoreUtil.getIWContext();
 		if (iwc == null) {
 			return false;
 		}
-		
+
 		BuilderService builder = getBuilderService(iwc);
 		Page page = null;
 		try {
@@ -263,10 +267,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return generatePDF(iwc, page, fileName, uploadPath, replaceInputs, checkCustomTags);
 	}
-	
+
 	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom.Document document) {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
@@ -274,7 +278,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			Element inlineStyles = null;
 			StringBuffer stylesBuffer = null;
 			List<Element> needless = new ArrayList<Element>();
-			
+
 			String mediaAttrName = "media";
 			String mediaAttrValueAll = "all";
 			String mediaAttrValuePrint = "print";
@@ -286,7 +290,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
 					href = style.getAttribute(hrefAttrName);
 					String hrefValue = href.getValue();
-					
+
 					String cssContent = null;
 					InputStream streamToContent = null;
 					try {
@@ -299,14 +303,14 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 							URL url = new URL(hrefValue);
 							streamToContent = url.openStream();
 						}
-						
+
 						cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
 					} catch (Exception e) {
 						LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
 					} finally {
 						IOUtil.close(streamToContent);
 					}
-					
+
 					if (StringUtil.isEmpty(cssContent)) {
 						setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
 																									mediaAttrValuePrint : mediaAttrValueAll);
@@ -318,25 +322,25 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 						if (stylesBuffer == null) {
 							stylesBuffer = new StringBuffer();
 						}
-						
+
 						stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
-						
+
 						needless.add(style);
 					}
 				}
 			}
-			
+
 			if (stylesBuffer != null && inlineStyles != null) {
 				inlineStyles.setText(stylesBuffer.toString());
 			}
-			
+
 			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
 				needlessStyles.next().detach();
 			}
 		}
-		
+
 		String htmlContent = getBuilderService(iwac).getCleanedHtmlContent(outputter.outputString(document), false, false, true);
-		
+
 		try {
 			return htmlContent.getBytes(CoreConstants.ENCODING_UTF8);
 		} catch (UnsupportedEncodingException e) {
@@ -344,10 +348,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 		return null;
 	}
-	
+
 	private org.jdom.Document getDocumentWithoutInputs(org.jdom.Document document) {
 		List<Element> needlessElements = new ArrayList<Element>();
-		
+
 		//	<input>
 		List<Element> inputs = getDocumentElements("input", document);
 		String typeAttrName = "type";
@@ -363,7 +367,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		List<String> checkedAttrValues = ListUtil.convertStringArrayToList(new String[] {"checked", Boolean.TRUE.toString(), CoreConstants.EMPTY});
 		for (Element input: inputs) {
 			needReplace = !doElementHasAttribute(input, typeAttrName, typeAttrValues);
-			
+
 			if (doElementHasAttribute(input, typeAttrName, Arrays.asList("hidden"))) {
 				needlessElements.add(input);
 			} else if (needReplace) {
@@ -385,31 +389,31 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	Removing needless elements
 		for (Iterator<Element> it = needlessElements.iterator(); it.hasNext();) {
 			it.next().detach();
 		}
-		
+
 		return document;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void setCustomAttributeToNextElement(Element element, String attrName, String attrValue) {
 		if (element == null) {
 			return;
 		}
-		
+
 		Element parent = element.getParentElement();
 		if (parent == null) {
 			return;
 		}
-		
+
 		List<Element> children = parent.getChildren();
 		if (ListUtil.isEmpty(children)) {
 			return;
 		}
-		
+
 		Element nextElement = null;
 		for (Iterator<Element> childrenIter = children.iterator(); (childrenIter.hasNext() && nextElement == null);) {
 			nextElement = childrenIter.next();
@@ -421,26 +425,26 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				nextElement = null;
 			}
 		}
-		
+
 		if (nextElement == null) {
 			return;
 		}
-		
+
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
-	
+
 	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
 		List<String> expectedValues = null;
-		
+
 		List<Element> needless = new ArrayList<Element>();
-		
+
 		//	<div>
 		List<Element> divs = getDocumentElements(TAG_DIV, document);
 		if (!ListUtil.isEmpty(divs)) {
 			expectedValues = ListUtil.convertStringArrayToList(new String[] {"deselected-case"});
 			List<String> buttonAreaClassValue = ListUtil.convertStringArrayToList(new String[] {"fbc_button_area"});
 			List<String> errorsClassValue = ListUtil.convertStringArrayToList(new String[] {"xformErrors"});
-			List<String> displayNoneAttributeValue = ListUtil.convertStringArrayToList(new String[] {ATTRIBUTE_VALUE_DISPLAY_NONE});	
+			List<String> displayNoneAttributeValue = ListUtil.convertStringArrayToList(new String[] {ATTRIBUTE_VALUE_DISPLAY_NONE});
 			for (Element div: divs) {
 				if (doElementHasAttribute(div, ATTRIBUTE_CLASS, buttonAreaClassValue)) {
 					needless.add(div);
@@ -453,7 +457,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	<legend>
 		List<Element> legends = getDocumentElements("legend", document);
 		if (!ListUtil.isEmpty(legends)) {
@@ -464,7 +468,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	<span>
 		List<Element> spans = getDocumentElements("span", document);
 		if (!ListUtil.isEmpty(spans)) {
@@ -479,7 +483,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	<textarea>
 		List<Element> textareas = getDocumentElements("textarea", document);
 		if (!ListUtil.isEmpty(textareas)) {
@@ -509,7 +513,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	Links
 		List<Element> links = getDocumentElements("a", document);
 		if (!ListUtil.isEmpty(links)) {
@@ -521,13 +525,13 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 		}
-		
+
 		//	Scripts
 		List<Element> scripts = getDocumentElements("script", document);
 		if (!ListUtil.isEmpty(scripts)) {
 			needless.addAll(scripts);
 		}
-		
+
 		//	<iframes>
 		List<Element> frames = getDocumentElements("iframe", document);
 		if (!ListUtil.isEmpty(frames)) {
@@ -556,7 +560,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				LOGGER.log(Level.WARNING, "Error getting resources bundle by locale: " + locale, e);
 			}
 			String defaultLabel = "None of the options selected";
-			
+
 			for (Element select: selects) {
 				if (doElementHasAttribute(select, ATTRIBUTE_CLASS, Arrays.asList("selector-prototype"))) {
 					needless.add(select);
@@ -573,12 +577,12 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 									selectedOptionsValues.add(option.getTextNormalize());
 								}
 							}
-							
+
 							if (ListUtil.isEmpty(selectedOptionsValues)) {
 								selectedOptionsValues.add(iwrb == null ? defaultLabel :
 																		iwrb.getLocalizedString("pdf_generator.none_of_options_selected", defaultLabel));
 							}
-							
+
 							select.setName(TAG_DIV);
 							select.setAttribute(new Attribute(ATTRIBUTE_CLASS, "selectDropdownReplacementForPDFDocument"));
 							if (doElementHasAttribute(select, ATTRIBUTE_STYLE, Arrays.asList(ATTRIBUTE_VALUE_DISPLAY_NONE))) {
@@ -603,14 +607,14 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			//	Removing empty selects
 			needless.addAll(selects);
 		}
-		
+
 		for (Iterator<Element> needlessIter = needless.iterator(); needlessIter.hasNext();) {
 			needlessIter.next().detach();
 		}
-		
+
 		return document;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private Map<String, List<Element>> getSelectOptions(Element select) {
 		List<Element> options = null;
@@ -624,7 +628,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			allOptions.put("allOptions", options);
 			return allOptions;
 		}
-		
+
 		int index = 0;
 		Map<String, List<Element>> groupedOptions = new HashMap<String, List<Element>>();
 		for (Element optionsGroup: optionsGroups) {
@@ -634,43 +638,43 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				index++;
 			}
 		}
-		
+
 		return groupedOptions;
 	}
-	
+
 	private boolean doElementHasAttribute(Element e, String attrName, List<String> expectedValues) {
 		if (e == null || attrName == null || expectedValues == null) {
 			return false;
 		}
-		
+
 		Attribute a = e.getAttribute(attrName);
 		if (a == null) {
 			return false;
 		}
-		
+
 		String attrValue = a.getValue();
 		if (attrValue == null) {
 			return false;
 		}
-		
+
 		if (expectedValues.contains(attrValue)) {
 			return true;
 		}
-		
+
 		for (String expectedValue: expectedValues) {
 			if (attrValue.indexOf(expectedValue) != -1) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	private void setCustomAttribute(Element e, String attrName, String attrValue) {
 		if (e == null || attrName == null || attrValue == null) {
 			return;
 		}
-		
+
 		Attribute a = e.getAttribute(attrName);
 		if (a == null) {
 			a = new Attribute(attrName, attrValue);
@@ -680,19 +684,15 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			a.setValue(attrValue);
 		}
 	}
-	
+
 	private List<Element> getDocumentElements(String tagName, org.jdom.Document document) {
 		List<Element> elements = XmlUtil.getElementsByXPath(document, tagName, XmlUtil.XHTML_NAMESPACE_ID);
 		return ListUtil.isEmpty(elements) ? new ArrayList<Element>(0) : elements;
 	}
 
+	@Override
 	public InputStream getStreamToGeneratedPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
-		byte[] pdfMemory = getPDFBytes(iwc, getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags));
-		if (pdfMemory == null) {
-			return null;
-		}
-		
-		return new ByteArrayInputStream(pdfMemory);
+		return new ByteArrayInputStream(getBytesOfGeneratedPDF(iwc, component, replaceInputs, checkCustomTags));
 	}
 
 	public ApplicationContext getApplicationContext() {
@@ -702,12 +702,17 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
 	}
-	
+
 	private IWSlideService getSlideService(IWApplicationContext iwac) {
 		return getServiceInstance(iwac, IWSlideService.class);
 	}
-	
+
 	private BuilderService getBuilderService(IWApplicationContext iwac) {
 		return getServiceInstance(iwac, BuilderService.class);
+	}
+
+	@Override
+	public byte[] getBytesOfGeneratedPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
+		return getPDFBytes(iwc, getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags));
 	}
 }
