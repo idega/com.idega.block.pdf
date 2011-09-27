@@ -3,77 +3,65 @@ package com.idega.block.pdf;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.rmi.RemoteException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.httpclient.HttpException;
-import org.apache.webdav.lib.WebdavResource;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
 import com.idega.io.DownloadWriter;
 import com.idega.presentation.IWContext;
-import com.idega.slide.business.IWSlideService;
+import com.idega.repository.RepositoryService;
+import com.idega.repository.bean.RepositoryItem;
 import com.idega.util.FileUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
-public class PDFWriter extends DownloadWriter{
-	
+public class PDFWriter extends DownloadWriter {
+
 	public static final String PDF_URL_PARAMETER = "pdf_url_parameter";
-	
+
 	private static final Logger logger = Logger.getLogger(PDFWriter.class.getName());
-	private WebdavResource pdfDoc;
-	
-	
+
+	RepositoryItem pdfDoc;
+
+	@Autowired
+	private RepositoryService repository;
+
 	@Override
 	public void init(HttpServletRequest req, IWContext iwc) {
-		
-		
+		ELUtil.getInstance().autowire(this);
+
 		String pathToPdf = iwc.getParameter(PDF_URL_PARAMETER);
 		if (StringUtil.isEmpty(pathToPdf)) {
 			logger.log(Level.SEVERE, "PDF from XForm was not generated!");
 			return;
 		}
-		
-		IWSlideService slide = null;
-		try {
-			slide = IBOLookup.getServiceInstance(iwc, IWSlideService.class);
-		} catch (IBOLookupException e) {
-			logger.log(Level.SEVERE, "Error getting IWSlideService!", e);
-		}
-		if (slide == null) {
-			return;
-		}
+
 		try{
-			pdfDoc = slide.getWebdavResourceAuthenticatedAsRoot(pathToPdf);
-		} catch (HttpException e) {
-			e.printStackTrace();
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+			pdfDoc = repository.getRepositoryItemAsRootUser(pathToPdf);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		if (pdfDoc == null || !pdfDoc.exists()) {
 			return;
 		}
-		Long length = Long.valueOf(pdfDoc.getGetContentLength());
-		setAsDownload(iwc, pdfDoc.getDisplayName(), length.intValue());
+		Long length = Long.valueOf(pdfDoc.getLength());
+		setAsDownload(iwc, pdfDoc.getName(), length.intValue());
 	}
-	
+
 	@Override
 	public void writeTo(OutputStream streamOut) throws IOException {
 		if (pdfDoc == null) {
 			logger.log(Level.SEVERE, "Unable to get XForm");
 			return;
 		}
-		
-		InputStream streamIn = pdfDoc.getMethodData();
+
+		InputStream streamIn = pdfDoc.getInputStream();
 		FileUtil.streamToOutputStream(streamIn, streamOut);
-		
+
 		streamOut.flush();
 		streamOut.close();
 		streamIn.close();

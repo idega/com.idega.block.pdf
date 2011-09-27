@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,8 +46,8 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.presentation.IWContext;
 import com.idega.presentation.Page;
+import com.idega.repository.RepositoryService;
 import com.idega.servlet.filter.IWBundleResourceFilter;
-import com.idega.slide.business.IWSlideService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.IOUtil;
@@ -68,6 +67,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Autowired
 	private ApplicationContext applicationContext;
+
+	@Autowired
+	private RepositoryService repository;
 
 	private static final String TAG_DIV = "div";
 	private static final String ATTRIBUTE_CLASS = "class";
@@ -135,7 +137,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		InputStream is = null;
 		try {
 			is = new ByteArrayInputStream(memory);
-			return getSlideService(iwc).uploadFileAndCreateFoldersFromStringAsRoot(uploadPath, fileName, is, MimeTypeUtil.MIME_TYPE_PDF_1, true);
+			return repository.uploadFileAndCreateFoldersFromStringAsRoot(uploadPath, fileName, is, MimeTypeUtil.MIME_TYPE_PDF_1);
 		} catch(Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -171,15 +173,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return;
 		}
 
-		IWSlideService slide = getSlideService(iwc);
-		if (slide == null) {
-			return;
-		}
-
 		LOGGER.warning("Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
 		try {
-			slide.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html", true);
-		} catch (RemoteException e) {
+			repository.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -295,7 +292,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 					InputStream streamToContent = null;
 					try {
 						if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-							streamToContent = getSlideService(iwac).getInputStream(hrefValue);
+							streamToContent = repository.getInputStream(hrefValue);
 						} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
 							File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
 							streamToContent = new FileInputStream(file);
@@ -701,10 +698,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
-	}
-
-	private IWSlideService getSlideService(IWApplicationContext iwac) {
-		return getServiceInstance(iwac, IWSlideService.class);
 	}
 
 	private BuilderService getBuilderService(IWApplicationContext iwac) {
