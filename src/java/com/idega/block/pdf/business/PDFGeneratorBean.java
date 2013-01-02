@@ -491,9 +491,13 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				if (StringUtil.isEmpty(originalText)) {
 					textarea.setText(CoreConstants.MINUS);
 				} else {
-					String text = new StringBuilder("<p>").append(originalText).append("</p>").toString();
+					String text = "<div>".concat(originalText).concat("</div>");
 					while (text.indexOf("src=\"../") != -1) {
 						text = StringHandler.replace(text, "../", CoreConstants.EMPTY);
+					}
+					text = StringHandler.replace(text, "<br data-mce-bogus=\"1\">", CoreConstants.EMPTY);
+					while (text.indexOf("<br") != -1) {
+						text = StringHandler.replace(text, "<br>", CoreConstants.EMPTY);
 					}
 					org.jdom.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
 					if (textAreaContent != null) {
