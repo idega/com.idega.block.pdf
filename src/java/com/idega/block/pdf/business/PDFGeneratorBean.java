@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 
 import javax.faces.component.UIComponent;
 
-import org.jdom.Attribute;
-import org.jdom.Content;
-import org.jdom.Element;
-import org.jdom.output.Format;
-import org.jdom.output.XMLOutputter;
+import org.jdom2.Attribute;
+import org.jdom2.Content;
+import org.jdom2.Element;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
@@ -161,7 +161,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return;
 		}
 
-		org.jdom.Document doc = XmlUtil.getJDOMXMLDocument(document);
+		org.jdom2.Document doc = XmlUtil.getJDOMXMLDocument(document);
 		if (doc == null) {
 			LOGGER.log(Level.WARNING, "Document is null!");
 			return;
@@ -191,7 +191,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return null;
 		}
 
-		org.jdom.Document doc = builder.getRenderedComponent(iwc, component, true, false, false);
+		org.jdom2.Document doc = builder.getRenderedComponent(iwc, component, true, false, false);
 		if (doc == null) {
 			return null;
 		}
@@ -268,7 +268,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return generatePDF(iwc, page, fileName, uploadPath, replaceInputs, checkCustomTags);
 	}
 
-	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom.Document document) {
+	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom2.Document document) {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
 			Element head = getDocumentElements("head", document).get(0);
@@ -346,7 +346,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return null;
 	}
 
-	private org.jdom.Document getDocumentWithoutInputs(org.jdom.Document document) {
+	private org.jdom2.Document getDocumentWithoutInputs(org.jdom2.Document document) {
 		List<Element> needlessElements = new ArrayList<Element>();
 
 		//	<input>
@@ -395,7 +395,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return document;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void setCustomAttributeToNextElement(Element element, String attrName, String attrValue) {
 		if (element == null) {
 			return;
@@ -430,7 +429,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 
-	private org.jdom.Document getDocumentWithModifiedTags(org.jdom.Document document) {
+	private org.jdom2.Document getDocumentWithModifiedTags(org.jdom2.Document document) {
 		List<String> expectedValues = null;
 
 		List<Element> needless = new ArrayList<Element>();
@@ -499,10 +498,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 					while (text.indexOf("<br") != -1) {
 						text = StringHandler.replace(text, "<br>", CoreConstants.EMPTY);
 					}
-					org.jdom.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
+					org.jdom2.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
 					if (textAreaContent != null) {
 						try {
-							@SuppressWarnings("unchecked")
 							List<Content> clonedContent = textAreaContent.cloneContent();
 							textarea.removeContent();
 							textarea.setContent(clonedContent);
@@ -616,7 +614,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return document;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Map<String, List<Element>> getSelectOptions(Element select) {
 		List<Element> options = null;
 		List<Element> optionsGroups = select.getChildren("optgroup");
@@ -686,8 +683,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 	}
 
-	private List<Element> getDocumentElements(String tagName, org.jdom.Document document) {
-		List<Element> elements = XmlUtil.getElementsByXPath(document, tagName, XmlUtil.XHTML_NAMESPACE_ID);
+	private List<Element> getDocumentElements(String tagName, org.jdom2.Document document) {
+		List<Element> elements = XmlUtil.getElementsByXPath(document.getRootElement(), tagName, XmlUtil.XHTML_NAMESPACE_ID);
 		return ListUtil.isEmpty(elements) ? new ArrayList<Element>(0) : elements;
 	}
 
