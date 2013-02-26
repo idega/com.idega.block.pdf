@@ -94,7 +94,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return null;
 		}
 
-		uploadSourceToSlide(iwc, doc);
+		uploadSourceToRepository(iwc, doc);
 
 		//	Rendering PDF
 		byte[] memory = null;
@@ -156,7 +156,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return generatePDF(iwc, document, fileName, uploadPath);
 	}
 
-	private void uploadSourceToSlide(IWContext iwc, Document document) {
+	private void uploadSourceToRepository(IWContext iwc, Document document) {
 		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE)) {
 			return;
 		}
