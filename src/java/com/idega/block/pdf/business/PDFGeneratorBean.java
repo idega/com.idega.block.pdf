@@ -106,8 +106,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			renderer.createPDF(os);
 			memory = os.toByteArray();
 		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
+			getLogger().log(Level.WARNING, "Error rendering:\n" + XmlUtil.getPrettyPrintedDOM(doc), e);
 		} finally {
 			IOUtil.close(os);
 		}
