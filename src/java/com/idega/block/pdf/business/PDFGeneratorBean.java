@@ -618,9 +618,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	private Map<String, List<Element>> getSelectOptions(Element select) {
 		List<Element> options = null;
-		List<Element> optionsGroups = select.getChildren("optgroup");
+		List<Element> optionsGroups = getElements("optgroup", select);
 		if (ListUtil.isEmpty(optionsGroups)) {
-			options = select.getChildren("option");
+			options = getElements("option", select);
 			if (ListUtil.isEmpty(options)) {
 				return null;
 			}
@@ -632,7 +632,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		int index = 0;
 		Map<String, List<Element>> groupedOptions = new HashMap<String, List<Element>>();
 		for (Element optionsGroup: optionsGroups) {
-			options = optionsGroup.getChildren("option");
+			options = getElements("option", optionsGroup);
 			if (!ListUtil.isEmpty(options)) {
 				groupedOptions.put(String.valueOf(index), options);
 				index++;
@@ -686,7 +686,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private List<Element> getDocumentElements(String tagName, org.jdom2.Document document) {
-		List<Element> elements = XmlUtil.getElementsByXPath(document.getRootElement(), tagName, XmlUtil.XHTML_NAMESPACE_ID);
+		return getElements(tagName, document.getRootElement());
+	}
+	private List<Element> getElements(String tagName, Element element) {
+		List<Element> elements = XmlUtil.getElementsByXPath(element, tagName, XmlUtil.XHTML_NAMESPACE_ID);
 		return ListUtil.isEmpty(elements) ? new ArrayList<Element>(0) : elements;
 	}
 
