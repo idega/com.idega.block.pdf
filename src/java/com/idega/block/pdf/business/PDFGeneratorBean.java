@@ -32,6 +32,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.w3c.dom.Document;
 import org.xhtmlrenderer.pdf.ITextRenderer;
 import org.xml.sax.InputSource;
@@ -54,6 +55,7 @@ import com.idega.util.IOUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.xml.XmlUtil;
 
 @Scope(BeanDefinition.SCOPE_SINGLETON)
@@ -157,9 +159,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private void uploadSourceToRepository(IWContext iwc, Document document) {
-		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE)) {
+		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE))
 			return;
-		}
 
 		org.jdom2.Document doc = XmlUtil.getJDOMXMLDocument(document);
 		if (doc == null) {
@@ -182,26 +183,29 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private Document getDocumentToConvertToPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
-		if (component == null) {
+		if (component == null)
 			return null;
-		}
 
 		BuilderService builder = getBuilderService(iwc);
-		if (builder == null) {
+		if (builder == null)
 			return null;
-		}
 
 		org.jdom2.Document doc = builder.getRenderedComponent(iwc, component, true, false, false);
-		if (doc == null) {
+		if (doc == null)
 			return null;
-		}
 
-		if (replaceInputs) {
+		Map<String, PDFChanger> pdfChangers = null;
+		try {
+			pdfChangers = WebApplicationContextUtils.getWebApplicationContext(getApplication().getServletContext()).getBeansOfType(PDFChanger.class);
+		} catch (Exception e) {}
+		if (!MapUtil.isEmpty(pdfChangers))
+			for (PDFChanger changer: pdfChangers.values())
+				doc = changer.getChangedDocument(doc);
+
+		if (replaceInputs)
 			doc = getDocumentWithoutInputs(doc);
-		}
-		if (checkCustomTags) {
+		if (checkCustomTags)
 			doc = getDocumentWithModifiedTags(doc);
-		}
 
 		byte[] memory = getDocumentWithFixedMediaType(iwc, doc);
 		if (memory == null) {
@@ -327,16 +331,15 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				}
 			}
 
-			if (stylesBuffer != null && inlineStyles != null) {
+			if (stylesBuffer != null && inlineStyles != null)
 				inlineStyles.setText(stylesBuffer.toString());
-			}
 
-			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
+			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();)
 				needlessStyles.next().detach();
-			}
 		}
 
 		String htmlContent = getBuilderService(iwac).getCleanedHtmlContent(outputter.outputString(document), false, false, true);
+		htmlContent = "<!DOCTYPE html>\n" + htmlContent;
 
 		try {
 			return htmlContent.getBytes(CoreConstants.ENCODING_UTF8);
@@ -358,7 +361,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		Attribute valueAttr = null;
 		String value = null;
 		boolean needReplace = true;
-		//	Inputs we don't want to be replaced
+
 		List<String> typeAttrValues = ListUtil.convertStringArrayToList(new String[] {"button", "image", "password", "reset", "submit"});
 		List<String> textTypeValue = ListUtil.convertStringArrayToList(new String[] {"text"});
 		List<String> checkedAttrValues = ListUtil.convertStringArrayToList(new String[] {"checked", Boolean.TRUE.toString(), CoreConstants.EMPTY});
@@ -376,8 +379,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 					input.setText(value);
 					input.setName(TAG_DIV);
 					setCustomAttribute(input, ATTRIBUTE_CLASS, className);
-				}
-				else {
+				} else {
 					//	Radio button or check box
 					if (!doElementHasAttribute(input, checkedAttrName, checkedAttrValues)) {
 						//	We need to hide not selected options
