@@ -88,22 +88,22 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
-		return upload(iwc, getPDFBytes(iwc, doc), fileName, uploadPath);
+		return upload(iwc, getPDFBytes(doc), fileName, uploadPath);
 	}
 
-	private synchronized byte[] getPDFBytes(IWContext iwc, Document doc) {
+	private synchronized byte[] getPDFBytes(Document doc) {
 		if (renderer == null || doc == null) {
 			return null;
 		}
 
-		uploadSourceToRepository(iwc, doc);
+		uploadSourceToRepository(doc);
 
 		//	Rendering PDF
 		byte[] memory = null;
 		ByteArrayOutputStream os = null;
 		try {
 			os = new ByteArrayOutputStream();
-			renderer.setDocument(doc, iwc.getServerURL());
+			renderer.setDocument(doc, getHost());
 			renderer.layout();
 			renderer.createPDF(os);
 			renderer.finishPDF();
@@ -158,8 +158,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return generatePDF(iwc, document, fileName, uploadPath);
 	}
 
-	private void uploadSourceToRepository(IWContext iwc, Document document) {
-		if (!iwc.getIWMainApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE))
+	private void uploadSourceToRepository(Document document) {
+		if (!getApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE))
 			return;
 
 		org.jdom2.Document doc = XmlUtil.getJDOMXMLDocument(document);
@@ -168,7 +168,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return;
 		}
 
-		String htmlContent = getBuilderService(iwc).getCleanedHtmlContent(outputter.outputString(doc), false, false, true);
+		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(doc), false, false, true);
 		if (StringUtil.isEmpty(htmlContent)) {
 			LOGGER.log(Level.WARNING, "Document converted to HTML is empty!");
 			return;
@@ -207,7 +207,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		if (checkCustomTags)
 			doc = getDocumentWithModifiedTags(doc);
 
-		byte[] memory = getDocumentWithFixedMediaType(iwc, doc);
+		byte[] memory = getDocumentWithFixedMediaType(doc);
 		if (memory == null) {
 			return null;
 		}
@@ -272,7 +272,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return generatePDF(iwc, page, fileName, uploadPath, replaceInputs, checkCustomTags);
 	}
 
-	private byte[] getDocumentWithFixedMediaType(IWApplicationContext iwac, org.jdom2.Document document) {
+	private byte[] getDocumentWithFixedMediaType(org.jdom2.Document document) {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
 			Element head = getDocumentElements("head", document).get(0);
@@ -296,7 +296,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 					InputStream streamToContent = null;
 					try {
 						if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-							streamToContent = repository.getInputStream(hrefValue);
+							streamToContent = repository.getInputStreamAsRoot(hrefValue);
 						} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
 							File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
 							streamToContent = new FileInputStream(file);
@@ -338,7 +338,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				needlessStyles.next().detach();
 		}
 
-		String htmlContent = getBuilderService(iwac).getCleanedHtmlContent(outputter.outputString(document), false, false, true);
+		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(document), false, false, true);
 		htmlContent = "<!DOCTYPE html>\n" + htmlContent;
 
 		try {
@@ -710,8 +710,12 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return getServiceInstance(iwac, BuilderService.class);
 	}
 
+	private BuilderService getBuilderService() {
+		return getServiceInstance(BuilderService.class);
+	}
+
 	@Override
 	public byte[] getBytesOfGeneratedPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
-		return getPDFBytes(iwc, getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags));
+		return getPDFBytes(getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags));
 	}
 }
