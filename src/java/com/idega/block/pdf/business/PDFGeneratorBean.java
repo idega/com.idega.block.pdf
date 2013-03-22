@@ -499,7 +499,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 						text = StringHandler.replace(text, "../", CoreConstants.EMPTY);
 					}
 					text = StringHandler.replace(text, "<br data-mce-bogus=\"1\">", CoreConstants.EMPTY);
-					while (text.indexOf("<br") != -1) {
+					text = StringHandler.replace(text, "<br mce-bogus=\"1\">", CoreConstants.EMPTY);
+					while (text.indexOf("<br>") != -1) {
 						text = StringHandler.replace(text, "<br>", CoreConstants.EMPTY);
 					}
 					org.jdom.Document textAreaContent = XmlUtil.getJDOMXMLDocument(text);
