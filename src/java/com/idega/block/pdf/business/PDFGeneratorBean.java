@@ -151,9 +151,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	@Override
 	public boolean generatePDF(IWContext iwc, UIComponent component, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
 		Document document = getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags);
-		if (document == null) {
+		if (document == null)
 			return false;
-		}
 
 		return generatePDF(iwc, document, fileName, uploadPath);
 	}
@@ -208,9 +207,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			doc = getDocumentWithModifiedTags(doc);
 
 		byte[] memory = getDocumentWithFixedMediaType(doc);
-		if (memory == null) {
+		if (memory == null)
 			return null;
-		}
 
 		Document document = null;
 		InputStream stream = null;
@@ -232,19 +230,16 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public boolean generatePDFFromComponent(String componentUUID, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
-		if (componentUUID == null) {
+		if (componentUUID == null)
 			return false;
-		}
 
 		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
+		if (iwc == null)
 			return false;
-		}
 
 		BuilderService builder = getBuilderService(iwc);
-		if (builder == null) {
+		if (builder == null)
 			return false;
-		}
 
 		UIComponent component = builder.findComponentInPage(iwc, String.valueOf(iwc.getCurrentIBPageID()), componentUUID);
 		return generatePDF(iwc, component, fileName, uploadPath, replaceInputs, checkCustomTags);
@@ -252,14 +247,12 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public boolean generatePDFFromPage(String pageUri, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
-		if (pageUri == null) {
+		if (pageUri == null)
 			return false;
-		}
 
 		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null) {
+		if (iwc == null)
 			return false;
-		}
 
 		BuilderService builder = getBuilderService(iwc);
 		Page page = null;
@@ -273,80 +266,85 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private byte[] getDocumentWithFixedMediaType(org.jdom2.Document document) {
-		List<Element> styles = getDocumentElements("link", document);
-		if (!ListUtil.isEmpty(styles)) {
-			Element head = getDocumentElements("head", document).get(0);
-			Element inlineStyles = null;
-			StringBuffer stylesBuffer = null;
-			List<Element> needless = new ArrayList<Element>();
-
-			String mediaAttrName = "media";
-			String mediaAttrValueAll = "all";
-			String mediaAttrValuePrint = "print";
-			String typeAttrName = "type";
-			String hrefAttrName = "href";
-			Attribute href = null;
-			List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
-			for (Element style: styles) {
-				if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
-					href = style.getAttribute(hrefAttrName);
-					String hrefValue = href.getValue();
-
-					String cssContent = null;
-					InputStream streamToContent = null;
-					try {
-						if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-							streamToContent = repository.getInputStreamAsRoot(hrefValue);
-						} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
-							File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
-							streamToContent = new FileInputStream(file);
-						} else {
-							URL url = new URL(hrefValue);
-							streamToContent = url.openStream();
-						}
-
-						cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
-					} catch (Exception e) {
-						LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
-					} finally {
-						IOUtil.close(streamToContent);
-					}
-
-					if (StringUtil.isEmpty(cssContent)) {
-						setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
-																									mediaAttrValuePrint : mediaAttrValueAll);
-					} else {
-						if (inlineStyles == null) {
-							inlineStyles = new Element("style");
-							head.addContent(inlineStyles);
-						}
-						if (stylesBuffer == null) {
-							stylesBuffer = new StringBuffer();
-						}
-
-						stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
-
-						needless.add(style);
-					}
-				}
-			}
-
-			if (stylesBuffer != null && inlineStyles != null)
-				inlineStyles.setText(stylesBuffer.toString());
-
-			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();)
-				needlessStyles.next().detach();
-		}
+		List<Element> linksFromHead = null;
+		while (!ListUtil.isEmpty(linksFromHead = getDocumentElements("link", document)))
+			doFixMediaType(document, linksFromHead);
 
 		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(document), false, false, true);
 		htmlContent = "<!DOCTYPE html>\n" + htmlContent;
-
 		try {
 			return htmlContent.getBytes(CoreConstants.ENCODING_UTF8);
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private void doFixMediaType(org.jdom2.Document document, List<Element> styles) {
+		if (ListUtil.isEmpty(styles))
+			return;
+
+		Element head = getDocumentElements("head", document).get(0);
+		Element inlineStyles = null;
+		StringBuffer stylesBuffer = null;
+		List<Element> needless = new ArrayList<Element>();
+
+		String mediaAttrName = "media";
+		String mediaAttrValueAll = "all";
+		String mediaAttrValuePrint = "print";
+		String typeAttrName = "type";
+		String hrefAttrName = "href";
+		Attribute href = null;
+		List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
+		for (Element style: styles) {
+			if (!doElementHasAttribute(style, typeAttrName, expectedValues))
+				continue;
+
+			href = style.getAttribute(hrefAttrName);
+			String hrefValue = href.getValue();
+			String cssContent = null;
+			InputStream streamToContent = null;
+			try {
+				if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+					streamToContent = repository.getInputStreamAsRoot(hrefValue);
+				} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
+					File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
+					streamToContent = new FileInputStream(file);
+				} else {
+					URL url = new URL(hrefValue);
+					streamToContent = url.openStream();
+				}
+
+				cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
+			} catch (Exception e) {
+				LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
+			} finally {
+				IOUtil.close(streamToContent);
+			}
+
+			if (StringUtil.isEmpty(cssContent)) {
+				setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
+																							mediaAttrValuePrint : mediaAttrValueAll);
+			} else {
+				if (inlineStyles == null) {
+					inlineStyles = new Element("style");
+					head.addContent(inlineStyles);
+				}
+				if (stylesBuffer == null) {
+					stylesBuffer = new StringBuffer();
+				}
+
+				stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
+
+				needless.add(style);
+			}
+		}
+
+		if (stylesBuffer != null && inlineStyles != null)
+			inlineStyles.setText(stylesBuffer.toString());
+
+		for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();)
+			needlessStyles.next().detach();
 	}
 
 	private org.jdom2.Document getDocumentWithoutInputs(org.jdom2.Document document) {
