@@ -481,6 +481,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				} else if (doElementHasAttribute(span, ATTRIBUTE_CLASS, Arrays.asList("alert"))) {
 					needless.add(span);
 				}
+				else if (doElementHasAttribute(span, ATTRIBUTE_CLASS, Arrays.asList("required-symbol"))) {
+					needless.add(span);
+				}
 			}
 		}
 
