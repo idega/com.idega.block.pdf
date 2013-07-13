@@ -88,7 +88,8 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
-		return upload(iwc, getPDFBytes(doc), fileName, uploadPath);
+		byte[] pdfBytes = getPDFBytes(doc);
+		return upload(iwc, pdfBytes, fileName, uploadPath);
 	}
 
 	private synchronized byte[] getPDFBytes(Document doc) {
@@ -175,7 +176,12 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 		LOGGER.warning("Uploading HTML code for PDF... Don't do this when CSS for PDF is made!");
 		try {
-			repository.uploadFileAndCreateFoldersFromStringAsRoot(CoreConstants.PUBLIC_PATH + CoreConstants.SLASH, "html_for_pdf.html", htmlContent, "text/html");
+			repository.uploadFileAndCreateFoldersFromStringAsRoot(
+					CoreConstants.PUBLIC_PATH + CoreConstants.SLASH,
+					"html_for_pdf.html",
+					htmlContent,
+					"text/html"
+			);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -429,10 +435,31 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		setCustomAttribute(nextElement, attrName, attrValue);
 	}
 
+	private List<Element> getHiddenElements(Element element, List<Element> emptyElements) {
+		if (element == null)
+			return emptyElements;
+
+		List<Element> children = element.getChildren();
+		Attribute style = element.getAttribute("style");
+		if (style != null && "display:none;".equals(style.getValue())) {
+			emptyElements.add(element);
+		}
+
+		if (!ListUtil.isEmpty(children)) {
+			for (Element child: children) {
+				emptyElements = getHiddenElements(child, emptyElements);
+			}
+		}
+
+		return emptyElements;
+	}
+
 	private org.jdom2.Document getDocumentWithModifiedTags(org.jdom2.Document document) {
 		List<String> expectedValues = null;
 
 		List<Element> needless = new ArrayList<Element>();
+		if (getApplication().getSettings().getBoolean("pdf.remove_hidden_elements", Boolean.TRUE))
+			needless = getHiddenElements(document.getRootElement(), needless);
 
 		//	<div>
 		List<Element> divs = getDocumentElements(TAG_DIV, document);
