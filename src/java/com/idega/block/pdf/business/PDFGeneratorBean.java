@@ -23,6 +23,7 @@ import java.util.logging.Logger;
 import javax.faces.component.UIComponent;
 
 import org.jdom2.Attribute;
+import org.jdom2.Comment;
 import org.jdom2.Content;
 import org.jdom2.Element;
 import org.jdom2.output.Format;
@@ -454,7 +455,24 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return emptyElements;
 	}
 
+	private void addCommentsToEmptyElements(Element element) {
+		if (element == null)
+			return;
+
+		List<Content> content = element.getContent();
+		if (ListUtil.isEmpty(content)) {
+			element.addContent(new Comment("idegaWeb"));
+		} else {
+			List<Element> children = element.getChildren();
+			for (Element child: children) {
+				addCommentsToEmptyElements(child);
+			}
+		}
+	}
+
 	private org.jdom2.Document getDocumentWithModifiedTags(org.jdom2.Document document) {
+		addCommentsToEmptyElements(document.getRootElement());
+
 		List<String> expectedValues = null;
 
 		List<Element> needless = new ArrayList<Element>();
