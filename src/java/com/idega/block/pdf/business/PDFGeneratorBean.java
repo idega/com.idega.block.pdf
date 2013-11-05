@@ -274,8 +274,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	private byte[] getDocumentWithFixedMediaType(org.jdom2.Document document) {
 		List<Element> linksFromHead = null;
-		while (!ListUtil.isEmpty(linksFromHead = getDocumentElements("link", document)))
-			doFixMediaType(document, linksFromHead);
+		boolean success = true;
+		while (success && !ListUtil.isEmpty(linksFromHead = getDocumentElements("link", document))) {
+			success = doFixMediaType(document, linksFromHead);
+		}
 
 		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(document), false, false, true);
 		htmlContent = "<!DOCTYPE html>\n" + htmlContent;
@@ -287,9 +289,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return null;
 	}
 
-	private void doFixMediaType(org.jdom2.Document document, List<Element> styles) {
-		if (ListUtil.isEmpty(styles))
-			return;
+	private boolean doFixMediaType(org.jdom2.Document document, List<Element> styles) {
+		if (ListUtil.isEmpty(styles)) {
+			return false;
+		}
 
 		Element head = getDocumentElements("head", document).get(0);
 		Element inlineStyles = null;
@@ -303,9 +306,12 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		String hrefAttrName = "href";
 		Attribute href = null;
 		List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
-		for (Element style: styles) {
-			if (!doElementHasAttribute(style, typeAttrName, expectedValues))
+		boolean error = false;
+		for (Iterator<Element> stylesIter = styles.iterator(); (!error && stylesIter.hasNext());) {
+			Element style = stylesIter.next();
+			if (!doElementHasAttribute(style, typeAttrName, expectedValues)) {
 				continue;
+			}
 
 			href = style.getAttribute(hrefAttrName);
 			String hrefValue = href.getValue();
@@ -325,6 +331,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
 			} catch (Exception e) {
 				LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
+				error = true;
 			} finally {
 				IOUtil.close(streamToContent);
 			}
@@ -346,12 +353,18 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				needless.add(style);
 			}
 		}
+		if (error) {
+			return false;
+		}
 
-		if (stylesBuffer != null && inlineStyles != null)
+		if (stylesBuffer != null && inlineStyles != null) {
 			inlineStyles.setText(stylesBuffer.toString());
+		}
 
-		for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();)
+		for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
 			needlessStyles.next().detach();
+		}
+		return true;
 	}
 
 	private org.jdom2.Document getDocumentWithoutInputs(org.jdom2.Document document) {
