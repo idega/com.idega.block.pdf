@@ -274,68 +274,71 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	private byte[] getDocumentWithFixedMediaType(org.jdom.Document document) {
 		List<Element> styles = getDocumentElements("link", document);
 		if (!ListUtil.isEmpty(styles)) {
-			Element head = getDocumentElements("head", document).get(0);
-			Element inlineStyles = null;
-			StringBuffer stylesBuffer = null;
-			List<Element> needless = new ArrayList<Element>();
+			List<Element> headElements = getDocumentElements("head", document);
+			if (!ListUtil.isEmpty(headElements)) {
+				Element head = headElements.get(0);
+				Element inlineStyles = null;
+				StringBuffer stylesBuffer = null;
+				List<Element> needless = new ArrayList<Element>();
 
-			String mediaAttrName = "media";
-			String mediaAttrValueAll = "all";
-			String mediaAttrValuePrint = "print";
-			String typeAttrName = "type";
-			String hrefAttrName = "href";
-			Attribute href = null;
-			List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
-			for (Element style: styles) {
-				if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
-					href = style.getAttribute(hrefAttrName);
-					String hrefValue = href.getValue();
+				String mediaAttrName = "media";
+				String mediaAttrValueAll = "all";
+				String mediaAttrValuePrint = "print";
+				String typeAttrName = "type";
+				String hrefAttrName = "href";
+				Attribute href = null;
+				List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
+				for (Element style: styles) {
+					if (doElementHasAttribute(style, typeAttrName, expectedValues)) {
+						href = style.getAttribute(hrefAttrName);
+						String hrefValue = href.getValue();
 
-					String cssContent = null;
-					InputStream streamToContent = null;
-					try {
-						if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
-							streamToContent = getSlideService().getInputStream(hrefValue);
-						} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
-							File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
-							streamToContent = new FileInputStream(file);
+						String cssContent = null;
+						InputStream streamToContent = null;
+						try {
+							if (hrefValue.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
+								streamToContent = getSlideService().getInputStream(hrefValue);
+							} else if (hrefValue.startsWith("/idegaweb/bundles/")) {
+								File file = IWBundleResourceFilter.copyResourceFromJarToWebapp(getApplication(), hrefValue);
+								streamToContent = new FileInputStream(file);
+							} else {
+								URL url = new URL(hrefValue);
+								streamToContent = url.openStream();
+							}
+
+							cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
+						} catch (Exception e) {
+							LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
+						} finally {
+							IOUtil.close(streamToContent);
+						}
+
+						if (StringUtil.isEmpty(cssContent)) {
+							setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
+																										mediaAttrValuePrint : mediaAttrValueAll);
 						} else {
-							URL url = new URL(hrefValue);
-							streamToContent = url.openStream();
+							if (inlineStyles == null) {
+								inlineStyles = new Element("style");
+								head.addContent(inlineStyles);
+							}
+							if (stylesBuffer == null) {
+								stylesBuffer = new StringBuffer();
+							}
+
+							stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
+
+							needless.add(style);
 						}
-
-						cssContent = streamToContent == null ? null : StringHandler.getContentFromInputStream(streamToContent);
-					} catch (Exception e) {
-						LOGGER.log(Level.WARNING, "Error getting content from: " + hrefValue, e);
-					} finally {
-						IOUtil.close(streamToContent);
-					}
-
-					if (StringUtil.isEmpty(cssContent)) {
-						setCustomAttribute(style, mediaAttrName, href == null ? mediaAttrValueAll : href.getValue().endsWith("pdf.css") ?
-																									mediaAttrValuePrint : mediaAttrValueAll);
-					} else {
-						if (inlineStyles == null) {
-							inlineStyles = new Element("style");
-							head.addContent(inlineStyles);
-						}
-						if (stylesBuffer == null) {
-							stylesBuffer = new StringBuffer();
-						}
-
-						stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
-
-						needless.add(style);
 					}
 				}
-			}
 
-			if (stylesBuffer != null && inlineStyles != null) {
-				inlineStyles.setText(stylesBuffer.toString());
-			}
+				if (stylesBuffer != null && inlineStyles != null) {
+					inlineStyles.setText(stylesBuffer.toString());
+				}
 
-			for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
-				needlessStyles.next().detach();
+				for (Iterator<Element> needlessStyles = needless.iterator(); needlessStyles.hasNext();) {
+					needlessStyles.next().detach();
+				}
 			}
 		}
 
@@ -354,6 +357,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 		//	<input>
 		List<Element> inputs = getDocumentElements("input", document);
+		if (ListUtil.isEmpty(inputs)) {
+			return document;
+		}
+
 		String typeAttrName = "type";
 		String checkedAttrName = "checked";
 		String className = "replaceForInputStyle";
