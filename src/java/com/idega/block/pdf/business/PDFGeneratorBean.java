@@ -77,7 +77,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	private static final String TAG_DIV = "div";
 	private static final String ATTRIBUTE_CLASS = "class";
 	private static final String ATTRIBUTE_STYLE = "style";
-	private static final String ATTRIBUTE_VALUE_DISPLAY_NONE = "display: none;";
+	private static final String ATTRIBUTE_VALUE_DISPLAY_NONE = "display: none!important;";
 
 	public PDFGeneratorBean() {
 		try {
@@ -372,6 +372,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 		//	<input>
 		List<Element> inputs = getDocumentElements("input", document);
+		if (ListUtil.isEmpty(inputs)) {
+			return document;
+		}
+
 		String typeAttrName = "type";
 		String checkedAttrName = "checked";
 		String className = "replaceForInputStyle";
