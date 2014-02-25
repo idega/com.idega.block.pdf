@@ -14,18 +14,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import com.idega.idegaweb.IWBundle;
 
 /**
- * 
+ *
  *  Last modified: $Date: 2009/01/22 17:30:04 $ by $Author: anton $
- * 
+ *
  * @author <a href="mailto:aron@idega.com">aron</a>
  * @version $Revision: 1.5 $
  */
 public class PrintingContextImpl implements PrintingContext {
-    
+
     private Map properties;
     private InputStream templateStream;
     private OutputStream documentStream;
@@ -33,18 +34,29 @@ public class PrintingContextImpl implements PrintingContext {
     private String resourceURL;
     private String fileName;
     private IWBundle bundle;
-    
+
+    private Logger logger = null;
+
+    protected Logger getLogger() {
+    	if (logger == null) {
+    		logger = Logger.getLogger(getClass().getName());
+    	}
+    	return logger;
+    }
+
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getDocumentProperties()
      */
-    public Map getDocumentProperties() {
+    @Override
+	public Map getDocumentProperties() {
         return this.properties;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#addDocumentProperties(java.util.Map)
      */
-    public void addDocumentProperties(Map properties) {
+    @Override
+	public void addDocumentProperties(Map properties) {
         if(this.properties==null) {
 					this.properties = new HashMap(properties);
 				}
@@ -56,73 +68,85 @@ public class PrintingContextImpl implements PrintingContext {
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getTemplateStream()
      */
-    public InputStream getTemplateStream() {
+    @Override
+	public InputStream getTemplateStream() {
         return this.templateStream;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#setTemplateStream(java.io.InputStream)
      */
-    public void setTemplateStream(InputStream stream) {
+    @Override
+	public void setTemplateStream(InputStream stream) {
         this.templateStream = stream;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getResourceDirectory()
      */
-    public File getResourceDirectory() {
+    @Override
+	public File getResourceDirectory() {
         return this.resourceDirectory;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#setResourceDirectory(java.io.File)
      */
-    public void setResourceDirectory(File directory) {
+    @Override
+	public void setResourceDirectory(File directory) {
         this.resourceDirectory = directory;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getResourceURL()
      */
-    public String getResourceURL() {
+    @Override
+	public String getResourceURL() {
         return this.resourceURL;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#setResourceURL(java.lang.String)
      */
-    public void setResourceURL(String url) {
+    @Override
+	public void setResourceURL(String url) {
         this.resourceURL = url;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#getDocumentStream()
      */
-    public OutputStream getDocumentStream() {
+    @Override
+	public OutputStream getDocumentStream() {
         return this.documentStream;
     }
 
     /* (non-Javadoc)
      * @see com.idega.block.pdf.business.PrintingContext#setDocumentStream(java.io.OutputStream)
      */
-    public void setDocumentStream(OutputStream out) {
+    @Override
+	public void setDocumentStream(OutputStream out) {
         this.documentStream = out;
     }
 
-		
+
+		@Override
 		public String getFileName() {
 			return this.fileName;
 		}
 
-		
+
+		@Override
 		public void setFileName(String fileName) {
 			this.fileName = fileName;
 		}
 
+	@Override
 	public IWBundle getBundle() {
 		return bundle;
 	}
 
+	@Override
 	public void setBundle(IWBundle bundle) {
 		this.bundle = bundle;
 	}
