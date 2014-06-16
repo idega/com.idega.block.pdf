@@ -93,7 +93,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return upload(iwc, pdfBytes, fileName, uploadPath);
 	}
 
-	private synchronized byte[] getPDFBytes(Document doc) {
+	private byte[] getPDFBytes(Document doc) {
 		if (renderer == null || doc == null) {
 			return null;
 		}
