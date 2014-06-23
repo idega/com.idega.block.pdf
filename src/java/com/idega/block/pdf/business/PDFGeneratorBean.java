@@ -26,7 +26,6 @@ import org.jdom2.Attribute;
 import org.jdom2.Comment;
 import org.jdom2.Content;
 import org.jdom2.Element;
-import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -85,7 +84,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		} catch(Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating PDF generator!", e);
 		}
-		outputter = new XMLOutputter(Format.getPrettyFormat());
+		outputter = new XMLOutputter(XmlUtil.getPrettyFormat(false));
 	}
 
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
