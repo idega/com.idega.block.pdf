@@ -1,9 +1,9 @@
 /*
  * $Id: PrintingServiceBean.java,v 1.13 2008/10/23 12:28:06 valdas Exp $ Created
  * on 15.10.2004
- * 
+ *
  * Copyright (C) 2004 Idega Software hf. All Rights Reserved.
- * 
+ *
  * This software is the proprietary information of Idega hf. Use is subject to
  * license terms.
  */
@@ -28,14 +28,14 @@ import com.idega.servlet.filter.IWBundleResourceFilter;
 
 
 /**
- * 
+ *
  * Last modified: $Date: 2008/10/23 12:28:06 $ by $Author: valdas $
- * 
+ *
  * @author <a href="mailto:aron@idega.com">aron</a>
  * @version $Revision: 1.13 $
  */
 public class PrintingServiceBean extends IBOServiceBean implements PrintingService {
-	
+
 	private static final long serialVersionUID = 5645957534865246451L;
 
 	/*
@@ -54,12 +54,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 * FileOutputStream("your-output-file.pdf");
 	 * documentPrinter.printDocument(pdfStream);
 	 */
-	
+
 	/**
 	 * Creates a pdf by transforming an xml template. The given PrintingContext
 	 * supplies the necessary resources for the generation
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	public DocumentPrinter printDocument(PrintingContext pcx) {
 		try {
 			Map documentProperties = pcx.getDocumentProperties();
@@ -69,31 +69,31 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 					pcx.setBundle((IWBundle) o);
 				}
 			}
-			
+
 			InputStream is = pcx.getTemplateStream();
-			
+
 			DocumentPrinter documentPrinter = new DocumentPrinter(is, documentProperties);
-			
+
 			/*TemplateInterpreterFactory tif = new DefaultTemplateInterpreterFactory();
 			TemplateInterpreter expi = tif.createTemplateInterpreter();
 			expi.(new IWBundleType(expi));
 			documentPrinter.setTemplateInterpreter(expi);*/
-			
+
 			File resourceDirectory = pcx.getResourceDirectory();
 			if (resourceDirectory != null) {
 				documentPrinter.setResourceLoader(new FileResourceLoader(resourceDirectory));
-				
+
 				loadAllResources(pcx.getBundle(), resourceDirectory);
 			}
-			
+
 			String resourceURL = pcx.getResourceURL();
 			if (resourceURL != null) {
 				documentPrinter.setResourceLoader(new HttpResourceLoader(resourceURL));
 			}
-			
+
 			OutputStream os = pcx.getDocumentStream();
 			documentPrinter.printDocument(os);
-			
+
 			return documentPrinter;
 		}
 		catch (DocumentHandlerException e) {
@@ -107,18 +107,19 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 
 	/**
 	 * Creates an empty PrintingContext to be filled
-	 * 
+	 *
 	 * @return
 	 */
+	@Override
 	public PrintingContext createPrintingContext() {
 		return new PrintingContextImpl();
 	}
-	
+
 	private boolean loadAllResources(IWBundle bundle, File resourceDirectory) {
 		if (bundle == null || resourceDirectory == null || !resourceDirectory.exists() || !resourceDirectory.isDirectory()) {
 			return false;
 		}
-		
+
 		String pathInBundle = resourceDirectory.getAbsolutePath();
 		int bundleIdentifierIndex = pathInBundle.indexOf(bundle.getBundleIdentifier());
 		if (bundleIdentifierIndex == -1) {
@@ -126,9 +127,9 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		}
 		pathInBundle = new StringBuilder(pathInBundle.substring(bundleIdentifierIndex + bundle.getBundleIdentifier().length() + 1)).append(File.separator)
 						.toString();
-		
+
 		IWBundleResourceFilter.copyAllFilesFromJarDirectory(IWMainApplication.getDefaultIWMainApplication(), bundle, pathInBundle);
-		
+
 		return true;
 	}
 }
