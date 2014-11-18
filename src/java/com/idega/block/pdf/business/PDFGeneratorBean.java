@@ -159,8 +159,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private void uploadSourceToRepository(Document document) {
-		if (!getApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE))
+		if (!getApplication().getSettings().getBoolean("upload_generated_pdf", Boolean.FALSE)) {
 			return;
+		}
 
 		org.jdom2.Document doc = XmlUtil.getJDOMXMLDocument(document);
 		if (doc == null) {
@@ -178,7 +179,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		try {
 			repository.uploadFileAndCreateFoldersFromStringAsRoot(
 					CoreConstants.PUBLIC_PATH + CoreConstants.SLASH,
-					"html_for_pdf.html",
+					getApplication().getSettings().getProperty("html_for_pdf_name", "html_for_pdf.html"),
 					htmlContent,
 					"text/html"
 			);
