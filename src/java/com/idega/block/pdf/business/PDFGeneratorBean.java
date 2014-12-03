@@ -89,6 +89,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
 		byte[] pdfBytes = getPDFBytes(doc);
+
 		return upload(iwc, pdfBytes, fileName, uploadPath);
 	}
 
@@ -109,7 +110,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			renderer.createPDF(os);
 			renderer.finishPDF();
 			memory = os.toByteArray();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Error rendering:\n" + XmlUtil.getPrettyPrintedDOM(doc), e);
 		} finally {
 			IOUtil.close(os);
@@ -152,8 +153,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	@Override
 	public boolean generatePDF(IWContext iwc, UIComponent component, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
 		Document document = getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags);
-		if (document == null)
+		if (document == null) {
 			return false;
+		}
 
 		return generatePDF(iwc, document, fileName, uploadPath);
 	}
