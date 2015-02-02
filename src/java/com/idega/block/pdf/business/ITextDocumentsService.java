@@ -82,10 +82,13 @@
  */
 package com.idega.block.pdf.business;
 
+import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
+import com.idega.block.pdf.presentation.ITextDocumentURIEditor;
 import com.idega.block.pdf.presentation.bean.ITextDocumentURI;
 
 /**
@@ -100,17 +103,56 @@ public interface ITextDocumentsService {
 
 	static final String BEAN_DEFINITION = "iTextDocumentsService";
 
+	/**
+	 * 
+	 * @return all entities in data source or {@link Collections#emptyList()} on
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	List<ITextDocumentURIEntity> getITextDocumentURIEntities();
 
+	/**
+	 * 
+	 * @return all {@link ITextDocumentURIEntity}s in data source transformed 
+	 * to {@link ITextDocumentURI} beans  or {@link Collections#emptyList()} on
+	 * failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	List<ITextDocumentURI> getITextDocumentURIs();
 
 	String getHomepageLink();
 
+	/**
+	 * 
+	 * <p>Removes record of {@link ITextDocumentURIEntity}</p>
+	 * @param id is {@link ITextDocumentURIEntity#getId()} to remove, 
+	 * not <code>null</code>;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	void remove(String id);
 
+	/**
+	 * 
+	 * @param id of JBPM process definition, not <code>null</code>;
+	 * @return {@link URI} to {@link ITextDocumentURIEditor} or 
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	String getEditorLink(Long id);
 
+	/**
+	 * 
+	 * @return {@link URI} to {@link ITextDocumentURIEditor} or 
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	String getEditorLink();
 
+	/**
+	 * 
+	 * @return {@link Map} of id and name of JBPM process definition 
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	Map<String, String> getProcessDefinitionNames();
 }
