@@ -53,10 +53,4 @@
 		<managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocumentURI</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
-
-	<!-- <managed-bean>
-		<managed-bean-name>missedTeeTimesAmounts</managed-bean-name>
-		<managed-bean-class>is.idega.idegaweb.golf.presentation.bean.MissedTeeTimesAmounts</managed-bean-class>
-		<managed-bean-scope>application</managed-bean-scope>
-	</managed-bean> -->
 </faces-config>
