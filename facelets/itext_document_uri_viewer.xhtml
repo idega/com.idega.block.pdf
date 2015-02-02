@@ -34,6 +34,9 @@
 	<script 
 		type="text/javascript"
 		src="#{iwResourceResolver['com.idega.block.pdf']['javascript/viewer.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.pdf']['javascript/ITextDocumentURIHelper.js']}"/>
 	<h:dataTable
 		id="editorTable"
 		value="#{iTextDocumentsService.ITextDocumentURIs}"
@@ -119,6 +122,7 @@
 				layout="block">
 				<h:graphicImage
 					url="#{IWURIResource.res['/idegaweb/bundles/com.idega.block.pdf.bundle/resources/style/images/delete.png']}"
+                    onclick="ITextDocumentURIHelper.remove(this.parentNode.parentNode)"
 					alt="#{localizedStrings['com.idega.block.pdf']['delete']}"/>
 			</h:panelGroup>
 		</h:column>

@@ -253,7 +253,7 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 	@Override
 	public void remove(ITextDocumentURIEntity entity) {
 		if (entity != null) {
-			remove(entity);
+			super.remove(entity);
 		}
 	}
 
