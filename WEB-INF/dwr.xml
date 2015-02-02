@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dwr PUBLIC "-//GetAhead Limited//DTD Direct Web Remoting 3.0//EN" "http://getahead.org/dwr//dwr30.dtd">
+
+<dwr>
+    <allow>
+        <create
+            creator="spring"
+            javascript="ITextDocumentService">
+            <param
+                name="beanName"
+                value="iTextDocumentsService" />
+            <include method="getHomepageLink" />
+            <include method="getEditorLink" />
+            <include method="remove" />
+        </create>
+    </allow>
+</dwr>
