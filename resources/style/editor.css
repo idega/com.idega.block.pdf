@@ -1,0 +1,12 @@
+table {
+	border-spacing: 5px;
+	white-space: nowrap;
+}
+
+td > input[type="text"], td > select {
+	width: 100%;
+}
+
+td > input[type="submit"] {
+	float: right;
+}

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+	version="1.2">
+
+	<component>
+		<component-class>com.idega.block.pdf.presentation.ITextDocumentURIViewer</component-class>
+		<component-type>iText document URI viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<component>
+		<component-class>com.idega.block.pdf.presentation.ITextDocumentURIEditor</component-class>
+		<component-type>iText document URI editor</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+	<component>
+		<component-class>com.idega.block.pdf.presentation.ITextDocumentPDFViewer</component-class>
+		<component-type>iText document PDF viewer</component-type>
+		<component-extension>
+			<idegaweb-info>
+        		<builder-visible>true</builder-visible>
+        		<object-type>jsf.uicomponent</object-type>
+      		</idegaweb-info>
+		</component-extension>
+	</component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.ITextDocumentSourceEditor</component-class>
+        <component-type>iText document source editor</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+	<managed-bean>
+		<managed-bean-name>iTextDucumentURI</managed-bean-name>
+		<managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocumentURI</managed-bean-class>
+		<managed-bean-scope>request</managed-bean-scope>
+	</managed-bean>
+
+	<!-- <managed-bean>
+		<managed-bean-name>missedTeeTimesAmounts</managed-bean-name>
+		<managed-bean-class>is.idega.idegaweb.golf.presentation.bean.MissedTeeTimesAmounts</managed-bean-class>
+		<managed-bean-scope>application</managed-bean-scope>
+	</managed-bean> -->
+</faces-config>
