@@ -242,4 +242,18 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 
 		return names;
 	}
+
+	@Override
+	public Map<String, String> getProcessDefinitionNamesWithURI() {
+		Map<String, String> names = new TreeMap<String, String>();
+		
+		List<ITextDocumentURIEntity> entities = getITextDocumentURIEntities();
+		for (ITextDocumentURIEntity entity : entities) {
+			names.put(
+					entity.getProcessDefinitionName(), 
+					entity.getProcessDefinitionId().toString());
+		}
+
+		return names;
+	}
 }

@@ -155,4 +155,13 @@ public interface ITextDocumentsService {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	Map<String, String> getProcessDefinitionNames();
+
+	/**
+	 * 
+	 * @return {@link Map} of {@link ITextDocumentURIEntity#getId()} and name of 
+	 * JBPM process definition or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Map<String, String> getProcessDefinitionNamesWithURI();
+
 }
