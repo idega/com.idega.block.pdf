@@ -1,5 +1,5 @@
 /**
- * @(#)ITextDocumentURI.java    1.0.0 16:39:21
+ * @(#)ITextDocument.java    1.0.0 19:52:46
  *
  * Idega Software hf. Source Code Licence Agreement x
  *
@@ -82,173 +82,147 @@
  */
 package com.idega.block.pdf.presentation.bean;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.logging.Level;
+
+import javax.faces.event.ValueChangeEvent;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
-import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
-import com.idega.presentation.IWContext;
-import com.idega.util.CoreUtil;
+import com.idega.util.FileUtil;
 import com.idega.util.StringUtil;
-import com.idega.util.expression.ELUtil;
 
 /**
- * <p>JSF managed bean for {@link ITextDocumentURIEntity}</p>
+ * <p>JSF managed bean for iText document editing</p>
  * <p>You can report about problems to: 
  * <a href="mailto:martynas@idega.is">Martynas Stakė</a></p>
  *
- * @version 1.0.0 2015 saus. 29
+ * @version 1.0.0 2015 vas. 2
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public class ITextDocumentURI {
+public class ITextDocument extends ITextDocumentURI {
 
-	public static final String PARAMETER_ID = "prm_id";
+	private File repositoryDocument;
 
-	private Long id;
+	private File bundleDocument;
 
-	private String bundleURI;
+	private File document;
 
-	private String repositoryURI;
+	private FileInputStream documentStream;
 
-	private Long processDefinitionId;
+	private String documentSource;
 
-	private String processDefinitionName;
+	public ITextDocument() {}
 
-	private String editorLink = null;
-
-	private ITextDocumentURIEntity entity;
-
-	@Autowired
-	private ITextDocumentURIDAO dao;
-
-	public static final String PARAMETER_SUBMITTED = "submitted";
-	private boolean submitted = Boolean.FALSE;
-
-	protected ITextDocumentURIDAO getDao() {
-		if (this.dao == null) {
-			ELUtil.getInstance().autowire(this);
-		}
-
-		return this.dao;
+	public ITextDocument(ITextDocumentURIEntity entity) {
+		super(entity);
 	}
 
-	public ITextDocumentURI() {}
-
-	public ITextDocumentURI(ITextDocumentURIEntity entity) {
-		this.entity = entity;
-	}
-
-	public Long getId() {
-		if (this.id == null && getEntity() != null) {
-			this.id = getEntity().getId();
-		}
-
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getBundleURI() {
-		if (StringUtil.isEmpty(this.bundleURI) && getEntity() != null) {
-			this.bundleURI = getEntity().getBundleURI();
-		}
-
-		return bundleURI;
-	}
-
-	public void setBundleURI(String bundleURI) {
-		this.bundleURI = bundleURI;
-	}
-
-	public String getRepositoryURI() {
-		if (StringUtil.isEmpty(this.repositoryURI) && getEntity() != null) {
-			this.repositoryURI = getEntity().getRepositoryURI();
-		}
-
-		return repositoryURI;
-	}
-
-	public void setRepositoryURI(String repositoryURI) {
-		this.repositoryURI = repositoryURI;
-	}
-
-	public Long getProcessDefinitionId() {
-		if (this.processDefinitionId == null && getEntity() != null) {
-			this.processDefinitionId = getEntity().getProcessDefinitionId();
-		}
-
-		return processDefinitionId;
-	}
-
-	public void setProcessDefinitionId(Long processDefinitionId) {
-		this.processDefinitionId = processDefinitionId;
-	}
-
-	public String getProcessDefinitionName() {
-		if (this.processDefinitionName == null && getEntity() != null) {
-			this.processDefinitionName = getEntity().getProcessDefinitionName();
-		}
-
-		return processDefinitionName;
-	}
-
-	public void setProcessDefinitionName(String processDefinitionName) {
-		this.processDefinitionName = processDefinitionName;
-	}
-
-	public String getEditorLink() {
-		return editorLink;
-	}
-
-	public void setEditorLink(String editorLink) {
-		this.editorLink = editorLink;
-	}
-
-	public boolean isSubmitted() {
-		String submitted = CoreUtil.getIWContext().getParameter(PARAMETER_SUBMITTED);
-		if (Boolean.TRUE.toString().equals(submitted)) {
-			this.submitted = Boolean.TRUE;
-		}
-
-		return this.submitted;
-	}
-
-	public void setSubmitted(boolean submitted) {
-		this.submitted = submitted;
-	}
-
-	public void save() {
-		if (getDao().update(null, 
-				this.bundleURI, 
-				this.repositoryURI, 
-				this.processDefinitionId, 
-				ITextDocumentURIEntity.class) != null) {
-			setSubmitted(Boolean.TRUE);
-		}
-	}
-
-	public ITextDocumentURIEntity getEntity() {
-		if (this.entity == null) {
-			if (this.id == null) {
-				IWContext context = CoreUtil.getIWContext();
-				if (context != null) {
-					String parameter = context.getParameter(PARAMETER_ID);
-					if (!StringUtil.isEmpty(parameter)) {
-						this.id = Long.valueOf(parameter);
-					}
-				}
-			}
-
-			if (this.id != null) {
-				this.entity = getDao().findById(this.id);
+	public File getRepositoryDocument() {
+		if (this.repositoryDocument == null && !StringUtil.isEmpty(getRepositoryURI())) {
+			try {
+				this.repositoryDocument = FileUtil.getFileFromWorkspace(getRepositoryURI());
+			} catch (IOException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to get document from repository "
+								+ "by path: '" + getRepositoryURI() 
+								+ "' cause of:", e);
 			}
 		}
 
-		return entity;
+		return repositoryDocument;
 	}
 
-	public void setEntity(ITextDocumentURIEntity entity) {
-		this.entity = entity;
+	public File getBundleDocument() {
+		if (this.bundleDocument == null && !StringUtil.isEmpty(getBundleURI())) {
+			try {
+				this.bundleDocument = FileUtil.getFileFromWorkspace(getBundleURI());
+			} catch (IOException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to get document from repository "
+								+ "by path: '" + getRepositoryURI() 
+								+ "' cause of:", e);
+			}
+		}
+
+		return bundleDocument;
+	}
+
+	public File getDocument() {
+		if (this.document == null) {
+			this.document = getRepositoryDocument();
+		}
+
+		if (this.document == null) {
+			this.document = getBundleDocument();
+		}
+
+		return this.document;
+	}
+
+	public FileInputStream getDocumentStream() {
+		if (this.documentStream == null && getDocument() != null) {
+			try {
+				this.documentStream = new FileInputStream(getDocument());
+			} catch (FileNotFoundException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to create input stream, "
+								+ "cause of:", e);
+			}
+		}
+
+		return this.documentStream;
+	}
+
+	public String getDocumentSource() {
+		if (this.documentSource == null && getDocument() != null) {
+			try {
+				this.documentSource = FileUtil.getStringFromFile(getDocument());
+			} catch (IOException e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to read file, cause of: ", e);
+			}
+		}
+
+		return documentSource;
+	}
+
+	public void setRepositoryDocument(File repositoryDocument) {
+		this.repositoryDocument = repositoryDocument;
+	}
+
+	public void setBundleDocument(File bundleDocument) {
+		this.bundleDocument = bundleDocument;
+	}
+
+	public void setDocument(File document) {
+		this.document = document;
+	}
+
+	public void setDocumentStream(FileInputStream documentStream) {
+		this.documentStream = documentStream;
+	}
+
+	public void setDocumentSource(String documentSource) {
+		this.documentSource = documentSource;
+	}
+
+	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
+		Object value = event.getNewValue();
+		if (value != null) {
+			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
+			setProcessDefinitionId(getEntity().getProcessDefinitionId());
+			setProcessDefinitionName(getEntity().getProcessDefinitionName());
+			setId(getEntity().getId());
+			setBundleURI(getEntity().getBundleURI());
+			setRepositoryURI(getEntity().getRepositoryURI());
+			setDocumentSource(null);
+			setDocumentStream(null);
+			setDocument(null);
+			setBundleDocument(null);
+			setRepositoryDocument(null);
+		}
 	}
 }
