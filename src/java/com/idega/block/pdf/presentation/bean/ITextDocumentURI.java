@@ -109,6 +109,8 @@ public class ITextDocumentURI implements Serializable {
 
 	private static final long serialVersionUID = 8431943648530058039L;
 
+	public static final String PARAMETER_ID = "prm_id";
+
 	private Long id;
 
 	private String bundleName;
@@ -132,7 +134,6 @@ public class ITextDocumentURI implements Serializable {
 
 	protected ITextDocumentURIDAO getDao() {
 		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
-		if (this.dao == null) {
 	}
 
 	public ITextDocumentURI() {}
