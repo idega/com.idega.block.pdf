@@ -111,7 +111,8 @@ public interface ITextDocumentURIDAO extends GenericDao {
 	 * 
 	 * @param id is {@link ITextDocumentURIEntity#getId()} or <code>null</code> 
 	 * when creating new entity;
-	 * @param bundleURI is id of fish type in remote system, 
+	 * @param bundlePath TODO
+	 * @param bundleURL is id of fish type in remote system, 
 	 * not <code>null</code> when creating new entity;
 	 * @param repositoryURI of type in remote system, not <code>null</code> when 
 	 * creating new entity;
@@ -124,17 +125,18 @@ public interface ITextDocumentURIDAO extends GenericDao {
 	 */
 	public <T extends ITextDocumentURIEntity> T update(
 			Long id, 
-			String bundleURI,
-			String repositoryURI,
+			String bundlePath,
+			String bundleURL,
+			String repositoryURI, 
 			Long processDefinition, 
-			String processDefinitionName, 
-			Class<T> clazz);
+			String processDefinitionName, Class<T> clazz);
 
 	/**
 	 * 
 	 * @param id is {@link ITextDocumentURIEntity#getId()} or <code>null</code> 
 	 * when creating new entity;
-	 * @param bundleURI is id of fish type in remote system, 
+	 * @param bundlePath TODO
+	 * @param bundleURL is id of fish type in remote system, 
 	 * not <code>null</code> when creating new entity;
 	 * @param repositoryURI of type in remote system, not <code>null</code> when 
 	 * creating new entity;
@@ -146,8 +148,9 @@ public interface ITextDocumentURIDAO extends GenericDao {
 	 */
 	public <T extends ITextDocumentURIEntity> T update(
 			Long id, 
-			String bundleURI, 
-			String repositoryURI,
+			String bundlePath, 
+			String bundleURL,
+			String repositoryURI, 
 			Long processDefinition, 
 			Class<T> clazz);
 

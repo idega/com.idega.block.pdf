@@ -131,10 +131,15 @@ public class ITextDocumentURIEntity implements Serializable {
 	@Id @GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	public static final String COLUMN_BUNDLE_URI = "bundle_uri";
-	public static final String bundleURIProp = "bundleURI";
-	@Column(name = COLUMN_BUNDLE_URI)
-	private String bundleURI;
+	public static final String COLUMN_BUNDLE_PATH = "bundle_path";
+	public static final String bundlePathProp = "bundlePath";
+	@Column(name = COLUMN_BUNDLE_PATH)
+	private String bundlePath;
+
+	public static final String COLUMN_BUNDLE_URL = "bundle_url";
+	public static final String bundleURLProp = "bundleURL";
+	@Column(name = COLUMN_BUNDLE_URL)
+	private String bundleURL;
 
 	public static final String COLUMN_REPOSITORY_URI = "repository_uri";
 	public static final String repositoryURIProp = "repositoryURI";
@@ -159,12 +164,20 @@ public class ITextDocumentURIEntity implements Serializable {
 		this.id = id;
 	}
 
-	public String getBundleURI() {
-		return bundleURI;
+	public String getBundlePath() {
+		return bundlePath;
 	}
 
-	public void setBundleURI(String bundleURI) {
-		this.bundleURI = bundleURI;
+	public void setBundlePath(String bundlePath) {
+		this.bundlePath = bundlePath;
+	}
+
+	public String getBundleURL() {
+		return bundleURL;
+	}
+
+	public void setBundleURL(String bundleURL) {
+		this.bundleURL = bundleURL;
 	}
 
 	public String getRepositoryURI() {

@@ -99,13 +99,17 @@ import com.idega.util.expression.ELUtil;
  * @version 1.0.0 2015 saus. 29
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public class ITextDocumentURI {
+public class ITextDocumentURI implements Serializable {
 
-	public static final String PARAMETER_ID = "prm_id";
+	private static final long serialVersionUID = 8431943648530058039L;
 
 	private Long id;
 
-	private String bundleURI;
+	private String bundleName;
+	
+	private String bundlePath;
+
+	private String bundleURL;
 
 	private String repositoryURI;
 
@@ -150,15 +154,53 @@ public class ITextDocumentURI {
 	}
 
 	public String getBundleURI() {
-		if (StringUtil.isEmpty(this.bundleURI) && getEntity() != null) {
-			this.bundleURI = getEntity().getBundleURI();
+		if (!StringUtil.isEmpty(getBundlePath()) && !StringUtil.isEmpty(getBundleURL())) {
+			return getBundlePath() + getBundleURL();
 		}
 
-		return bundleURI;
+		return "-";
 	}
 
-	public void setBundleURI(String bundleURI) {
-		this.bundleURI = bundleURI;
+	public String getBundleURL() {
+		if (StringUtil.isEmpty(this.bundleURL) && getEntity() != null) {
+			this.bundleURL = getEntity().getBundleURL();
+		}
+
+		return bundleURL;
+	}
+
+	public void setBundleURL(String bundleURL) {
+		this.bundleURL = bundleURL;
+	}
+
+	public String getBundleName() {
+		if (StringUtil.isEmpty(this.bundleName) 
+				&& !StringUtil.isEmpty(getBundlePath())) {
+			this.bundleName = getBundlePath().substring(
+					getBundlePath().lastIndexOf("/") + 1);
+			if (this.bundleName.contains(".bundle")) {
+				this.bundleName = this.bundleName.substring(
+						0, this.bundleName.indexOf(".bundle"));
+			}
+		}
+		
+		return bundleName;
+	}
+
+	public void setBundleName(String bundleName) {
+		this.bundleName = bundleName;
+	}
+
+	public String getBundlePath() {
+		if (StringUtil.isEmpty(this.bundlePath) && getEntity() != null) {
+			this.bundlePath = getEntity().getBundlePath();
+		}
+
+		return bundlePath;
+	}
+
+	public void setBundlePath(String bundlePath) {
+		this.bundlePath = bundlePath;
 	}
 
 	public String getRepositoryURI() {
@@ -220,7 +262,8 @@ public class ITextDocumentURI {
 
 	public void save() {
 		if (getDao().update(null, 
-				this.bundleURI, 
+				this.bundlePath,
+				this.bundleURL,
 				this.repositoryURI, 
 				this.processDefinitionId, 
 				ITextDocumentURIEntity.class) != null) {
@@ -228,6 +271,23 @@ public class ITextDocumentURI {
 		}
 	}
 
+	public Map<String, String> getBundleURLs() {
+		Map<String, String> bundleURLs = new TreeMap<String, String>();
+
+		if (!StringUtil.isEmpty(getBundleName())) {
+			List<String> files = FileUtil.getAllFilesRecursively(getBundlePath() + "/resources");
+			for (String path : files) {
+				path = path.substring(path.indexOf(getBundleName()));
+				if (path.contains("/")) {
+					path = path.substring(path.indexOf("/"));
+				}
+
+				bundleURLs.put(path, path);
+			}
+		}
+
+		return bundleURLs;
+	}
 	public ITextDocumentURIEntity getEntity() {
 		if (this.entity == null) {
 			if (this.id == null) {

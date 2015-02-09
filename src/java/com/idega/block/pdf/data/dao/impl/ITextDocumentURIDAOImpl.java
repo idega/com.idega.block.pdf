@@ -165,7 +165,8 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 	@Override
 	public <T extends ITextDocumentURIEntity> T update(
 			Long id, 
-			String bundleURI,
+			String bundlePath,
+			String bundleURL, 
 			String repositoryURI, 
 			Long processDefinition, 
 			String processDefinitionName, 
@@ -193,8 +194,12 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 			}
 		}
 
-		if (!StringUtil.isEmpty(bundleURI)) {
-			entityToUpdate.setBundleURI(bundleURI);
+		if (!StringUtil.isEmpty(bundleURL)) {
+			entityToUpdate.setBundleURL(bundleURL);
+		}
+
+		if (!StringUtil.isEmpty(bundlePath)) {
+			entityToUpdate.setBundlePath(bundlePath);
 		}
 
 		if (!StringUtil.isEmpty(repositoryURI)) {
@@ -219,17 +224,18 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 	@Override
 	public <T extends ITextDocumentURIEntity> T update(
 			Long id,
-			String bundleURI,
-			String repositoryURI,
+			String bundlePath,
+			String bundleURL,
+			String repositoryURI, 
 			Long processDefinition, 
 			Class<T> clazz) {
 		return update(
 				id, 
-				bundleURI, 
+				bundlePath, 
+				bundleURL, 
 				repositoryURI, 
 				processDefinition, 
-				getProcessDefinitionName(processDefinition), 
-				clazz);
+				getProcessDefinitionName(processDefinition), clazz);
 	}
 
 	/* (non-Javadoc)
@@ -243,8 +249,8 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 			Long processDefinition, 
 			String processDefinitionName) {
 
-		return update(null, bundleURI, repositoryURI, processDefinition, 
-				processDefinitionName, clazz);
+		return update(null, null, bundleURI, repositoryURI, 
+				processDefinition, processDefinitionName, clazz);
 	}
 
 	/* (non-Javadoc)

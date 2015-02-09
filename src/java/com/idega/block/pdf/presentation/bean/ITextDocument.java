@@ -215,8 +215,6 @@ public class ITextDocument extends ITextDocumentURI {
 			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
 			setProcessDefinitionId(getEntity().getProcessDefinitionId());
 			setProcessDefinitionName(getEntity().getProcessDefinitionName());
-			setId(getEntity().getId());
-			setBundleURI(getEntity().getBundleURI());
 			setRepositoryURI(getEntity().getRepositoryURI());
 			setDocumentSource(null);
 			setDocumentStream(null);
