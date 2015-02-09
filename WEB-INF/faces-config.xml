@@ -49,7 +49,7 @@
     </component>
 
 	<managed-bean>
-		<managed-bean-name>iTextDucumentURI</managed-bean-name>
+		<managed-bean-name>iTextDocumentURI</managed-bean-name>
 		<managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocumentURI</managed-bean-class>
 		<managed-bean-scope>request</managed-bean-scope>
 	</managed-bean>
