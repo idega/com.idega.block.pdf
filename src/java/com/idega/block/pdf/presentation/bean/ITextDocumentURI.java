@@ -82,12 +82,18 @@
  */
 package com.idega.block.pdf.presentation.bean;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.faces.event.ValueChangeEvent;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreUtil;
+import com.idega.util.FileUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
@@ -121,18 +127,12 @@ public class ITextDocumentURI implements Serializable {
 
 	private ITextDocumentURIEntity entity;
 
-	@Autowired
-	private ITextDocumentURIDAO dao;
-
 	public static final String PARAMETER_SUBMITTED = "submitted";
 	private boolean submitted = Boolean.FALSE;
 
 	protected ITextDocumentURIDAO getDao() {
+		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
 		if (this.dao == null) {
-			ELUtil.getInstance().autowire(this);
-		}
-
-		return this.dao;
 	}
 
 	public ITextDocumentURI() {}
