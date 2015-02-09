@@ -89,6 +89,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
+import javax.faces.context.FacesContext;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -103,11 +105,14 @@ import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.data.SimpleQuerier;
+import com.idega.idegaweb.IWBundle;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.expression.ELUtil;
 
 /**
@@ -243,6 +248,10 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		return names;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.ITextDocumentsService#getProcessDefinitionNamesWithURI()
+	 */
 	@Override
 	public Map<String, String> getProcessDefinitionNamesWithURI() {
 		Map<String, String> names = new TreeMap<String, String>();
@@ -255,5 +264,29 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		}
 
 		return names;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.ITextDocumentsService#getBundlePathsAndNames()
+	 */
+	@Override
+	public Map<String, String> getBundlePathsAndNames() {
+		Map<String, String> bundleNames = new TreeMap<String, String>();
+
+		IWMainApplication application = IWMainApplication.getIWMainApplication(
+				FacesContext.getCurrentInstance());
+		if (application != null) {
+			Map<String, IWBundle> bundles = application.getLoadedBundles();
+			if (!MapUtil.isEmpty(bundles)) {
+				for (IWBundle bundle : bundles.values()) {
+					bundleNames.put(
+							bundle.getBundleName(),
+							bundle.getBundleBaseRealPath());
+				}
+			}
+		}
+
+		return bundleNames;
 	}
 }

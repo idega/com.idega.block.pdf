@@ -164,4 +164,5 @@ public interface ITextDocumentsService {
 	 */
 	Map<String, String> getProcessDefinitionNamesWithURI();
 
+	Map<String, String> getBundlePathsAndNames();
 }
