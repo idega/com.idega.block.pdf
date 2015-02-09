@@ -8,26 +8,27 @@ div.header {
 	font-weight: bold;
 }
 
+.overflow {
+	overflow: auto;
+}
+
 table.table {
 	border-collapse:collapse;
 	width: 100%;
 }
 
+table.table th, table.table td {
+	border-top: 1px solid #CCCCCC;
+	padding: 5px 8px;
+} 
+
 table.table th {
 	border-bottom: 1px solid #CCCCCC;
-    border-top: 1px solid #CCCCCC;
     font-weight: bold;
-    overflow: hidden;
-    padding: 5px 8px;
-    text-align: left;
     font-size: 12px;
 }
 
 table.table td {
-	border-top: 1px solid #CCCCCC;
-    font-size: 0.85em;
-    overflow: hidden;
-    padding: 5px 8px;
     font-size: 10px;
 }
 
