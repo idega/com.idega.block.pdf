@@ -262,6 +262,11 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 		remove(findById(id));	
 	}
 
+	@Override
+	public void removeByProcessDefinitionId(Long processDefinitionId) {
+		remove(findByProcessDefinition(processDefinitionId));
+	}
+
 	/* (non-Javadoc)
 	 * @see is.idega.idegaweb.egov.gumbo.dao.FishingLicenseURIDAO#getById(java.lang.Long, java.lang.Class)
 	 */

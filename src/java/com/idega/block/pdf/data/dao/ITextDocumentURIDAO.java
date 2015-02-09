@@ -172,6 +172,8 @@ public interface ITextDocumentURIDAO extends GenericDao {
 	public void remove(ITextDocumentURIEntity entity);
 
 	public void remove(Long id);
+
+	public void removeByProcessDefinitionId(Long processDefinitionId);
 	
 	/**
 	 *
