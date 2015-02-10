@@ -300,15 +300,17 @@ public class ITextDocumentURI implements Serializable {
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
 		if (value != null) {
-			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
-			setId(null);
 			setProcessDefinitionId(Long.valueOf(value.toString()));
-			setProcessDefinitionName(null);
-			setRepositoryURI(null);
-			setBundlePath(null);
-			setBundleURL(null);
-			setBundleName(null);
-			this.processDefinitionUpdated = true;
+			if (event.getOldValue() != null) {
+				setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
+				setId(null);
+				setProcessDefinitionName(null);
+				setRepositoryURI(null);
+				setBundlePath(null);
+				setBundleURL(null);
+				setBundleName(null);
+				this.processDefinitionUpdated = true;
+			}
 		}
 	}
 
