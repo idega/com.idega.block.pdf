@@ -63,7 +63,9 @@
             <h:panelGroup>
                 <h:selectOneMenu
                     id="bundle"
-                   	value="#{iTextDocumentURI.bundlePath}">
+                   	value="#{iTextDocumentURI.bundlePath}"
+                    valueChangeListener="#{iTextDocumentURI.selectedBundlePathChange}"
+                    onchange="showLoadingMessage('Loading'); submit();">
                     <f:selectItem
                         itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
                         noSelectValue="true"/>

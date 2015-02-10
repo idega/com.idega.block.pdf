@@ -110,11 +110,11 @@ public class ITextDocumentURI implements Serializable {
 	private static final long serialVersionUID = 8431943648530058039L;
 
 	public static final String PARAMETER_ID = "prm_id";
-
 	private Long id;
 
 	private String bundleName;
-	
+
+	public static final String PARAMETER_BUNDLE_PATH = "editorForm:bundle";
 	private String bundlePath;
 
 	private String bundleURL;
@@ -197,6 +197,11 @@ public class ITextDocumentURI implements Serializable {
 			this.bundlePath = getEntity().getBundlePath();
 		}
 
+		if (StringUtil.isEmpty(this.bundlePath)) {
+			this.bundlePath = IWContext.getInstance().getParameter(
+					PARAMETER_BUNDLE_PATH);
+		}
+
 		return bundlePath;
 	}
 
@@ -261,6 +266,20 @@ public class ITextDocumentURI implements Serializable {
 		this.submitted = submitted;
 	}
 
+	public void selectedBundlePathChange(ValueChangeEvent event) {
+ 		Object value = event.getNewValue();
+		if (value != null) {
+			setBundlePath(value.toString());
+		}
+	}
+
+	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
+		Object value = event.getNewValue();
+		if (value != null) {
+			setProcessDefinitionId(Long.valueOf(value.toString()));
+		}
+	}
+
 	public void save() {
 		if (getDao().update(null, 
 				this.bundlePath,
@@ -289,6 +308,7 @@ public class ITextDocumentURI implements Serializable {
 
 		return bundleURLs;
 	}
+
 	public ITextDocumentURIEntity getEntity() {
 		if (this.entity == null) {
 			if (this.id == null) {
