@@ -123,6 +123,8 @@ public class ITextDocumentURI implements Serializable {
 
 	private Long processDefinitionId;
 
+	private Long oldProcessDefinitionId;
+
 	private String processDefinitionName;
 
 	private String editorLink = null;
@@ -132,7 +134,7 @@ public class ITextDocumentURI implements Serializable {
 	public static final String PARAMETER_SUBMITTED = "submitted";
 	private boolean submitted = Boolean.FALSE;
 
-	private boolean processDefinitionUpdated = false;
+	private boolean processDefinitionUpdated = Boolean.FALSE;
 
 	protected ITextDocumentURIDAO getDao() {
 		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
@@ -144,6 +146,49 @@ public class ITextDocumentURI implements Serializable {
 		this.entity = entity;
 	}
 
+	public boolean isProcessDefinitionUpdated() {
+		return processDefinitionUpdated;
+	}
+
+	public void setProcessDefinitionUpdated(boolean processDefinitionUpdated) {
+		this.processDefinitionUpdated = processDefinitionUpdated;
+	}
+
+	public Long getProcessDefinitionId() {
+		if (this.processDefinitionId == null && getEntity() != null) {
+			this.processDefinitionId = getEntity().getProcessDefinitionId();
+		}
+
+		return processDefinitionId;
+	}
+
+	public void setProcessDefinitionId(Long processDefinitionId) {
+			this.processDefinitionId = processDefinitionId;
+	}
+
+	public Long getOldProcessDefinitionId() {
+		if (this.oldProcessDefinitionId == null) {
+			String parameter = IWContext.getInstance().getParameter(
+					"editorForm:oldProcessDefinitionId");
+			if (!StringUtil.isEmpty(parameter)) {
+				this.oldProcessDefinitionId = Long.valueOf(parameter);
+			}
+		}
+
+		return oldProcessDefinitionId;
+	}
+	
+	protected boolean isUpdatingProcessDefinition() {
+		return getOldProcessDefinitionId() != null 
+				&& !getOldProcessDefinitionId().equals(getProcessDefinitionId());
+	}
+
+	public void setOldProcessDefinitionId(Long oldProcessDefinitionId) {
+		if (!isProcessDefinitionUpdated()) {
+			this.oldProcessDefinitionId = oldProcessDefinitionId;
+		}
+	}
+	
 	public Long getId() {
 		if (this.id == null && getEntity() != null) {
 			this.id = getEntity().getId();
@@ -158,14 +203,6 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
-	public String getBundleURI() {
-		if (!StringUtil.isEmpty(getBundlePath()) && !StringUtil.isEmpty(getBundleURL())) {
-			return getBundlePath() + getBundleURL();
-		}
-
-		return "-";
-	}
-
 	public String getBundleURL() {
 		if (StringUtil.isEmpty(this.bundleURL) && getEntity() != null) {
 			this.bundleURL = getEntity().getBundleURL();
@@ -177,6 +214,25 @@ public class ITextDocumentURI implements Serializable {
 	public void setBundleURL(String bundleURL) {
 		if (!isProcessDefinitionUpdated()) {
 			this.bundleURL = bundleURL;
+		}
+	}
+
+	public String getBundlePath() {
+		if (StringUtil.isEmpty(this.bundlePath) && getEntity() != null) {
+			this.bundlePath = getEntity().getBundlePath();
+		}
+
+		if (StringUtil.isEmpty(this.bundlePath) && !isProcessDefinitionUpdated()) {
+			this.bundlePath = IWContext.getInstance().getParameter(
+					PARAMETER_BUNDLE_PATH);
+		}
+
+		return bundlePath;
+	}
+
+	public void setBundlePath(String bundlePath) {
+		if (!isProcessDefinitionUpdated()) {
+			this.bundlePath = bundlePath;
 		}
 	}
 
@@ -200,23 +256,12 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
-	public String getBundlePath() {
-		if (StringUtil.isEmpty(this.bundlePath) && getEntity() != null) {
-			this.bundlePath = getEntity().getBundlePath();
+	public String getBundleURI() {
+		if (!StringUtil.isEmpty(getBundlePath()) && !StringUtil.isEmpty(getBundleURL())) {
+			return getBundlePath() + getBundleURL();
 		}
 
-		if (StringUtil.isEmpty(this.bundlePath) && !isProcessDefinitionUpdated()) {
-			this.bundlePath = IWContext.getInstance().getParameter(
-					PARAMETER_BUNDLE_PATH);
-		}
-
-		return bundlePath;
-	}
-
-	public void setBundlePath(String bundlePath) {
-		if (!isProcessDefinitionUpdated()) {
-			this.bundlePath = bundlePath;
-		}
+		return "-";
 	}
 
 	public String getRepositoryURI() {
@@ -230,20 +275,6 @@ public class ITextDocumentURI implements Serializable {
 	public void setRepositoryURI(String repositoryURI) {
 		if (!isProcessDefinitionUpdated()) {
 			this.repositoryURI = repositoryURI;
-		}
-	}
-
-	public Long getProcessDefinitionId() {
-		if (this.processDefinitionId == null && getEntity() != null) {
-			this.processDefinitionId = getEntity().getProcessDefinitionId();
-		}
-
-		return processDefinitionId;
-	}
-
-	public void setProcessDefinitionId(Long processDefinitionId) {
-		if (!isProcessDefinitionUpdated()) {
-			this.processDefinitionId = processDefinitionId;
 		}
 	}
 
@@ -282,35 +313,32 @@ public class ITextDocumentURI implements Serializable {
 		this.submitted = submitted;
 	}
 
-	public boolean isProcessDefinitionUpdated() {
-		return processDefinitionUpdated;
-	}
-
-	public void setProcessDefinitionUpdated(boolean processDefinitionUpdated) {
-		this.processDefinitionUpdated = processDefinitionUpdated;
-	}
+	
 
 	public void selectedBundlePathChange(ValueChangeEvent event) {
  		Object value = event.getNewValue();
-		if (value != null) {
-			setBundlePath(value.toString());
-		}
+ 		if (!isProcessDefinitionUpdated() && value != null) {
+			this.bundlePath = value.toString();
+ 		}
 	}
 
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
 		if (value != null) {
 			setProcessDefinitionId(Long.valueOf(value.toString()));
-			if (event.getOldValue() != null) {
-				setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
-				setId(null);
-				setProcessDefinitionName(null);
-				setRepositoryURI(null);
-				setBundlePath(null);
-				setBundleURL(null);
-				setBundleName(null);
-				this.processDefinitionUpdated = true;
+			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
+
+			if (isUpdatingProcessDefinition()) {
+				this.id = null;
+				this.processDefinitionName = null;
+				this.repositoryURI = null;
+				this.bundlePath = null;
+				this.bundleURL = null;
+				this.bundleName = null;
+				this.processDefinitionUpdated = Boolean.TRUE;
 			}
+
+			this.oldProcessDefinitionId = Long.valueOf(value.toString());
 		}
 	}
 
