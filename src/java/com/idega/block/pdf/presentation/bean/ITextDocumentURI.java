@@ -132,6 +132,8 @@ public class ITextDocumentURI implements Serializable {
 	public static final String PARAMETER_SUBMITTED = "submitted";
 	private boolean submitted = Boolean.FALSE;
 
+	private boolean processDefinitionUpdated = false;
+
 	protected ITextDocumentURIDAO getDao() {
 		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
 	}
@@ -151,7 +153,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setId(Long id) {
-		this.id = id;
+		if (!isProcessDefinitionUpdated()) {
+			this.id = id;
+		}
 	}
 
 	public String getBundleURI() {
@@ -171,7 +175,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setBundleURL(String bundleURL) {
-		this.bundleURL = bundleURL;
+		if (!isProcessDefinitionUpdated()) {
+			this.bundleURL = bundleURL;
+		}
 	}
 
 	public String getBundleName() {
@@ -189,7 +195,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setBundleName(String bundleName) {
-		this.bundleName = bundleName;
+		if (!isProcessDefinitionUpdated()) {
+			this.bundleName = bundleName;
+		}
 	}
 
 	public String getBundlePath() {
@@ -197,7 +205,7 @@ public class ITextDocumentURI implements Serializable {
 			this.bundlePath = getEntity().getBundlePath();
 		}
 
-		if (StringUtil.isEmpty(this.bundlePath)) {
+		if (StringUtil.isEmpty(this.bundlePath) && !isProcessDefinitionUpdated()) {
 			this.bundlePath = IWContext.getInstance().getParameter(
 					PARAMETER_BUNDLE_PATH);
 		}
@@ -206,7 +214,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setBundlePath(String bundlePath) {
-		this.bundlePath = bundlePath;
+		if (!isProcessDefinitionUpdated()) {
+			this.bundlePath = bundlePath;
+		}
 	}
 
 	public String getRepositoryURI() {
@@ -218,7 +228,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setRepositoryURI(String repositoryURI) {
-		this.repositoryURI = repositoryURI;
+		if (!isProcessDefinitionUpdated()) {
+			this.repositoryURI = repositoryURI;
+		}
 	}
 
 	public Long getProcessDefinitionId() {
@@ -230,7 +242,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setProcessDefinitionId(Long processDefinitionId) {
-		this.processDefinitionId = processDefinitionId;
+		if (!isProcessDefinitionUpdated()) {
+			this.processDefinitionId = processDefinitionId;
+		}
 	}
 
 	public String getProcessDefinitionName() {
@@ -242,7 +256,9 @@ public class ITextDocumentURI implements Serializable {
 	}
 
 	public void setProcessDefinitionName(String processDefinitionName) {
-		this.processDefinitionName = processDefinitionName;
+		if (!isProcessDefinitionUpdated()) {
+			this.processDefinitionName = processDefinitionName;
+		}
 	}
 
 	public String getEditorLink() {
@@ -266,6 +282,14 @@ public class ITextDocumentURI implements Serializable {
 		this.submitted = submitted;
 	}
 
+	public boolean isProcessDefinitionUpdated() {
+		return processDefinitionUpdated;
+	}
+
+	public void setProcessDefinitionUpdated(boolean processDefinitionUpdated) {
+		this.processDefinitionUpdated = processDefinitionUpdated;
+	}
+
 	public void selectedBundlePathChange(ValueChangeEvent event) {
  		Object value = event.getNewValue();
 		if (value != null) {
@@ -276,7 +300,15 @@ public class ITextDocumentURI implements Serializable {
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
 		if (value != null) {
+			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
+			setId(null);
 			setProcessDefinitionId(Long.valueOf(value.toString()));
+			setProcessDefinitionName(null);
+			setRepositoryURI(null);
+			setBundlePath(null);
+			setBundleURL(null);
+			setBundleName(null);
+			this.processDefinitionUpdated = true;
 		}
 	}
 

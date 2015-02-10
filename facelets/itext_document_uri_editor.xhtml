@@ -47,7 +47,9 @@
             <h:panelGroup>
                 <h:selectOneMenu
                     id="category"
-                    value="#{iTextDocumentURI.processDefinitionId}">
+                    value="#{iTextDocumentURI.processDefinitionId}"
+                    valueChangeListener="#{iTextDocumentURI.selectedProcessDefinitionIdChange}"
+                    onchange="showLoadingMessage('Loading'); submit();">
                     <f:selectItem
                         itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
                         noSelectValue="true"/>
