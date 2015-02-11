@@ -138,7 +138,7 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public File getBundleDocument() {
-		if (this.bundleDocument == null && !StringUtil.isEmpty(getBundleURI())) {
+		if (this.bundleDocument == null && !StringUtil.isEmpty(getBundleURI()) && !getBundleURI().equals("-")) {
 			try {
 				this.bundleDocument = FileUtil.getFileFromWorkspace(getBundleURI());
 			} catch (IOException e) {
