@@ -104,6 +104,8 @@ import com.idega.util.StringUtil;
  */
 public class ITextDocument extends ITextDocumentURI {
 
+	private static final long serialVersionUID = -1964054087009829433L;
+
 	private File repositoryDocument;
 
 	private File bundleDocument;
@@ -190,37 +192,58 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public void setRepositoryDocument(File repositoryDocument) {
-		this.repositoryDocument = repositoryDocument;
+		if (!isProcessDefinitionUpdated()) {
+			this.repositoryDocument = repositoryDocument;
+		}
 	}
 
 	public void setBundleDocument(File bundleDocument) {
-		this.bundleDocument = bundleDocument;
+		if (!isProcessDefinitionUpdated()) {
+			this.bundleDocument = bundleDocument;
+		}
 	}
 
 	public void setDocument(File document) {
-		this.document = document;
+		if (!isProcessDefinitionUpdated()) {
+			this.document = document;
+		}
 	}
 
 	public void setDocumentStream(FileInputStream documentStream) {
-		this.documentStream = documentStream;
+		if (!isProcessDefinitionUpdated()) {
+			this.documentStream = documentStream;
+		}
 	}
 
 	public void setDocumentSource(String documentSource) {
-		this.documentSource = documentSource;
+		if (!isProcessDefinitionUpdated()) {
+			this.documentSource = documentSource;
+		}
 	}
 
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
 		if (value != null) {
+			setProcessDefinitionId(Long.valueOf(value.toString()));
 			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
-			setProcessDefinitionId(getEntity().getProcessDefinitionId());
-			setProcessDefinitionName(getEntity().getProcessDefinitionName());
-			setRepositoryURI(getEntity().getRepositoryURI());
-			setDocumentSource(null);
-			setDocumentStream(null);
-			setDocument(null);
-			setBundleDocument(null);
-			setRepositoryDocument(null);
+
+			if (isUpdatingProcessDefinition()) {
+				setId(null);
+				setProcessDefinitionName(null);
+				setRepositoryURI(null);
+				setBundlePath(null);
+				setBundleURL(null);
+				setBundleName(null);
+				setDocumentSource(null);
+				setDocumentStream(null);
+				setDocument(null);
+				setBundleDocument(null);
+				setRepositoryDocument(null);
+				setOldProcessDefinitionId(Long.valueOf(value.toString()));
+				setProcessDefinitionUpdated(true);
+			}
+
+			setOldProcessDefinitionId(Long.valueOf(value.toString()));
 		}
 	}
 }

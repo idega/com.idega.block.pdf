@@ -12,6 +12,10 @@
         rel="stylesheet"
         type="text/css"
         href="#{iwResourceResolver['com.idega.block.pdf']['style/editor.css']}"/>
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.pdf']['style/source_editor.css']}"/>
     <script
         type="text/javascript"
         src="http://code.jquery.com/jquery-1.11.0.js"/>
@@ -58,33 +62,28 @@
             </h:panelGroup>
             <h:panelGroup>
                 <h:outputLabel
-                    for="bundleURI"
-                    value="#{localizedStrings['com.idega.block.pdf']['bundle_uri']}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputText
-                    id="bundleURI"
-                    value="#{iTextDocument.bundleURI}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputLabel
-                    for="repositoryURI"
-                    value="#{localizedStrings['com.idega.block.pdf']['repository_uri']}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputText
-                    id="repositoryURI"
-                    value="#{iTextDocument.repositoryURI}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputLabel
                     for="sourceCode"
                     value="#{localizedStrings['com.idega.block.pdf']['source_code']}"/>
             </h:panelGroup>
             <h:panelGroup>
                 <h:inputTextarea
                     id="sourceCode"
-                    value="#{iTextDocument.documentSource}"/>
+                    value="#{iTextDocument.documentSource}"
+                    styleClass="sourceEditorArea"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:inputHidden
+                    id="prm_id"
+                    value="#{iTextDocumentURI.id}"/>
+                <h:inputHidden
+                    id="oldProcessDefinitionId"
+                    value="#{iTextDocumentURI.oldProcessDefinitionId}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:commandButton
+                    id="saveButton"
+                    value="#{localizedStrings['com.idega.block.pdf']['save']}"
+                    action="#{iTextDocumentURI.save}"/>
             </h:panelGroup>
         </h:panelGrid>
     </h:form>
