@@ -24,6 +24,47 @@
         src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"/>
     <script 
         type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/edit_area_full.js']}"
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/langs/en.js']}" 
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/xml.js']}" 
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/html.js']}" 
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/js.js']}" 
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/css.js']}" 
+        charset="UTF-8"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/java.js']}" 
+        charset="UTF-8"/>
+    <script>
+        editAreaLoader.init({
+    		id:						"editorForm:sourceCode",
+    		language:				"en",
+    		syntax:					"xml",
+    		syntax_selection_allow:	"css,html,js,java,xml",
+    		toolbar: 				"search, go_to_line, |, undo, redo, |, select_font, |, syntax_selection, |, change_smooth_selection, highlight, reset_highlight, |, help",
+    		allow_toggle:			true,
+    		start_highlight:		true,
+			show_line_colors:		true,
+			min_width:				650
+    	});
+    </script>
+    <script 
+        type="text/javascript" 
         src="#{iwResourceResolver['com.idega.core']['iw_core.js']}"/>
     <!-- <script 
         type="text/javascript"
