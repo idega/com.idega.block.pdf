@@ -84,15 +84,21 @@ package com.idega.block.pdf.presentation.bean;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.faces.event.ValueChangeEvent;
+import javax.jcr.RepositoryException;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
+import com.idega.repository.RepositoryService;
 import com.idega.util.FileUtil;
+import com.idega.util.IWTimestamp;
 import com.idega.util.StringUtil;
+import com.idega.util.expression.ELUtil;
 
 /**
  * <p>JSF managed bean for iText document editing</p>
@@ -106,13 +112,11 @@ public class ITextDocument extends ITextDocumentURI {
 
 	private static final long serialVersionUID = -1964054087009829433L;
 
-	private File repositoryDocument;
+	public static final String REPOSITORY_ITEXT_PATH = "/dynamic_resources/itext/";	
 
 	private File bundleDocument;
 
-	private File document;
-
-	private FileInputStream documentStream;
+	private InputStream documentStream;
 
 	private String documentSource;
 
@@ -122,19 +126,8 @@ public class ITextDocument extends ITextDocumentURI {
 		super(entity);
 	}
 
-	public File getRepositoryDocument() {
-		if (this.repositoryDocument == null && !StringUtil.isEmpty(getRepositoryURI())) {
-			try {
-				this.repositoryDocument = FileUtil.getFileFromWorkspace(getRepositoryURI());
-			} catch (IOException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, "Failed to get document from repository "
-								+ "by path: '" + getRepositoryURI() 
-								+ "' cause of:", e);
-			}
-		}
-
-		return repositoryDocument;
+	protected RepositoryService getRepositoryService() {
+		return ELUtil.getInstance().getBean(RepositoryService.BEAN_NAME);
 	}
 
 	public File getBundleDocument() {
@@ -152,23 +145,22 @@ public class ITextDocument extends ITextDocumentURI {
 		return bundleDocument;
 	}
 
-	public File getDocument() {
-		if (this.document == null) {
-			this.document = getRepositoryDocument();
-		}
-
-		if (this.document == null) {
-			this.document = getBundleDocument();
-		}
-
-		return this.document;
-	}
-
-	public FileInputStream getDocumentStream() {
-		if (this.documentStream == null && getDocument() != null) {
+	public InputStream getDocumentStream() {
+		if (this.documentStream == null) {
 			try {
-				this.documentStream = new FileInputStream(getDocument());
-			} catch (FileNotFoundException e) {
+				this.documentStream = getRepositoryService()
+						.getInputStreamAsRoot(getRepositoryURI());
+			} catch (Exception e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to get input stream by path: '" + 
+								getRepositoryURI() + "' cause of: ", e);
+			}
+		}
+
+		if (this.documentStream == null && getBundleDocument() != null) {
+			try {
+				this.documentStream = new FileInputStream(getBundleDocument());
+			} catch (Exception e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, "Failed to create input stream, "
 								+ "cause of:", e);
@@ -179,33 +171,20 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public String getDocumentSource() {
-		if (this.documentSource == null && getDocument() != null) {
-			try {
-				this.documentSource = FileUtil.getStringFromFile(getDocument());
-			} catch (IOException e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, "Failed to read file, cause of: ", e);
-			}
+		if (this.documentSource == null && getDocumentStream() != null) {
+			this.documentSource = new Scanner(getDocumentStream()).useDelimiter("\\Z").next();
+		}
+
+		if (!StringUtil.isEmpty(this.documentSource)) {
+			this.documentSource = this.documentSource.replaceAll("\t", "    ");
 		}
 
 		return documentSource;
 	}
 
-	public void setRepositoryDocument(File repositoryDocument) {
-		if (!isProcessDefinitionUpdated()) {
-			this.repositoryDocument = repositoryDocument;
-		}
-	}
-
 	public void setBundleDocument(File bundleDocument) {
 		if (!isProcessDefinitionUpdated()) {
 			this.bundleDocument = bundleDocument;
-		}
-	}
-
-	public void setDocument(File document) {
-		if (!isProcessDefinitionUpdated()) {
-			this.document = document;
 		}
 	}
 
@@ -228,6 +207,15 @@ public class ITextDocument extends ITextDocumentURI {
 			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
 
 			if (isUpdatingProcessDefinition()) {
+				if (getDocumentStream() != null) {
+					try {
+						getDocumentStream().close();
+					} catch (IOException e) {
+						Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+								"Failed to close document, cause of:", e);
+					}
+				}
+
 				setId(null);
 				setProcessDefinitionName(null);
 				setRepositoryURI(null);
@@ -236,14 +224,46 @@ public class ITextDocument extends ITextDocumentURI {
 				setBundleName(null);
 				setDocumentSource(null);
 				setDocumentStream(null);
-				setDocument(null);
 				setBundleDocument(null);
-				setRepositoryDocument(null);
 				setOldProcessDefinitionId(Long.valueOf(value.toString()));
 				setProcessDefinitionUpdated(true);
 			}
 
 			setOldProcessDefinitionId(Long.valueOf(value.toString()));
+		}
+	}
+
+	public String getITextRepositoryPath() {
+		String webdavServerURL = getRepositoryService().getWebdavServerURL();
+		if (!StringUtil.isEmpty(webdavServerURL)) {
+			return webdavServerURL + REPOSITORY_ITEXT_PATH;
+		}
+
+		return null;
+	}
+
+	public String getNewFilename() {
+		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".xml";
+	}
+	
+	@Override
+	public void save() {
+		try {
+			if (getRepositoryService().uploadXMLFileAndCreateFoldersFromStringAsRoot(
+					getITextRepositoryPath(), 
+					getNewFilename(), 
+					getDocumentSource())) {
+				setRepositoryURI(getITextRepositoryPath() + getNewFilename());
+				super.save();
+				getDocumentStream().close();
+			}
+		} catch (RepositoryException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING, 
+					"Failed to save file by path: " + getITextRepositoryPath() + "/" +
+					getNewFilename() + " Cause of:", e);
+		} catch (IOException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
 		}
 	}
 }
