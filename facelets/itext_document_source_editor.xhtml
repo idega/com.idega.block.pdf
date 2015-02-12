@@ -34,33 +34,16 @@
         type="text/javascript" 
         src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/xml.js']}" 
         charset="UTF-8"/>
-    <script 
-        type="text/javascript" 
-        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/html.js']}" 
-        charset="UTF-8"/>
-    <script 
-        type="text/javascript" 
-        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/js.js']}" 
-        charset="UTF-8"/>
-    <script 
-        type="text/javascript" 
-        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/css.js']}" 
-        charset="UTF-8"/>
-    <script 
-        type="text/javascript" 
-        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/java.js']}" 
-        charset="UTF-8"/>
     <script>
         editAreaLoader.init({
-    		id:						"editorForm:sourceCode",
-    		language:				"en",
-    		syntax:					"xml",
-    		syntax_selection_allow:	"css,html,js,java,xml",
-    		toolbar: 				"search, go_to_line, |, undo, redo, |, select_font, |, syntax_selection, |, change_smooth_selection, highlight, reset_highlight, |, help",
-    		allow_toggle:			true,
-    		start_highlight:		true,
-			show_line_colors:		true,
-			min_width:				650
+    		id:					"editorForm:sourceCode",
+    		language:			"en",
+    		syntax:				"xml",
+    		toolbar:			"undo, redo",
+    		allow_toggle:		false,
+    		start_highlight:	true,
+			show_line_colors:	true,
+			min_width:			650
     	});
     </script>
     <script 
@@ -74,11 +57,11 @@
         WarningMessageEditorHelper.SAVING = "#{localizedStrings['is.idega.idegaweb.golf']['saving']}";
     </script> -->
     <h:outputText
-        rendered="#{iTextDucumentURI.submitted}"
+        rendered="#{iTextDocument.submitted}"
         styleClass="savedText"
         value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
     <h:form
-        rendered="#{not iTextDucumentURI.submitted}"
+        rendered="#{not iTextDocument.submitted}"
         id="editorForm">
         <h:panelGrid
             columns="2"
@@ -98,7 +81,7 @@
                         itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
                         itemValue="-1"/>
                     <f:selectItems
-                        value="#{iTextDocumentsService.processDefinitionNamesWithURI}"/>
+                        value="#{iTextDocumentsService.processDefinitionNames}"/>
                 </h:selectOneMenu>
             </h:panelGroup>
             <h:panelGroup>
@@ -115,16 +98,16 @@
             <h:panelGroup>
                 <h:inputHidden
                     id="prm_id"
-                    value="#{iTextDocumentURI.id}"/>
+                    value="#{iTextDocument.id}"/>
                 <h:inputHidden
                     id="oldProcessDefinitionId"
-                    value="#{iTextDocumentURI.oldProcessDefinitionId}"/>
+                    value="#{iTextDocument.oldProcessDefinitionId}"/>
             </h:panelGroup>
             <h:panelGroup>
                 <h:commandButton
                     id="saveButton"
                     value="#{localizedStrings['com.idega.block.pdf']['save']}"
-                    action="#{iTextDocumentURI.save}"/>
+                    action="#{iTextDocument.save}"/>
             </h:panelGroup>
         </h:panelGrid>
     </h:form>
