@@ -251,7 +251,7 @@ public class ITextDocument extends ITextDocumentURI {
 
 	public String getPDFName() {
 		String path = getRepositoryURI();
-		if (!StringUtil.isEmpty(path)) {
+		if (StringUtil.isEmpty(path)) {
 			path = getBundlePath();
 		}
 
