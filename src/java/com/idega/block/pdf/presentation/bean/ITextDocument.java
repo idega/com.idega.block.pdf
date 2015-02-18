@@ -285,6 +285,9 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public void download() throws IOException {
+		save();
+		setSubmitted(false);
+		
 	    FacesContext fc = FacesContext.getCurrentInstance();
 	    HttpServletResponse response = (HttpServletResponse) fc.getExternalContext().getResponse();
 
