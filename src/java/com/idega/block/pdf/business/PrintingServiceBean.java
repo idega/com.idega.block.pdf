@@ -24,7 +24,10 @@ import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.io.MemoryFileBuffer;
+import com.idega.io.MemoryOutputStream;
 import com.idega.servlet.filter.IWBundleResourceFilter;
+import com.idega.util.StringUtil;
 
 
 /**
@@ -55,6 +58,34 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 * documentPrinter.printDocument(pdfStream);
 	 */
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#print(java.io.InputStream, java.lang.String)
+	 */
+	@Override
+	public void print(
+			InputStream inputStream, 
+			OutputStream outputStream, 
+			String documentResourcesFolder
+			) throws IOException, DocumentHandlerException {
+		if (inputStream != null) {
+			if (StringUtil.isEmpty(documentResourcesFolder)) {
+				documentResourcesFolder = getIWApplicationContext().getDomain().getURL() + "content/files/public/";
+			}
+
+			if (outputStream == null) {
+				MemoryFileBuffer memoryBuffer = new MemoryFileBuffer();
+				memoryBuffer.setMimeType("application/pdf");
+				outputStream = new MemoryOutputStream(memoryBuffer);
+			}
+
+			DocumentPrinter documentPrinter = new DocumentPrinter();
+			documentPrinter.setTemplateSource(inputStream);
+			documentPrinter.setResourceLoader(new HttpResourceLoader(documentResourcesFolder));
+			documentPrinter.printDocument(outputStream);
+		}
+	}
+	
 	/**
 	 * Creates a pdf by transforming an xml template. The given PrintingContext
 	 * supplies the necessary resources for the generation
