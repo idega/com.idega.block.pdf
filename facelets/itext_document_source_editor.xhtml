@@ -108,6 +108,10 @@
                     id="saveButton"
                     value="#{localizedStrings['com.idega.block.pdf']['save']}"
                     action="#{iTextDocument.save}"/>
+                <h:commandButton
+                    id="previewButton"
+                    value="#{localizedStrings['com.idega.block.pdf']['preview']}"
+                    action="#{iTextDocument.download}"/>
             </h:panelGroup>
         </h:panelGrid>
     </h:form>

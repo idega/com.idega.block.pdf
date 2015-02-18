@@ -90,11 +90,14 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
-import javax.jcr.RepositoryException;
+import javax.servlet.http.HttpServletResponse;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
+import com.idega.core.file.util.MimeType;
 import com.idega.repository.RepositoryService;
+import com.idega.util.CoreConstants;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.StringUtil;
@@ -236,7 +239,7 @@ public class ITextDocument extends ITextDocumentURI {
 	public String getITextRepositoryPath() {
 		String webdavServerURL = getRepositoryService().getWebdavServerURL();
 		if (!StringUtil.isEmpty(webdavServerURL)) {
-			return webdavServerURL + REPOSITORY_ITEXT_PATH;
+			return webdavServerURL + CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH;
 		}
 
 		return null;
@@ -244,6 +247,22 @@ public class ITextDocument extends ITextDocumentURI {
 
 	public String getNewFilename() {
 		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".xml";
+	}
+
+	public String getPDFName() {
+		String path = getRepositoryURI();
+		if (!StringUtil.isEmpty(path)) {
+			path = getBundlePath();
+		}
+
+		if (!StringUtil.isEmpty(path)) {
+			return path.substring(
+					getRepositoryURI().lastIndexOf('/') + 1,
+					getRepositoryURI().lastIndexOf('.')) 
+					+ ".pdf";
+		}
+
+		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".pdf";
 	}
 	
 	@Override
@@ -257,13 +276,62 @@ public class ITextDocument extends ITextDocumentURI {
 				super.save();
 				getDocumentStream().close();
 			}
-		} catch (RepositoryException e) {
+		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
 					"Failed to save file by path: " + getITextRepositoryPath() + "/" +
 					getNewFilename() + " Cause of:", e);
-		} catch (IOException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
 		}
+	}
+
+	public void download() throws IOException {
+	    FacesContext fc = FacesContext.getCurrentInstance();
+	    HttpServletResponse response = (HttpServletResponse) fc.getExternalContext().getResponse();
+
+	    /* 
+	     * Some JSF component library or some Filter might have set some headers 
+	     * in the buffer beforehand. We want to get rid of them, else it may 
+	     * collide. 
+	     */
+	    response.reset();
+
+	    /* 
+	     * Check http://www.iana.org/assignments/media-types for all types. Use 
+	     * if necessary ServletContext#getMimeType() for auto-detection based on 
+	     * filename. 
+	     */
+	    response.setContentType(MimeType.pdf.getMimeType()); 
+
+	    /*
+	     * Set it with the file size. This header is optional. It will work if 
+	     * it's omitted, but the download progress will be unknown.
+	     */
+	    response.setContentLength(getDocumentStream().available());
+
+	    /*
+	     * The Save As popup magic is done here. You can give it any file name 
+	     * you want, this only won't work in MSIE, it will use current request 
+	     * URL as file name instead.
+	     */
+	    response.setHeader("Content-Disposition", "attachment; filename=\"" + getPDFName() + "\"");
+
+	    /*
+	     * Now you can write the InputStream of the file to the above 
+	     * OutputStream the usual way.
+	     */
+	    try {
+			getPrintingService().print(getDocumentStream(), response.getOutputStream(), null);
+		} catch (Exception e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(
+					Level.WARNING, "Failed to create PDF document, cause of:", e);
+		}
+
+	    /*
+	     * Important! Otherwise JSF will attempt to render the response which 
+	     * obviously will fail since it's already written with a file and closed.
+	     */
+	    fc.responseComplete();
+
+	    getDocumentStream().close();
 	}
 }
