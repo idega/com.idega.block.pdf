@@ -9,4 +9,6 @@ td > input[type="text"], td > select {
 
 td > input[type="submit"] {
 	float: right;
+	margin-left: 5px;
+	margin-top: 12pt;
 }
