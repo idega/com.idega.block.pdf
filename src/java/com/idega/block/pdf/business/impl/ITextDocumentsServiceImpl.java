@@ -96,6 +96,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.pdf.PDFConstants;
 import com.idega.block.pdf.business.ITextDocumentsService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
@@ -231,7 +232,7 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT jpd.ID_, jpd.NAME_ FROM JBPM_PROCESSDEFINITION jpd");
 
-		IWBundle bundle = getBundle("is.idega.idegaweb.egov.cases");
+		IWBundle bundle = getBundle(PDFConstants.IW_BUNDLE_IDENTIFIER);
 		IWResourceBundle resourceBundle = bundle.getResourceBundle(getCurrentLocale());
 		
 		List<Serializable[]> results = null;
@@ -246,7 +247,7 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		if (!ListUtil.isEmpty(results)) {
 			for (Serializable[] result : results) {
 				names.put(
-						resourceBundle.getLocalizedString(result[1].toString(), result[1].toString()), 
+						resourceBundle.getLocalizedString("fishing_license_description." + result[1].toString(), result[1].toString()), 
 						result[0].toString());
 			}
 		}
