@@ -84,17 +84,16 @@
                         value="#{iTextDocumentsService.processDefinitionNames}"/>
                 </h:selectOneMenu>
             </h:panelGroup>
-            <h:panelGroup>
-                <h:outputLabel
-                    for="sourceCode"
-                    value="#{localizedStrings['com.idega.block.pdf']['source_code']}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:inputTextarea
-                    id="sourceCode"
-                    value="#{iTextDocument.documentSource}"
-                    styleClass="sourceEditorArea"/>
-            </h:panelGroup>
+        </h:panelGrid>
+        <h:panelGroup>
+            <h:inputTextarea
+                id="sourceCode"
+                value="#{iTextDocument.documentSource}"
+                styleClass="sourceEditorArea"/>
+        </h:panelGroup>
+        <h:panelGrid
+            columns="2"
+            styleClass="editorTable">
             <h:panelGroup>
                 <h:inputHidden
                     id="prm_id"
