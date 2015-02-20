@@ -12,6 +12,7 @@
             <include method="getHomepageLink" />
             <include method="getEditorLink" />
             <include method="remove" />
+            <include method="updateTempolarPDF"/>
         </create>
     </allow>
 </dwr>

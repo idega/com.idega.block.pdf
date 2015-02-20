@@ -103,6 +103,8 @@ public interface ITextDocumentsService {
 
 	static final String BEAN_DEFINITION = "iTextDocumentsService";
 
+	static final String PDF_RESOURCE_URL = "content/files/public/tmp/";
+
 	/**
 	 * 
 	 * @return all entities in data source or {@link Collections#emptyList()} on
@@ -165,4 +167,6 @@ public interface ITextDocumentsService {
 	Map<String, String> getProcessDefinitionNamesWithURI();
 
 	Map<String, String> getBundlePathsAndNames();
+
+	String updateTempolarPDF(String processDefinitionId, String source);
 }

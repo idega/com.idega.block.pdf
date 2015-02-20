@@ -82,15 +82,18 @@
  */
 package com.idega.block.pdf.business.impl;
 
+import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -98,18 +101,25 @@ import org.springframework.stereotype.Service;
 
 import com.idega.block.pdf.PDFConstants;
 import com.idega.block.pdf.business.ITextDocumentsService;
+import com.idega.block.pdf.business.PrintingService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
 import com.idega.block.pdf.presentation.ITextDocumentURIEditor;
 import com.idega.block.pdf.presentation.bean.ITextDocumentURI;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogic;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.core.business.DefaultSpringBean;
+import com.idega.core.file.util.MimeType;
 import com.idega.data.SimpleQuerier;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
+import com.idega.io.MemoryFileBuffer;
+import com.idega.io.MemoryOutputStream;
 import com.idega.presentation.IWContext;
+import com.idega.repository.RepositoryService;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.ListUtil;
@@ -132,12 +142,39 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 	@Autowired
 	private ITextDocumentURIDAO iTextDocumentURIDAO;
 
+	@Autowired
+	private RepositoryService repositoryService;
+
+	private PrintingService printingService;
+
+	protected PrintingService getPrintingService() {
+		try {
+			this.printingService = (PrintingService) IBOLookup.getServiceInstance(
+					IWMainApplication.getDefaultIWApplicationContext(), 
+					PrintingService.class);
+		} catch (IBOLookupException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + PrintingService.class.getSimpleName() + 
+					", cause of:", e);
+		}
+
+		return this.printingService;
+	}
+
 	protected ITextDocumentURIDAO getITextDocumentURIDAO() {
 		if (this.iTextDocumentURIDAO == null) {
 			ELUtil.getInstance().autowire(this);
 		}
 
 		return this.iTextDocumentURIDAO;
+	}
+
+	protected RepositoryService getRepositoryService() {
+		if (this.repositoryService == null) {
+			ELUtil.getInstance().autowire(this);
+		}
+
+		return this.repositoryService;
 	}
 
 	/*
@@ -295,5 +332,31 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		}
 
 		return bundleNames;
+	}
+
+	@Override
+	public String updateTempolarPDF(String processDefinitionId, String source) {
+		if (!StringUtil.isEmpty(processDefinitionId) && !StringUtil.isEmpty(source)) {
+			MemoryOutputStream outputStream = new MemoryOutputStream(new MemoryFileBuffer());
+			String filename = "license-" + System.currentTimeMillis() + ".pdf"; 
+			try {
+				getPrintingService().print(
+						IOUtils.toInputStream(source), 
+						outputStream, null);
+				if (getRepositoryService().uploadFile(
+						CoreConstants.SLASH + PDF_RESOURCE_URL, 
+						filename, 
+						MimeType.pdf.toString(), 
+						new ByteArrayInputStream(outputStream.getBuffer().buffer()))) {
+					return getApplication().getIWApplicationContext().getDomain().getURL() 
+							+ PDF_RESOURCE_URL + filename;
+				}
+			} catch (Exception e) {
+				java.util.logging.Logger.getLogger(getClass().getName()).log(
+						Level.WARNING, "Failed to create PDF document, cause of:", e);
+			}
+		}
+
+		return "";
 	}
 }

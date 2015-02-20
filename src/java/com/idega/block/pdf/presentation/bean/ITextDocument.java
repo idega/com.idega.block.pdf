@@ -305,20 +305,20 @@ public class ITextDocument extends ITextDocumentURI {
 	     */
 	    response.setContentType(MimeType.pdf.getMimeType()); 
 
-	    /*
+	    /* 
 	     * Set it with the file size. This header is optional. It will work if 
 	     * it's omitted, but the download progress will be unknown.
 	     */
 	    response.setContentLength(getDocumentStream().available());
 
-	    /*
+	    /* 
 	     * The Save As popup magic is done here. You can give it any file name 
 	     * you want, this only won't work in MSIE, it will use current request 
 	     * URL as file name instead.
 	     */
 	    response.setHeader("Content-Disposition", "attachment; filename=\"" + getPDFName() + "\"");
 
-	    /*
+	    /* 
 	     * Now you can write the InputStream of the file to the above 
 	     * OutputStream the usual way.
 	     */
@@ -329,7 +329,7 @@ public class ITextDocument extends ITextDocumentURI {
 					Level.WARNING, "Failed to create PDF document, cause of:", e);
 		}
 
-	    /*
+	    /* 
 	     * Important! Otherwise JSF will attempt to render the response which 
 	     * obviously will fail since it's already written with a file and closed.
 	     */
