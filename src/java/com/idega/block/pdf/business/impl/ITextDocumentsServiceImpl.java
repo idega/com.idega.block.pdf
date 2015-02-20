@@ -283,9 +283,12 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		Map<String, String> names = new TreeMap<String, String>();
 		if (!ListUtil.isEmpty(results)) {
 			for (Serializable[] result : results) {
-				names.put(
-						resourceBundle.getLocalizedString("fishing_license_description." + result[1].toString(), result[1].toString()), 
-						result[0].toString());
+				String localizedName = resourceBundle.getLocalizedString(
+						"fishing_license_description." + result[1].toString(), 
+						result[1].toString());
+				if (!localizedName.equals(result[1].toString()) || CoreUtil.getIWContext().isSuperAdmin()) {
+					names.put(localizedName, result[0].toString());
+				}
 			}
 		}
 
