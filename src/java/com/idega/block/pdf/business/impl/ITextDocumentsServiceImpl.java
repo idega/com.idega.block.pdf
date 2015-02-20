@@ -284,7 +284,7 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 		if (!ListUtil.isEmpty(results)) {
 			for (Serializable[] result : results) {
 				String localizedName = resourceBundle.getLocalizedString(
-						"fishing_license_description." + result[1].toString(), 
+						"process_definition_name." + result[1].toString(), 
 						result[1].toString());
 				if (!localizedName.equals(result[1].toString()) || CoreUtil.getIWContext().isSuperAdmin()) {
 					names.put(localizedName, result[0].toString());
