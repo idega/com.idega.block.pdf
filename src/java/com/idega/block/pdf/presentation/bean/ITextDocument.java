@@ -174,7 +174,7 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public String getDocumentSource() {
-		if (this.documentSource == null && getDocumentStream() != null) {
+		if (StringUtil.isEmpty(this.documentSource) && getDocumentStream() != null) {
 			this.documentSource = new Scanner(getDocumentStream()).useDelimiter("\\Z").next();
 		}
 
