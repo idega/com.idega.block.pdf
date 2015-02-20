@@ -15,6 +15,10 @@
     <link 
         rel="stylesheet"
         type="text/css"
+        href="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.css']}"/>
+    <link 
+        rel="stylesheet"
+        type="text/css"
         href="#{iwResourceResolver['com.idega.block.pdf']['style/source_editor.css']}"/>
     <script
         type="text/javascript"
@@ -34,21 +38,21 @@
         type="text/javascript" 
         src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/editArea/reg_syntax/xml.js']}" 
         charset="UTF-8"/>
-    <script>
-        editAreaLoader.init({
-    		id:					"editorForm:sourceCode",
-    		language:			"en",
-    		syntax:				"xml",
-    		toolbar:			"undo, redo",
-    		allow_toggle:		false,
-    		start_highlight:	true,
-			show_line_colors:	true,
-			min_width:			650
-    	});
-    </script>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/jquery-plugins/jquery.easing.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/helpers/jquery.fancybox-media.js']}"/>
     <script 
         type="text/javascript" 
         src="#{iwResourceResolver['com.idega.core']['iw_core.js']}"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.pdf']['javascript/source_editor.js']}"/>
     <!-- <script 
         type="text/javascript"
         src="#{iwResourceResolver['is.idega.idegaweb.golf']['javascript/warningMessageEditorHelper.js']}"/> -->
@@ -107,10 +111,13 @@
                     id="saveButton"
                     value="#{localizedStrings['com.idega.block.pdf']['save']}"
                     action="#{iTextDocument.save}"/>
-                <h:commandButton
-                    id="previewButton"
-                    value="#{localizedStrings['com.idega.block.pdf']['preview']}"
-                    action="#{iTextDocument.download}"/>
+                <h:outputLink
+                    styleClass="windowLink">
+                    <input
+                        value="#{localizedStrings['com.idega.block.pdf']['preview']}"
+                        type="button"
+                        class="button"/>
+                </h:outputLink>
             </h:panelGroup>
         </h:panelGrid>
     </h:form>

@@ -11,3 +11,9 @@ textarea.sourceEditorArea {
 label {
 	vertical-align: top;
 }
+
+a.windowLink {
+	float: right;
+	margin-left: 5px;
+	margin-top: 12pt;
+}
