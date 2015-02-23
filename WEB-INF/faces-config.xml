@@ -26,17 +26,6 @@
 		</component-extension>
 	</component>
 
-	<component>
-		<component-class>com.idega.block.pdf.presentation.ITextDocumentPDFViewer</component-class>
-		<component-type>iText document PDF viewer</component-type>
-		<component-extension>
-			<idegaweb-info>
-        		<builder-visible>true</builder-visible>
-        		<object-type>jsf.uicomponent</object-type>
-      		</idegaweb-info>
-		</component-extension>
-	</component>
-
     <component>
         <component-class>com.idega.block.pdf.presentation.ITextDocumentSourceEditor</component-class>
         <component-type>iText document source editor</component-type>
