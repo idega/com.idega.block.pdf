@@ -81,6 +81,16 @@
                         value="#{iTextDocumentsService.processDefinitionNames}"/>
                 </h:selectOneMenu>
             </h:panelGroup>
+            <h:panelGroup>
+                <h:outputLabel
+                    for="helpText"
+                    value="#{localizedStrings['com.idega.block.pdf']['tags']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputText 
+                    id="helpText" 
+                    value="${'${dateFrom}, ${fisheryName}, ${fisheryAddress}, ${fishingAreaName}, ${fisheryPersonalID}, ${fisheryPostal}, ${shipID}, ${shipName}'}"/>
+            </h:panelGroup>
         </h:panelGrid>
         <h:panelGroup>
             <h:inputTextarea
