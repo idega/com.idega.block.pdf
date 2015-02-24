@@ -91,7 +91,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,6 +100,8 @@ import javax.faces.event.ValueChangeEvent;
 import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.io.IOUtils;
 
 import com.idega.block.pdf.business.PrintingService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
@@ -139,8 +140,6 @@ public class ITextDocument extends ITextDocumentURI {
 
 	private String documentSource;
 
-	private boolean repositoryURIUpdated = false;
-
 	public ITextDocument() {}
 
 	public ITextDocument(ITextDocumentURIEntity entity) {
@@ -173,20 +172,6 @@ public class ITextDocument extends ITextDocumentURI {
 		}
 
 		return null;
-	}
-
-	/**
-	 * 
-	 * @return <code>true</code> if {@link ITextDocumentURI#getRepositoryURI()}
-	 * was changed, <code>false</code> otherwise;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public boolean isRepositoryURIUpdated() {
-		return repositoryURIUpdated;
-	}
-
-	public void setRepositoryURIUpdated(boolean repositoryURIUpdated) {
-		this.repositoryURIUpdated = repositoryURIUpdated;
 	}
 
 	/**
@@ -263,7 +248,14 @@ public class ITextDocument extends ITextDocumentURI {
 	 */
 	public String getDocumentSource() {
 		if (StringUtil.isEmpty(this.documentSource) && getDocumentStream() != null) {
-			this.documentSource = new Scanner(getDocumentStream()).useDelimiter("\\Z").next();
+			try {
+				this.documentSource = IOUtils.toString(getDocumentStream());
+			} catch (Exception e) {
+				try {
+				} catch (Exception e1) {
+					java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to read stream:", e1);
+				}
+			}
 		}
 
 		if (!StringUtil.isEmpty(this.documentSource)) {
@@ -359,7 +351,7 @@ public class ITextDocument extends ITextDocumentURI {
 				Long timeInMillis = Long.valueOf(timeString);
 				revisions.put(
 						new IWTimestamp(timeInMillis).toSQLString(), 
-						node.getAbsolutePath());
+						"/content" + node.getAbsolutePath());
 			}
 		}
 
@@ -412,39 +404,49 @@ public class ITextDocument extends ITextDocumentURI {
 	public void selectedRepositoryURIChange(ValueChangeEvent event) {
  		Object value = event.getNewValue();
  		if (!isProcessDefinitionUpdated() && value != null) {
- 			super.selectedRepositoryURIChange(event);
-			this.documentSource = null;
-			if (this.documentStream != null) {
-				try {
-					this.documentStream.close();
-				} catch (IOException e) {
-					java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+			setRepositoryURI(value.toString());
+ 			if (isUpdatingOldRepositoryURI()) {
+ 				if (getDocumentStream() != null) {
+					try {
+						getDocumentStream().close();
+					} catch (IOException e) {
+						Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+								"Failed to close document, cause of:", e);
+					}
 				}
 
-				this.documentStream = null;
-			}
+ 				setDocumentSource(null);
+ 				setDocumentStream(null);
+ 	 			setOldRepositoryURI(value.toString());
+ 				setRepositoryURIUpdated(true);
+ 			}
 
-			setRepositoryURIUpdated(true);
+ 			setOldRepositoryURI(value.toString());
  		}
 	}
 
 	@Override
 	public void save() {
+		String fileName = getNewFilename();
+
 		try {
 			if (getRepositoryService().uploadXMLFileAndCreateFoldersFromStringAsRoot(
 					getITextRepositoryPath(), 
-					getNewFilename(), 
+					fileName, 
 					getDocumentSource())) {
-				setRepositoryURI(getITextRepositoryPath() + getNewFilename());
+				setRepositoryURI(getITextRepositoryPath() + fileName);
 				super.save();
-				getDocumentStream().close();
 			}
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
 					"Failed to save file by path: " + getITextRepositoryPath() + "/" +
-					getNewFilename() + " Cause of:", e);
+							fileName + " Cause of:", e);
 		}
+
+		try {
+			getDocumentStream().close();
+		} catch (Exception e) {}
 	}
 
 	/**

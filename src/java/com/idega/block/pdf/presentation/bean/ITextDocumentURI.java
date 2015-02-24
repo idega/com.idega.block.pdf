@@ -123,9 +123,15 @@ public class ITextDocumentURI implements Serializable {
 
 	private String repositoryURI;
 
+	private String oldRepositoryURI;
+
+	private boolean repositoryURIUpdated = false;
+
 	private Long processDefinitionId;
 
 	private Long oldProcessDefinitionId;
+
+	private boolean processDefinitionUpdated = Boolean.FALSE;
 
 	private String processDefinitionName;
 
@@ -136,7 +142,6 @@ public class ITextDocumentURI implements Serializable {
 	public static final String PARAMETER_SUBMITTED = "submitted";
 	private boolean submitted = Boolean.FALSE;
 
-	private boolean processDefinitionUpdated = Boolean.FALSE;
 
 	public ITextDocumentURI() {}
 
@@ -325,6 +330,20 @@ public class ITextDocumentURI implements Serializable {
 
 	/**
 	 * 
+	 * @return <code>true</code> if {@link ITextDocumentURI#getRepositoryURI()}
+	 * was changed, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean isRepositoryURIUpdated() {
+		return repositoryURIUpdated;
+	}
+
+	public void setRepositoryURIUpdated(boolean repositoryURIUpdated) {
+		this.repositoryURIUpdated = repositoryURIUpdated;
+	}
+
+	/**
+	 * 
 	 * @return {@link ITextDocumentURIEntity#getRepositoryURI()};
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -340,6 +359,36 @@ public class ITextDocumentURI implements Serializable {
 		if (!isProcessDefinitionUpdated()) {
 			this.repositoryURI = repositoryURI;
 		}
+	}
+
+	/**
+	 * 
+	 * @return same as with process definition
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public String getOldRepositoryURI() {
+		if (StringUtil.isEmpty(this.oldRepositoryURI)) {
+			String parameter = IWContext.getInstance().getParameter(
+					"editorForm:oldRepositoryURI");
+			if (!StringUtil.isEmpty(parameter)) {
+				this.oldRepositoryURI = parameter;
+			} else {
+				this.oldRepositoryURI = getRepositoryURI();
+			}
+		}
+
+		return oldRepositoryURI;
+	}
+
+	public void setOldRepositoryURI(String oldRepositoryURI) {
+		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
+			this.oldRepositoryURI = oldRepositoryURI;
+		}
+	}
+
+	protected boolean isUpdatingOldRepositoryURI() {
+		return getOldRepositoryURI() != null 
+				&& !getOldRepositoryURI().equals(getRepositoryURI());
 	}
 
 	/**

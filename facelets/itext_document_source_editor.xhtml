@@ -58,7 +58,6 @@
         styleClass="savedText"
         value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
     <h:form
-        rendered="#{not iTextDocument.submitted}"
         id="editorForm">
         <h:panelGrid
             columns="2"
@@ -128,6 +127,9 @@
                 <h:inputHidden
                     id="oldProcessDefinitionId"
                     value="#{iTextDocument.oldProcessDefinitionId}"/>
+                <h:inputHidden
+                    id="oldRepositoryURI"
+                    value="#{iTextDocument.oldRepositoryURI}"/>
             </h:panelGroup>
             <h:panelGroup>
                 <h:commandButton
