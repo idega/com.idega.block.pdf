@@ -147,10 +147,20 @@ public class ITextDocument extends ITextDocumentURI {
 		super(entity);
 	}
 
+	/**
+	 * 
+	 * @return service to work with {@link Repository}
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	protected RepositoryService getRepositoryService() {
 		return ELUtil.getInstance().getBean(RepositoryService.BEAN_NAME);
 	}
 
+	/**
+	 * 
+	 * @return service to convert iText file to PDF file;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	protected PrintingService getPrintingService() {
 		try {
 			return (PrintingService) IBOLookup.getServiceInstance(
