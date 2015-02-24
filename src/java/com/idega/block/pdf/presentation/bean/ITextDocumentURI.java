@@ -91,6 +91,8 @@ import javax.faces.event.ValueChangeEvent;
 
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
+import com.idega.block.pdf.presentation.ITextDocumentURIEditor;
+import com.idega.idegaweb.IWBundle;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreUtil;
 import com.idega.util.FileUtil;
@@ -136,16 +138,27 @@ public class ITextDocumentURI implements Serializable {
 
 	private boolean processDefinitionUpdated = Boolean.FALSE;
 
-	protected ITextDocumentURIDAO getDao() {
-		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
-	}
-
 	public ITextDocumentURI() {}
 
 	public ITextDocumentURI(ITextDocumentURIEntity entity) {
 		this.entity = entity;
 	}
 
+	/**
+	 * 
+	 * @return service for managing {@link ITextDocumentURIEntity};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected ITextDocumentURIDAO getDao() {
+		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
+	}
+
+	/**
+	 * 
+	 * @return <code>true</code> if {@link ITextDocumentURI#getProcessDefinitionId()}
+	 * was changed, <code>false</code> otherwise.
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public boolean isProcessDefinitionUpdated() {
 		return processDefinitionUpdated;
 	}
@@ -154,6 +167,11 @@ public class ITextDocumentURI implements Serializable {
 		this.processDefinitionUpdated = processDefinitionUpdated;
 	}
 
+	/**
+	 * 
+	 * @return jBPM process definition id or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public Long getProcessDefinitionId() {
 		if (this.processDefinitionId == null && getEntity() != null) {
 			this.processDefinitionId = getEntity().getProcessDefinitionId();
@@ -166,6 +184,14 @@ public class ITextDocumentURI implements Serializable {
 			this.processDefinitionId = processDefinitionId;
 	}
 
+	/**
+	 * 
+	 * <p>This is required because 
+	 * {@link ITextDocumentURI#selectedProcessDefinitionIdChange(ValueChangeEvent)}
+	 * works incorrectly, because it is called when there is no need to.</p>
+	 * @return jBPM process definition id or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public Long getOldProcessDefinitionId() {
 		if (this.oldProcessDefinitionId == null) {
 			String parameter = IWContext.getInstance().getParameter(
@@ -177,18 +203,29 @@ public class ITextDocumentURI implements Serializable {
 
 		return oldProcessDefinitionId;
 	}
-	
-	protected boolean isUpdatingProcessDefinition() {
-		return getOldProcessDefinitionId() != null 
-				&& !getOldProcessDefinitionId().equals(getProcessDefinitionId());
-	}
 
 	public void setOldProcessDefinitionId(Long oldProcessDefinitionId) {
 		if (!isProcessDefinitionUpdated()) {
 			this.oldProcessDefinitionId = oldProcessDefinitionId;
 		}
 	}
-	
+
+	/**
+	 * 
+	 * @return <code>true</code> if {@link ITextDocumentURI#getProcessDefinitionId()} 
+	 * and {@link ITextDocumentURI#getOldProcessDefinitionId()} are different;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean isUpdatingProcessDefinition() {
+		return getOldProcessDefinitionId() != null 
+				&& !getOldProcessDefinitionId().equals(getProcessDefinitionId());
+	}
+
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getId()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public Long getId() {
 		if (this.id == null && getEntity() != null) {
 			this.id = getEntity().getId();
@@ -203,6 +240,11 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getBundleURL()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getBundleURL() {
 		if (StringUtil.isEmpty(this.bundleURL) && getEntity() != null) {
 			this.bundleURL = getEntity().getBundleURL();
@@ -217,6 +259,11 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getBundlePath()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getBundlePath() {
 		if (StringUtil.isEmpty(this.bundlePath) && getEntity() != null) {
 			this.bundlePath = getEntity().getBundlePath();
@@ -236,6 +283,13 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return extracted {@link IWBundle#getBundleIdentifier()} from
+	 * {@link ITextDocumentURIEntity#getBundlePath()} or <code>null</code>
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getBundleName() {
 		if (StringUtil.isEmpty(this.bundleName) 
 				&& !StringUtil.isEmpty(getBundlePath())) {
@@ -256,6 +310,11 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getBundleURL()} + {@link ITextDocumentURIEntity#getBundlePath()}
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getBundleURI() {
 		if (!StringUtil.isEmpty(getBundlePath()) && !StringUtil.isEmpty(getBundleURL())) {
 			return getBundlePath() + getBundleURL();
@@ -264,6 +323,11 @@ public class ITextDocumentURI implements Serializable {
 		return "-";
 	}
 
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getRepositoryURI()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getRepositoryURI() {
 		if (StringUtil.isEmpty(this.repositoryURI) && getEntity() != null) {
 			this.repositoryURI = getEntity().getRepositoryURI();
@@ -278,6 +342,11 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity#getProcessDefinitionName()};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getProcessDefinitionName() {
 		if (this.processDefinitionName == null && getEntity() != null) {
 			this.processDefinitionName = getEntity().getProcessDefinitionName();
@@ -292,6 +361,11 @@ public class ITextDocumentURI implements Serializable {
 		}
 	}
 
+	/**
+	 * 
+	 * @return link of {@link ITextDocumentURIEditor} for this {@link ITextDocumentURI};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getEditorLink() {
 		return editorLink;
 	}
@@ -300,6 +374,11 @@ public class ITextDocumentURI implements Serializable {
 		this.editorLink = editorLink;
 	}
 
+	/**
+	 * 
+	 * @return <code>true</code> is {@link ITextDocumentURIEntity} was saved;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public boolean isSubmitted() {
 		String submitted = CoreUtil.getIWContext().getParameter(PARAMETER_SUBMITTED);
 		if (Boolean.TRUE.toString().equals(submitted)) {
@@ -311,6 +390,67 @@ public class ITextDocumentURI implements Serializable {
 
 	public void setSubmitted(boolean submitted) {
 		this.submitted = submitted;
+	}
+
+	/**
+	 * 
+	 * @return {@link ITextDocumentURIEntity} for this {@link ITextDocumentURI}
+	 * or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public ITextDocumentURIEntity getEntity() {
+		if (this.entity == null) {
+			IWContext context = CoreUtil.getIWContext();
+			String parameter = null;
+			if (this.id == null) {
+				if (context != null) {
+					parameter = context.getParameter(PARAMETER_ID);
+					if (!StringUtil.isEmpty(parameter)) {
+						this.id = Long.valueOf(parameter);
+					}
+				}
+			}
+
+			if (this.id != null) {
+				this.entity = getDao().findById(this.id);
+			}
+
+			if (this.entity == null) {
+				parameter = context.getParameter("editorForm:category");
+				if (!StringUtil.isEmpty(parameter)) {
+					this.entity = getDao().findByProcessDefinition(Long.valueOf(parameter));
+				}
+			}
+		}
+
+		return entity;
+	}
+
+	public void setEntity(ITextDocumentURIEntity entity) {
+		this.entity = entity;
+	}
+
+	/**
+	 * 
+	 * @return existing path of resources;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Map<String, String> getBundleURLs() {
+		Map<String, String> bundleURLs = new TreeMap<String, String>();
+
+		if (!StringUtil.isEmpty(getBundleName())) {
+			List<String> files = FileUtil.getAllFilesRecursively(getBundlePath() + "/resources");
+			for (String path : files) {
+				path = path.substring(path.indexOf(getBundleName()));
+				if (path.contains("/")) {
+					path = path.substring(path.indexOf("/"));
+				}
+
+				bundleURLs.put(path, path);
+			}
+		}
+
+		return bundleURLs;
 	}
 
 	public void selectedBundlePathChange(ValueChangeEvent event) {
@@ -356,55 +496,5 @@ public class ITextDocumentURI implements Serializable {
 				ITextDocumentURIEntity.class) != null) {
 			setSubmitted(Boolean.TRUE);
 		}
-	}
-
-	public Map<String, String> getBundleURLs() {
-		Map<String, String> bundleURLs = new TreeMap<String, String>();
-
-		if (!StringUtil.isEmpty(getBundleName())) {
-			List<String> files = FileUtil.getAllFilesRecursively(getBundlePath() + "/resources");
-			for (String path : files) {
-				path = path.substring(path.indexOf(getBundleName()));
-				if (path.contains("/")) {
-					path = path.substring(path.indexOf("/"));
-				}
-
-				bundleURLs.put(path, path);
-			}
-		}
-
-		return bundleURLs;
-	}
-
-	public ITextDocumentURIEntity getEntity() {
-		if (this.entity == null) {
-			IWContext context = CoreUtil.getIWContext();
-			String parameter = null;
-			if (this.id == null) {
-				if (context != null) {
-					parameter = context.getParameter(PARAMETER_ID);
-					if (!StringUtil.isEmpty(parameter)) {
-						this.id = Long.valueOf(parameter);
-					}
-				}
-			}
-
-			if (this.id != null) {
-				this.entity = getDao().findById(this.id);
-			}
-
-			if (this.entity == null) {
-				parameter = context.getParameter("editorForm:category");
-				if (!StringUtil.isEmpty(parameter)) {
-					this.entity = getDao().findByProcessDefinition(Long.valueOf(parameter));
-				}
-			}
-		}
-
-		return entity;
-	}
-
-	public void setEntity(ITextDocumentURIEntity entity) {
-		this.entity = entity;
 	}
 }
