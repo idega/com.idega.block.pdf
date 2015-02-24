@@ -81,6 +81,26 @@
                         value="#{iTextDocumentsService.processDefinitionNames}"/>
                 </h:selectOneMenu>
             </h:panelGroup>
+            <h:panelGroup
+                rendered="#{iTextDocument.revisionExist}">
+                <h:outputLabel
+                    for="revision"
+                    value="#{localizedStrings['com.idega.block.pdf']['revision']}"/>
+            </h:panelGroup>
+            <h:panelGroup
+                rendered="#{iTextDocument.revisionExist}">
+                <h:selectOneMenu
+                    id="revision"
+                    value="#{iTextDocument.repositoryURI}"
+                    valueChangeListener="#{iTextDocument.selectedRepositoryURIChange}"
+                    onchange="showLoadingMessage('Loading'); submit();">
+                    <f:selectItem
+                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                        itemValue="-1"/>
+                    <f:selectItems
+                        value="#{iTextDocument.revisions}"/>
+                </h:selectOneMenu>
+            </h:panelGroup>
             <h:panelGroup>
                 <h:outputLabel
                     for="helpText"

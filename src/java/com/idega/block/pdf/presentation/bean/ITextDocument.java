@@ -86,21 +86,33 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
 
+import com.idega.block.pdf.business.PrintingService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.core.file.util.MimeType;
+import com.idega.idegaweb.IWMainApplication;
 import com.idega.repository.RepositoryService;
+import com.idega.repository.bean.RepositoryItem;
 import com.idega.util.CoreConstants;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
+import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.expression.ELUtil;
 
 /**
@@ -113,15 +125,17 @@ import com.idega.util.expression.ELUtil;
  */
 public class ITextDocument extends ITextDocumentURI {
 
-	private static final long serialVersionUID = -1964054087009829433L;
-
 	public static final String REPOSITORY_ITEXT_PATH = "/dynamic_resources/itext/";	
+
+	private static final long serialVersionUID = -1964054087009829433L;
 
 	private File bundleDocument;
 
 	private InputStream documentStream;
 
 	private String documentSource;
+
+	private boolean repositoryURIUpdated = false;
 
 	public ITextDocument() {}
 
@@ -131,6 +145,20 @@ public class ITextDocument extends ITextDocumentURI {
 
 	protected RepositoryService getRepositoryService() {
 		return ELUtil.getInstance().getBean(RepositoryService.BEAN_NAME);
+	}
+
+	protected PrintingService getPrintingService() {
+		try {
+			return (PrintingService) IBOLookup.getServiceInstance(
+					IWMainApplication.getDefaultIWApplicationContext(), 
+					PrintingService.class);
+		} catch (IBOLookupException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get " + PrintingService.class.getSimpleName() + 
+					", cause of:", e);
+		}
+
+		return null;
 	}
 
 	public File getBundleDocument() {
@@ -185,6 +213,14 @@ public class ITextDocument extends ITextDocumentURI {
 		return documentSource;
 	}
 
+	public boolean isRepositoryURIUpdated() {
+		return repositoryURIUpdated;
+	}
+
+	public void setRepositoryURIUpdated(boolean repositoryURIUpdated) {
+		this.repositoryURIUpdated = repositoryURIUpdated;
+	}
+
 	public void setBundleDocument(File bundleDocument) {
 		if (!isProcessDefinitionUpdated()) {
 			this.bundleDocument = bundleDocument;
@@ -192,13 +228,13 @@ public class ITextDocument extends ITextDocumentURI {
 	}
 
 	public void setDocumentStream(FileInputStream documentStream) {
-		if (!isProcessDefinitionUpdated()) {
+		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
 			this.documentStream = documentStream;
 		}
 	}
 
 	public void setDocumentSource(String documentSource) {
-		if (!isProcessDefinitionUpdated()) {
+		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
 			this.documentSource = documentSource;
 		}
 	}
@@ -236,17 +272,38 @@ public class ITextDocument extends ITextDocumentURI {
 		}
 	}
 
+	public void selectedRepositoryURIChange(ValueChangeEvent event) {
+ 		Object value = event.getNewValue();
+ 		if (!isProcessDefinitionUpdated() && value != null) {
+ 			super.selectedRepositoryURIChange(event);
+			this.documentSource = null;
+			if (this.documentStream != null) {
+				try {
+					this.documentStream.close();
+				} catch (IOException e) {
+					java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+				}
+
+				this.documentStream = null;
+			}
+
+			setRepositoryURIUpdated(true);
+ 		}
+	}
+
 	public String getITextRepositoryPath() {
 		String webdavServerURL = getRepositoryService().getWebdavServerURL();
 		if (!StringUtil.isEmpty(webdavServerURL)) {
-			return webdavServerURL + CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH;
+			return webdavServerURL 
+					+ CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH 
+					+ getProcessDefinitionId() + "/";
 		}
 
 		return null;
 	}
 
 	public String getNewFilename() {
-		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".xml";
+		return System.currentTimeMillis() + ".xml";
 	}
 
 	public String getPDFName() {
@@ -256,15 +313,47 @@ public class ITextDocument extends ITextDocumentURI {
 		}
 
 		if (!StringUtil.isEmpty(path)) {
-			return path.substring(
+			String dateString =  path.substring(
 					getRepositoryURI().lastIndexOf('/') + 1,
-					getRepositoryURI().lastIndexOf('.')) 
-					+ ".pdf";
+					getRepositoryURI().lastIndexOf('.'));
+			try {
+				Long timeInMillis = Long.valueOf(dateString);
+				if (timeInMillis != null) {
+					return getProcessDefinitionName() + "-" + new Date(timeInMillis) + ".pdf";
+				}
+			} catch (Exception e) {}
 		}
 
 		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".pdf";
 	}
-	
+
+	public Map<String, String> getRevisions() {
+		TreeMap<String, String> revisions = new TreeMap<String, String>();
+
+		Collection<RepositoryItem> nodes = null;
+		try {
+			nodes = getRepositoryService()
+					.getChildNodesAsRootUser(getITextRepositoryPath());
+		} catch (RepositoryException e) {
+			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
+		}
+
+		if (!ListUtil.isEmpty(nodes)) {
+			for (RepositoryItem node : nodes) {
+				String fileName = node.getNodeName();
+				String timeString = fileName.substring(0, fileName.indexOf(CoreConstants.DOT));
+				Long timeInMillis = Long.valueOf(timeString);
+				revisions.put(new IWTimestamp(timeInMillis).toSQLString(), node.getAbsolutePath());
+			}
+		}
+
+		return revisions.descendingMap();
+	}
+
+	public boolean isRevisionExist() {
+		return !MapUtil.isEmpty(getRevisions());
+	}
+
 	@Override
 	public void save() {
 		try {

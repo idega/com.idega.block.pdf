@@ -86,17 +86,11 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.faces.event.ValueChangeEvent;
 
-import com.idega.block.pdf.business.PrintingService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
-import com.idega.business.IBOLookup;
-import com.idega.business.IBOLookupException;
-import com.idega.idegaweb.IWMainApplication;
 import com.idega.presentation.IWContext;
 import com.idega.util.CoreUtil;
 import com.idega.util.FileUtil;
@@ -141,20 +135,6 @@ public class ITextDocumentURI implements Serializable {
 	private boolean submitted = Boolean.FALSE;
 
 	private boolean processDefinitionUpdated = Boolean.FALSE;
-
-	protected PrintingService getPrintingService() {
-		try {
-			return (PrintingService) IBOLookup.getServiceInstance(
-					IWMainApplication.getDefaultIWApplicationContext(), 
-					PrintingService.class);
-		} catch (IBOLookupException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to get " + PrintingService.class.getSimpleName() + 
-					", cause of:", e);
-		}
-
-		return null;
-	}
 
 	protected ITextDocumentURIDAO getDao() {
 		return ELUtil.getInstance().getBean(ITextDocumentURIDAO.BEAN_NAME);
@@ -340,6 +320,13 @@ public class ITextDocumentURI implements Serializable {
  		}
 	}
 
+	public void selectedRepositoryURIChange(ValueChangeEvent event) {
+ 		Object value = event.getNewValue();
+ 		if (!isProcessDefinitionUpdated() && value != null) {
+			this.repositoryURI = value.toString();
+ 		}
+	}
+
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
 		if (value != null) {
@@ -391,10 +378,11 @@ public class ITextDocumentURI implements Serializable {
 
 	public ITextDocumentURIEntity getEntity() {
 		if (this.entity == null) {
+			IWContext context = CoreUtil.getIWContext();
+			String parameter = null;
 			if (this.id == null) {
-				IWContext context = CoreUtil.getIWContext();
 				if (context != null) {
-					String parameter = context.getParameter(PARAMETER_ID);
+					parameter = context.getParameter(PARAMETER_ID);
 					if (!StringUtil.isEmpty(parameter)) {
 						this.id = Long.valueOf(parameter);
 					}
@@ -403,6 +391,13 @@ public class ITextDocumentURI implements Serializable {
 
 			if (this.id != null) {
 				this.entity = getDao().findById(this.id);
+			}
+
+			if (this.entity == null) {
+				parameter = context.getParameter("editorForm:category");
+				if (!StringUtil.isEmpty(parameter)) {
+					this.entity = getDao().findByProcessDefinition(Long.valueOf(parameter));
+				}
 			}
 		}
 
