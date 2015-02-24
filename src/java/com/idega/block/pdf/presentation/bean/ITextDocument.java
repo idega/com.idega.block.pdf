@@ -86,7 +86,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Scanner;
@@ -96,6 +98,7 @@ import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.jcr.Repository;
 import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -104,6 +107,7 @@ import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.core.file.util.MimeType;
+import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.repository.RepositoryService;
 import com.idega.repository.bean.RepositoryItem;
@@ -161,6 +165,26 @@ public class ITextDocument extends ITextDocumentURI {
 		return null;
 	}
 
+	/**
+	 * 
+	 * @return <code>true</code> if {@link ITextDocumentURI#getRepositoryURI()}
+	 * was changed, <code>false</code> otherwise;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean isRepositoryURIUpdated() {
+		return repositoryURIUpdated;
+	}
+
+	public void setRepositoryURIUpdated(boolean repositoryURIUpdated) {
+		this.repositoryURIUpdated = repositoryURIUpdated;
+	}
+
+	/**
+	 * 
+	 * @return iText {@link File} placed in {@link IWBundle} or 
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public File getBundleDocument() {
 		if (this.bundleDocument == null && !StringUtil.isEmpty(getBundleURI()) && !getBundleURI().equals("-")) {
 			try {
@@ -176,6 +200,20 @@ public class ITextDocument extends ITextDocumentURI {
 		return bundleDocument;
 	}
 
+	public void setBundleDocument(File bundleDocument) {
+		if (!isProcessDefinitionUpdated()) {
+			this.bundleDocument = bundleDocument;
+		}
+	}
+
+	/**
+	 * 
+	 * @return {@link InputStream} from document placed in {@link Repository} by
+	 * {@link ITextDocumentURI#getRepositoryURI()}. If no {@link File} found,
+	 * then returns stream from {@link ITextDocument#getBundleDocument()} or
+	 * <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public InputStream getDocumentStream() {
 		if (this.documentStream == null) {
 			try {
@@ -201,6 +239,18 @@ public class ITextDocument extends ITextDocumentURI {
 		return this.documentStream;
 	}
 
+	public void setDocumentStream(FileInputStream documentStream) {
+		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
+			this.documentStream = documentStream;
+		}
+	}
+
+	/**
+	 * 
+	 * @return {@link InputStream} form {@link ITextDocument#getDocumentStream()}
+	 * in {@link String} format or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public String getDocumentSource() {
 		if (StringUtil.isEmpty(this.documentSource) && getDocumentStream() != null) {
 			this.documentSource = new Scanner(getDocumentStream()).useDelimiter("\\Z").next();
@@ -213,30 +263,107 @@ public class ITextDocument extends ITextDocumentURI {
 		return documentSource;
 	}
 
-	public boolean isRepositoryURIUpdated() {
-		return repositoryURIUpdated;
-	}
-
-	public void setRepositoryURIUpdated(boolean repositoryURIUpdated) {
-		this.repositoryURIUpdated = repositoryURIUpdated;
-	}
-
-	public void setBundleDocument(File bundleDocument) {
-		if (!isProcessDefinitionUpdated()) {
-			this.bundleDocument = bundleDocument;
-		}
-	}
-
-	public void setDocumentStream(FileInputStream documentStream) {
-		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
-			this.documentStream = documentStream;
-		}
-	}
-
 	public void setDocumentSource(String documentSource) {
 		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
 			this.documentSource = documentSource;
 		}
+	}
+
+	/**
+	 * 
+	 * @return something like /content/files/public/dynamic_resources/itext/{@link ITextDocumentURI#getProcessDefinitionId()}
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public String getITextRepositoryPath() {
+		String webdavServerURL = getRepositoryService().getWebdavServerURL();
+		if (!StringUtil.isEmpty(webdavServerURL)) {
+			return webdavServerURL 
+					+ CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH 
+					+ getProcessDefinitionId() + "/";
+		}
+
+		return null;
+	}
+
+	/**
+	 * 
+	 * @return filename of .xml file with {@link System#currentTimeMillis()}
+	 * as name;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public String getNewFilename() {
+		return System.currentTimeMillis() + ".xml";
+	}
+
+	/**
+	 * 
+	 * @return PDF filename with formatted {@link Date} from exiting iText 
+	 * document filename or new one with current {@link Date};
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public String getPDFName() {
+		String path = getRepositoryURI();
+		if (StringUtil.isEmpty(path)) {
+			path = getBundlePath();
+		}
+
+		if (!StringUtil.isEmpty(path)) {
+			String dateString =  path.substring(
+					getRepositoryURI().lastIndexOf('/') + 1,
+					getRepositoryURI().lastIndexOf('.'));
+			try {
+				Long timeInMillis = Long.valueOf(dateString);
+				if (timeInMillis != null) {
+					return getProcessDefinitionName() + "-" + new Date(timeInMillis) + ".pdf";
+				}
+			} catch (Exception e) {}
+		}
+
+		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".pdf";
+	}
+
+	/**
+	 * 
+	 * @return all existing filenames with {@link Date}s in 
+	 * {@link ITextDocumentURI#getRepositoryURI()} directory or 
+	 * {@link Collections#emptyMap()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public Map<String, String> getRevisions() {
+		TreeMap<String, String> revisions = new TreeMap<String, String>();
+
+		Collection<RepositoryItem> nodes = null;
+		try {
+			nodes = getRepositoryService()
+					.getChildNodesAsRootUser(getITextRepositoryPath());
+		} catch (RepositoryException e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to get files list from directory: '" 
+							+ getITextRepositoryPath() + "';");
+		}
+
+		if (!ListUtil.isEmpty(nodes)) {
+			for (RepositoryItem node : nodes) {
+				String fileName = node.getNodeName();
+				String timeString = fileName.substring(0, fileName.indexOf(CoreConstants.DOT));
+				Long timeInMillis = Long.valueOf(timeString);
+				revisions.put(
+						new IWTimestamp(timeInMillis).toSQLString(), 
+						node.getAbsolutePath());
+			}
+		}
+
+		return revisions.descendingMap();
+	}
+
+	/**
+	 * 
+	 * @return <code>true</code> if {@link ITextDocument#getRevisions()} is not
+	 * empty;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public boolean isRevisionExist() {
+		return !MapUtil.isEmpty(getRevisions());
 	}
 
 	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
@@ -291,69 +418,6 @@ public class ITextDocument extends ITextDocumentURI {
  		}
 	}
 
-	public String getITextRepositoryPath() {
-		String webdavServerURL = getRepositoryService().getWebdavServerURL();
-		if (!StringUtil.isEmpty(webdavServerURL)) {
-			return webdavServerURL 
-					+ CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH 
-					+ getProcessDefinitionId() + "/";
-		}
-
-		return null;
-	}
-
-	public String getNewFilename() {
-		return System.currentTimeMillis() + ".xml";
-	}
-
-	public String getPDFName() {
-		String path = getRepositoryURI();
-		if (StringUtil.isEmpty(path)) {
-			path = getBundlePath();
-		}
-
-		if (!StringUtil.isEmpty(path)) {
-			String dateString =  path.substring(
-					getRepositoryURI().lastIndexOf('/') + 1,
-					getRepositoryURI().lastIndexOf('.'));
-			try {
-				Long timeInMillis = Long.valueOf(dateString);
-				if (timeInMillis != null) {
-					return getProcessDefinitionName() + "-" + new Date(timeInMillis) + ".pdf";
-				}
-			} catch (Exception e) {}
-		}
-
-		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".pdf";
-	}
-
-	public Map<String, String> getRevisions() {
-		TreeMap<String, String> revisions = new TreeMap<String, String>();
-
-		Collection<RepositoryItem> nodes = null;
-		try {
-			nodes = getRepositoryService()
-					.getChildNodesAsRootUser(getITextRepositoryPath());
-		} catch (RepositoryException e) {
-			java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
-		}
-
-		if (!ListUtil.isEmpty(nodes)) {
-			for (RepositoryItem node : nodes) {
-				String fileName = node.getNodeName();
-				String timeString = fileName.substring(0, fileName.indexOf(CoreConstants.DOT));
-				Long timeInMillis = Long.valueOf(timeString);
-				revisions.put(new IWTimestamp(timeInMillis).toSQLString(), node.getAbsolutePath());
-			}
-		}
-
-		return revisions.descendingMap();
-	}
-
-	public boolean isRevisionExist() {
-		return !MapUtil.isEmpty(getRevisions());
-	}
-
 	@Override
 	public void save() {
 		try {
@@ -373,6 +437,13 @@ public class ITextDocument extends ITextDocumentURI {
 		}
 	}
 
+	/**
+	 * 
+	 * <p>Returns {@link OutputStream} of generated PDF file to 
+	 * {@link HttpServletResponse}</p>
+	 * @throws IOException
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
 	public void download() throws IOException {
 		save();
 		setSubmitted(false);
