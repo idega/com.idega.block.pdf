@@ -68,17 +68,14 @@
     <dependency>
       <groupId>itextpdf</groupId>
       <artifactId>itext-paulo</artifactId>
-      <version>${itextpdf-itext-paulo-version}</version>
     </dependency>
     <dependency>
       <groupId>itext</groupId>
       <artifactId>itext-xml</artifactId>
-      <version>${itext-itext-xml-version}</version>
     </dependency>
     <dependency>
       <groupId>ujac</groupId>
       <artifactId>ujac</artifactId>
-      <version>${ujac-ujac-version}</version>
     </dependency>
     <dependency>
       <groupId>flyingsaucer</groupId>
@@ -89,6 +86,11 @@
     	<groupId>flyingsaucer</groupId>
     	<artifactId>minium</artifactId>
     	<version>${flyingsaucer-minium-version}</version>
+    </dependency>
+    <dependency>
+        <groupId>com.itextpdf.tool</groupId>
+        <artifactId>xmlworker</artifactId>
+        <version>5.5.1</version>
     </dependency>
   </dependencies>
 </project>
