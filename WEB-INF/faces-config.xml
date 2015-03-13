@@ -37,6 +37,73 @@
         </component-extension>
     </component>
 
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURITypeEditor</component-class>
+        <component-type>Document URI Type editor</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURITypesViewer</component-class>
+        <component-type>Document URI Types viewer</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURIEditor</component-class>
+        <component-type>Document URI editor</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURIViewer</component-class>
+        <component-type>Document URI viewer</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURIGroupEditor</component-class>
+        <component-type>Document URI group editor</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <component>
+        <component-class>com.idega.block.pdf.presentation.DocumentURIGroupViewer</component-class>
+        <component-type>Document URI groups viewer</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
+
+    <!-- Request -->
 	<managed-bean>
 		<managed-bean-name>iTextDocumentURI</managed-bean-name>
 		<managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocumentURI</managed-bean-class>
@@ -46,6 +113,24 @@
     <managed-bean>
         <managed-bean-name>iTextDocument</managed-bean-name>
         <managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocument</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>documentURIType</managed-bean-name>
+        <managed-bean-class>com.idega.block.pdf.presentation.bean.DocumentURIType</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>documentURI</managed-bean-name>
+        <managed-bean-class>com.idega.block.pdf.presentation.bean.DocumentURI</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>documentURIGroup</managed-bean-name>
+        <managed-bean-class>com.idega.block.pdf.presentation.bean.DocumentURIGroup</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 </faces-config>
