@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core">
+
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.pdf']['style/editor.css']}"/>
+
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.pdf']['style/source_editor.css']}"/>
+
+    <!-- jQuery -->
+    <script
+        type="text/javascript"
+        src="//code.jquery.com/jquery-latest.js"/>
+
+    <!-- Fancybox -->
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.css']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/jquery-plugins/jquery.easing.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/helpers/jquery.fancybox-media.js']}"/>
+
+    <!-- Core stuff -->
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.core']['style/iw_core.css']}"/>
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.core']['iw_core.js']}"/>
+
+    <!-- DWR -->
+    <script
+        type="text/javascript"
+        src="/dwr/engine.js" />
+    <script
+        type="text/javascript"
+        src="/dwr/util.js" />
+    <script
+        type="text/javascript"
+        src="/dwr/interface/RichTextDocumentService.js" />
+
+    <!-- TinyMCE -->
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/tinymce/3.5.8/tiny_mce.js']}"/>
+
+    <!-- Helper -->
+    <script 
+        type="text/javascript" 
+        src="#{iwResourceResolver['com.idega.block.pdf']['javascript/RichTextDocumentEditorHelper.js']}"/>
+
+    <h:outputText
+        rendered="#{richTextDocument.submitted}"
+        styleClass="savedText"
+        value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
+    <h:form
+        id="editorForm">
+        <h:panelGrid
+            columns="2"
+            styleClass="editorTable">
+            <h:panelGroup>
+                <h:outputLabel
+                    for="category"
+                    value="#{localizedStrings['com.idega.block.pdf']['process_definition']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:selectOneMenu
+                    id="category"
+                    value="#{richTextDocument.processDefinitionId}"
+                    valueChangeListener="#{richTextDocument.selectedProcessDefinitionIdChange}"
+                    onchange="showLoadingMessage('Loading'); submit();">
+                    <f:selectItem
+                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                        itemValue="-1"/>
+                    <f:selectItems
+                        value="#{iTextDocumentsService.processDefinitionNames}"/>
+                </h:selectOneMenu>
+            </h:panelGroup>
+            <h:panelGroup
+                rendered="#{richTextDocument.revisionExist}">
+                <h:outputLabel
+                    for="revision"
+                    value="#{localizedStrings['com.idega.block.pdf']['revision']}"/>
+            </h:panelGroup>
+            <h:panelGroup
+                rendered="#{richTextDocument.revisionExist}">
+                <h:selectOneMenu
+                    id="revision"
+                    value="#{richTextDocument.repositoryURI}"
+                    valueChangeListener="#{richTextDocument.selectedRepositoryURIChange}"
+                    onchange="showLoadingMessage('Loading'); submit();">
+                    <f:selectItem
+                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                        itemValue="-1"/>
+                    <f:selectItems
+                        value="#{richTextDocument.revisions}"/>
+                </h:selectOneMenu>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputLabel
+                    for="helpText"
+                    value="#{localizedStrings['com.idega.block.pdf']['tags']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputText 
+                    id="helpText" 
+                    value="${'${dateFrom}, ${fisheryName}, ${fisheryAddress}, ${fishingAreaName}, ${fisheryPersonalID}, ${fisheryPostal}, ${shipID}, ${shipName}'}"/>
+            </h:panelGroup>
+        </h:panelGrid>
+        <h:panelGroup>
+            <h:inputTextarea
+                id="sourceCode"
+                value="#{richTextDocument.documentSource}"
+                styleClass="sourceEditorArea"/>
+        </h:panelGroup>
+        <h:panelGroup>
+            <h:inputHidden
+                id="prm_id"
+                value="#{richTextDocument.id}"/>
+            <h:inputHidden
+                id="oldProcessDefinitionId"
+                value="#{richTextDocument.oldProcessDefinitionId}"/>
+            <h:inputHidden
+                id="oldRepositoryURI"
+                value="#{richTextDocument.oldRepositoryURI}"/>
+        </h:panelGroup>
+        <h:panelGroup>
+            <h:commandButton
+                id="saveButton"
+                value="#{localizedStrings['com.idega.block.pdf']['save']}"
+                action="#{richTextDocument.save}"/>
+            <h:outputLink
+                styleClass="windowLink">
+                <input
+                    value="#{localizedStrings['com.idega.block.pdf']['preview']}"
+                    type="button"
+                    class="button"/>
+            </h:outputLink>
+        </h:panelGroup>
+    </h:form>
+</div>

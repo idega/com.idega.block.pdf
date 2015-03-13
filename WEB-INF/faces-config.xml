@@ -36,6 +36,17 @@
             </idegaweb-info>
         </component-extension>
     </component>
+    
+    <component>
+        <component-class>com.idega.block.pdf.presentation.RichTextDocumentEditor</component-class>
+        <component-type>Rich text document editor</component-type>
+        <component-extension>
+            <idegaweb-info>
+                <builder-visible>true</builder-visible>
+                <object-type>jsf.uicomponent</object-type>
+            </idegaweb-info>
+        </component-extension>
+    </component>
 
     <component>
         <component-class>com.idega.block.pdf.presentation.DocumentURITypeEditor</component-class>
@@ -131,6 +142,12 @@
     <managed-bean>
         <managed-bean-name>documentURIGroup</managed-bean-name>
         <managed-bean-class>com.idega.block.pdf.presentation.bean.DocumentURIGroup</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+    
+    <managed-bean>
+        <managed-bean-name>richTextDocument</managed-bean-name>
+        <managed-bean-class>com.idega.block.pdf.presentation.bean.RichTextDocument</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 </faces-config>

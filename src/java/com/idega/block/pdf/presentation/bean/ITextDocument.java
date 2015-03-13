@@ -258,9 +258,7 @@ public class ITextDocument extends ITextDocumentURI {
 			}
 		}
 
-		if (!StringUtil.isEmpty(this.documentSource)) {
-			this.documentSource = this.documentSource.replaceAll("\t", "    ");
-		}
+		closeStreamSilently();
 
 		return documentSource;
 	}
@@ -375,14 +373,7 @@ public class ITextDocument extends ITextDocumentURI {
 			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
 
 			if (isUpdatingProcessDefinition()) {
-				if (getDocumentStream() != null) {
-					try {
-						getDocumentStream().close();
-					} catch (IOException e) {
-						Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-								"Failed to close document, cause of:", e);
-					}
-				}
+				closeStreamSilently();
 
 				setId(null);
 				setProcessDefinitionName(null);
@@ -406,14 +397,7 @@ public class ITextDocument extends ITextDocumentURI {
  		if (!isProcessDefinitionUpdated() && value != null) {
 			setRepositoryURI(value.toString());
  			if (isUpdatingOldRepositoryURI()) {
- 				if (getDocumentStream() != null) {
-					try {
-						getDocumentStream().close();
-					} catch (IOException e) {
-						Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-								"Failed to close document, cause of:", e);
-					}
-				}
+ 				closeStreamSilently();
 
  				setDocumentSource(null);
  				setDocumentStream(null);
@@ -425,6 +409,29 @@ public class ITextDocument extends ITextDocumentURI {
  		}
 	}
 
+	/**
+	 * 
+	 * <p>Handling concurrent modification problem</p>
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected void closeStreamSilently() {
+		/*
+		 * Let's take care of unused stream anymore
+		 */
+		try {
+			if (getDocumentStream() != null) {
+				getDocumentStream().close();
+				setDocumentStream(null);
+			}
+
+			Logger.getLogger(getClass().getName()).log(Level.INFO, 
+					"Stream was closed after using.");
+		} catch (Exception e) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+					"Failed to close stream, cause of: " + e.getMessage());
+		}
+	}
+	
 	@Override
 	public void save() {
 		String fileName = getNewFilename();
@@ -443,10 +450,6 @@ public class ITextDocument extends ITextDocumentURI {
 					"Failed to save file by path: " + getITextRepositoryPath() + "/" +
 							fileName + " Cause of:", e);
 		}
-
-		try {
-			getDocumentStream().close();
-		} catch (Exception e) {}
 	}
 
 	/**
@@ -507,6 +510,6 @@ public class ITextDocument extends ITextDocumentURI {
 	     */
 	    fc.responseComplete();
 
-	    getDocumentStream().close();
+	    closeStreamSilently();
 	}
 }

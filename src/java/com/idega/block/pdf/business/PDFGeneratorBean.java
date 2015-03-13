@@ -64,9 +64,6 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	private static final Logger LOGGER = Logger.getLogger(PDFGeneratorBean.class.getName());
 
-	private ITextRenderer renderer = null;
-	private XMLOutputter outputter = null;
-
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -78,13 +75,17 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	private static final String ATTRIBUTE_STYLE = "style";
 	private static final String ATTRIBUTE_VALUE_DISPLAY_NONE = "display: none!important;";
 
-	public PDFGeneratorBean() {
+	private ITextRenderer getITextRenderer() {
 		try {
-			renderer = new ITextRenderer();
+			return new ITextRenderer();
 		} catch(Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating PDF generator!", e);
 		}
-		outputter = new XMLOutputter(XmlUtil.getPrettyFormat(false));
+		return null;
+	}
+
+	private XMLOutputter getXMLOutputter() {
+		return new XMLOutputter(XmlUtil.getPrettyFormat(false));
 	}
 
 	private boolean generatePDF(IWContext iwc, Document doc, String fileName, String uploadPath) {
@@ -94,7 +95,14 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private byte[] getPDFBytes(Document doc) {
-		if (renderer == null || doc == null) {
+		if (doc == null) {
+			getLogger().warning("Document is not provided");
+			return null;
+		}
+
+		ITextRenderer renderer = getITextRenderer();
+		if (renderer == null) {
+			getLogger().warning(ITextRenderer.class.getName() + " is not available");
 			return null;
 		}
 
@@ -171,7 +179,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			return;
 		}
 
-		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(doc), false, false, true);
+		String htmlContent = getBuilderService().getCleanedHtmlContent(getXMLOutputter().outputString(doc), false, false, true);
 		if (StringUtil.isEmpty(htmlContent)) {
 			LOGGER.log(Level.WARNING, "Document converted to HTML is empty!");
 			return;
@@ -281,7 +289,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			success = doFixMediaType(document, linksFromHead);
 		}
 
-		String htmlContent = getBuilderService().getCleanedHtmlContent(outputter.outputString(document), false, false, true);
+		String htmlContent = getBuilderService().getCleanedHtmlContent(getXMLOutputter().outputString(document), false, false, true);
 		htmlContent = "<!DOCTYPE html>\n" + htmlContent;
 		try {
 			return htmlContent.getBytes(CoreConstants.ENCODING_UTF8);
