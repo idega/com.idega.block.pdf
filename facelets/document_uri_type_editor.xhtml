@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core">
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.pdf']['style/editor.css']}"/>
+    <h:outputText
+		rendered="#{documentURIType.submitted}"
+		styleClass="savedText"
+		value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
+	<h:form
+		rendered="#{not documentURIType.submitted}"
+		id="editorForm">
+        <h:panelGrid
+			columns="2"
+			styleClass="editorTable">
+            <h:panelGroup>
+                <h:outputLabel
+                    for="externalId"
+                    value="#{localizedStrings['com.idega.block.pdf']['external_id']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:inputText
+                    id="externalId"
+                    value="#{documentURIType.externalId}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputLabel
+                    for="name"
+                    value="#{localizedStrings['com.idega.block.pdf']['name']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:inputText
+                    id="name"
+                    value="#{documentURIType.name}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputLabel
+                    for="groupId"
+                    value="#{localizedStrings['com.idega.block.pdf']['group']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:selectOneMenu
+                    id="groupId"
+                    value="#{documentURIType.groupId}">
+                    <f:selectItem
+                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                        noSelectValue="true"/>
+                    <f:selectItems
+                        value="#{documentURIGroupService.documentURIGroupsMap}"/>
+                </h:selectOneMenu>
+            </h:panelGroup>
+		</h:panelGrid>
+        <h:inputHidden
+            id="prm_id"
+            value="#{documentURIType.id}"/>
+        <h:commandButton
+            id="saveButton"
+            value="#{localizedStrings['com.idega.block.pdf']['save']}"
+            action="#{documentURIType.save}"/>
+	</h:form>
+</div>
