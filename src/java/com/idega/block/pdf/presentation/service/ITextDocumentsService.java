@@ -80,7 +80,7 @@
  *     License that was purchased to become eligible to receive the Source 
  *     Code after Licensee receives the source code. 
  */
-package com.idega.block.pdf.business;
+package com.idega.block.pdf.presentation.service;
 
 import java.net.URI;
 import java.util.Collections;

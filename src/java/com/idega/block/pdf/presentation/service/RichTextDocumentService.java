@@ -148,7 +148,7 @@ public class RichTextDocumentService extends DefaultSpringBean {
 	
 	@RemoteMethod
 	public String updateTempolarPDF(String processDefinitionId, String source) {
-		if (!StringUtil.isEmpty(processDefinitionId) && !StringUtil.isEmpty(source)) {
+		if (!StringUtil.isEmpty(source)) {
 			
 			if (source.contains("data-mce-bogus")) {
 				source = source.replaceAll("<br data-mce-bogus=\"1\">", "");

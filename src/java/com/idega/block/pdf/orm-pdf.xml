@@ -5,4 +5,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
     version="2.0">
     <entity class="com.idega.block.pdf.data.ITextDocumentURIEntity" />
+    <entity class="com.idega.block.pdf.data.DocumentURITypeEntity" />
+    <entity class="com.idega.block.pdf.data.DocumentURIGroupEntity" />
+    <entity class="com.idega.block.pdf.data.DocumentURIEntity" />
 </entity-mappings>

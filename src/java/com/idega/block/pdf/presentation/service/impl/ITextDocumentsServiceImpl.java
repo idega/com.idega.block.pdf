@@ -80,7 +80,7 @@
  *     License that was purchased to become eligible to receive the Source 
  *     Code after Licensee receives the source code. 
  */
-package com.idega.block.pdf.business.impl;
+package com.idega.block.pdf.presentation.service.impl;
 
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
@@ -100,12 +100,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.pdf.PDFConstants;
-import com.idega.block.pdf.business.ITextDocumentsService;
 import com.idega.block.pdf.business.PrintingService;
 import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
 import com.idega.block.pdf.presentation.ITextDocumentURIEditor;
 import com.idega.block.pdf.presentation.bean.ITextDocumentURI;
+import com.idega.block.pdf.presentation.service.ITextDocumentsService;
 import com.idega.builder.bean.AdvancedProperty;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
@@ -339,7 +339,7 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 
 	@Override
 	public String updateTempolarPDF(String processDefinitionId, String source) {
-		if (!StringUtil.isEmpty(processDefinitionId) && !StringUtil.isEmpty(source)) {
+		if (!StringUtil.isEmpty(source)) {
 			MemoryOutputStream outputStream = new MemoryOutputStream(new MemoryFileBuffer());
 			String filename = "license-" + System.currentTimeMillis() + ".pdf"; 
 			try {
