@@ -125,6 +125,11 @@
         <managed-bean-name>iTextDocument</managed-bean-name>
         <managed-bean-class>com.idega.block.pdf.presentation.bean.ITextDocument</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>documentURIFilterBean</property-name>
+            <property-class>com.idega.block.pdf.presentation.filter.DocumentURIFilterBean</property-class>
+            <value>#{documentURIFilterBean}</value>
+        </managed-property>
     </managed-bean>
 
     <managed-bean>
@@ -149,5 +154,17 @@
         <managed-bean-name>richTextDocument</managed-bean-name>
         <managed-bean-class>com.idega.block.pdf.presentation.bean.RichTextDocument</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
+        <managed-property>
+            <property-name>documentURIFilterBean</property-name>
+            <property-class>com.idega.block.pdf.presentation.filter.DocumentURIFilterBean</property-class>
+            <value>#{documentURIFilterBean}</value>
+        </managed-property>
+    </managed-bean>
+
+    <!-- Filters -->
+    <managed-bean>
+        <managed-bean-name>documentURIFilterBean</managed-bean-name>
+        <managed-bean-class>com.idega.block.pdf.presentation.filter.DocumentURIFilterBean</managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 </faces-config>
