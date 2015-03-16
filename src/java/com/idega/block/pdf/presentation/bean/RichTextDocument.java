@@ -174,7 +174,5 @@ public class RichTextDocument extends ITextDocument {
 	     * obviously will fail since it's already written with a file and closed.
 	     */
 	    fc.responseComplete();
-
-	    closeStreamSilently();
 	}
 }

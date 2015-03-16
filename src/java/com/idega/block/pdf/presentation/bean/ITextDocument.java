@@ -87,37 +87,36 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.faces.context.FacesContext;
-import javax.faces.event.ValueChangeEvent;
 import javax.jcr.Repository;
-import javax.jcr.RepositoryException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
 
 import com.idega.block.pdf.business.PrintingService;
-import com.idega.block.pdf.data.ITextDocumentURIEntity;
+import com.idega.block.pdf.data.DocumentURIEntity;
+import com.idega.block.pdf.data.DocumentURITypeEntity;
+import com.idega.block.pdf.presentation.filter.DocumentURIFilterBean;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.core.file.util.MimeType;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.repository.RepositoryService;
-import com.idega.repository.bean.RepositoryItem;
 import com.idega.util.CoreConstants;
 import com.idega.util.FileUtil;
 import com.idega.util.IWTimestamp;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
-import com.idega.util.datastructures.map.MapUtil;
 import com.idega.util.expression.ELUtil;
 
 /**
@@ -128,22 +127,115 @@ import com.idega.util.expression.ELUtil;
  * @version 1.0.0 2015 vas. 2
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
  */
-public class ITextDocument extends ITextDocumentURI {
+public class ITextDocument extends DocumentURI {
 
-	public static final String REPOSITORY_ITEXT_PATH = "/dynamic_resources/itext/";	
+	public static final String REPOSITORY_PATH = CoreConstants.PUBLIC_PATH + "/dynamic_resources/";	
 
 	private static final long serialVersionUID = -1964054087009829433L;
 
-	private File bundleDocument;
-
-	private InputStream documentStream;
-
 	private String documentSource;
+
+	private DocumentURIFilterBean documentURIFilterBean;
 
 	public ITextDocument() {}
 
-	public ITextDocument(ITextDocumentURIEntity entity) {
+	public ITextDocument(DocumentURIEntity entity) {
 		super(entity);
+	}
+
+	public DocumentURIFilterBean getDocumentURIFilterBean() {
+		return documentURIFilterBean;
+	}
+
+	public void setDocumentURIFilterBean(DocumentURIFilterBean documentURIFilterBean) {
+		this.documentURIFilterBean = documentURIFilterBean;
+	}
+
+	protected List<Long> getEntityTypeIDs(DocumentURIEntity entity) {
+		if (entity != null) {
+			ArrayList<Long> ids = new ArrayList<Long>();
+
+			List<DocumentURITypeEntity> types = entity.getTypes();
+			for (DocumentURITypeEntity type: types) {
+				ids.add(type.getId());
+			}
+
+			return ids;
+		}
+
+		return Collections.emptyList();
+	}
+
+	public List<DocumentURIEntity> getEntities() {
+		List<Long> types = getDocumentURIFilterBean().getSelectedTypes();
+		if (!ListUtil.isEmpty(types)) {
+			List<DocumentURIEntity> result = new ArrayList<DocumentURIEntity>();
+
+			List<DocumentURIEntity> entitiesContainingTypes = getDAO().findByTypeIds(types);
+			for (DocumentURIEntity duri : entitiesContainingTypes) {
+				List<Long> entityTypesIds = getEntityTypeIDs(duri);
+				if (entityTypesIds.containsAll(types)) {
+					result.add(duri);
+				}
+			}
+
+			return result;
+		}
+
+		return Collections.emptyList();
+	}
+
+	public Map<String, Long> getEntitiesMap() {
+		TreeMap<String, Long> map = new TreeMap<String, Long>();
+
+		for (DocumentURIEntity entity : getEntities()) {
+			String uri = entity.getRepositoryURI();
+			if (!StringUtil.isEmpty(uri)) {
+				
+				try {
+					uri = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
+					Long time = Long.valueOf(uri);
+					map.put(new Date(time).toLocaleString(), entity.getId());
+				} catch (Exception e) {
+					map.put(uri, entity.getId());
+				}
+			}
+		}
+
+		return map.descendingMap();
+	}
+
+	public boolean isMultiple() {
+		List<DocumentURIEntity> entities = getEntities();
+		if (!ListUtil.isEmpty(entities)) {
+			return entities.size() > 1;
+		}
+
+		return false;
+	}
+
+	@Override
+	public DocumentURIEntity getEntity() {
+		DocumentURIEntity entity = super.getEntity();
+		if (entity == null) {
+			List<DocumentURIEntity> entities = getEntities();
+			if (entities != null && entities.size() == 1) {
+				entity = entities.iterator().next();
+			}
+		}
+
+		List<Long> selectedTypes = getDocumentURIFilterBean().getSelectedTypes();
+		List<Long> existingtypes = getEntityTypeIDs(entity);
+		if (existingtypes.containsAll(selectedTypes)) {
+			return entity;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public String getIdClass() {
+		return "editorForm:prm_id";
 	}
 
 	/**
@@ -181,9 +273,9 @@ public class ITextDocument extends ITextDocumentURI {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public File getBundleDocument() {
-		if (this.bundleDocument == null && !StringUtil.isEmpty(getBundleURI()) && !getBundleURI().equals("-")) {
+		if (!StringUtil.isEmpty(getBundleURI()) && !getBundleURI().equals("-")) {
 			try {
-				this.bundleDocument = FileUtil.getFileFromWorkspace(getBundleURI());
+				return FileUtil.getFileFromWorkspace(getBundleURI());
 			} catch (IOException e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, "Failed to get document from repository "
@@ -192,13 +284,7 @@ public class ITextDocument extends ITextDocumentURI {
 			}
 		}
 
-		return bundleDocument;
-	}
-
-	public void setBundleDocument(File bundleDocument) {
-		if (!isProcessDefinitionUpdated()) {
-			this.bundleDocument = bundleDocument;
-		}
+		return null;
 	}
 
 	/**
@@ -210,9 +296,10 @@ public class ITextDocument extends ITextDocumentURI {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public InputStream getDocumentStream() {
-		if (this.documentStream == null) {
+		InputStream documentStream = null;
+		if (documentStream == null) {
 			try {
-				this.documentStream = getRepositoryService()
+				documentStream = getRepositoryService()
 						.getInputStreamAsRoot(getRepositoryURI());
 			} catch (Exception e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
@@ -221,9 +308,9 @@ public class ITextDocument extends ITextDocumentURI {
 			}
 		}
 
-		if (this.documentStream == null && getBundleDocument() != null) {
+		if (documentStream == null && getBundleDocument() != null) {
 			try {
-				this.documentStream = new FileInputStream(getBundleDocument());
+				documentStream = new FileInputStream(getBundleDocument());
 			} catch (Exception e) {
 				java.util.logging.Logger.getLogger(getClass().getName()).log(
 						Level.WARNING, "Failed to create input stream, "
@@ -231,13 +318,7 @@ public class ITextDocument extends ITextDocumentURI {
 			}
 		}
 
-		return this.documentStream;
-	}
-
-	public void setDocumentStream(FileInputStream documentStream) {
-		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
-			this.documentStream = documentStream;
-		}
+		return documentStream;
 	}
 
 	/**
@@ -247,42 +328,33 @@ public class ITextDocument extends ITextDocumentURI {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public String getDocumentSource() {
-		if (StringUtil.isEmpty(this.documentSource) && getDocumentStream() != null) {
+		InputStream documentStream = getDocumentStream();
+		if (documentStream != null) {
+			String code = null;
 			try {
-				this.documentSource = IOUtils.toString(getDocumentStream());
+				code = IOUtils.toString(getDocumentStream());
 			} catch (Exception e) {
-				try {
-				} catch (Exception e1) {
-					java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "Failed to read stream:", e1);
-				}
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to read stream:", e);
 			}
-		}
 
-		closeStreamSilently();
+			try {
+				documentStream.close();
+				Logger.getLogger(getClass().getName()).log(Level.INFO, 
+						"Stream was closed after using.");
+			} catch (Exception e) {
+				Logger.getLogger(getClass().getName()).log(Level.WARNING, 
+						"Failed to close stream, cause of: " + e.getMessage());
+			}
 
-		return documentSource;
-	}
-
-	public void setDocumentSource(String documentSource) {
-		if (!isProcessDefinitionUpdated() && !isRepositoryURIUpdated()) {
-			this.documentSource = documentSource;
-		}
-	}
-
-	/**
-	 * 
-	 * @return something like /content/files/public/dynamic_resources/itext/{@link ITextDocumentURI#getProcessDefinitionId()}
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	public String getITextRepositoryPath() {
-		String webdavServerURL = getRepositoryService().getWebdavServerURL();
-		if (!StringUtil.isEmpty(webdavServerURL)) {
-			return webdavServerURL 
-					+ CoreConstants.PUBLIC_PATH + REPOSITORY_ITEXT_PATH 
-					+ getProcessDefinitionId() + "/";
+			return code;
 		}
 
 		return null;
+	}
+
+	public void setDocumentSource(String documentSource) {
+		this.documentSource = documentSource;
 	}
 
 	/**
@@ -302,152 +374,43 @@ public class ITextDocument extends ITextDocumentURI {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public String getPDFName() {
-		String path = getRepositoryURI();
-		if (StringUtil.isEmpty(path)) {
-			path = getBundlePath();
-		}
-
-		if (!StringUtil.isEmpty(path)) {
-			String dateString =  path.substring(
-					getRepositoryURI().lastIndexOf('/') + 1,
-					getRepositoryURI().lastIndexOf('.'));
-			try {
-				Long timeInMillis = Long.valueOf(dateString);
-				if (timeInMillis != null) {
-					return getProcessDefinitionName() + "-" + new Date(timeInMillis) + ".pdf";
-				}
-			} catch (Exception e) {}
-		}
-
-		return getProcessDefinitionName() + "-" + IWTimestamp.RightNow().toSQLDateString() + ".pdf";
+		return IWTimestamp.RightNow().toSQLDateString() + ".pdf";
 	}
 
 	/**
 	 * 
-	 * @return all existing filenames with {@link Date}s in 
-	 * {@link ITextDocumentURI#getRepositoryURI()} directory or 
-	 * {@link Collections#emptyMap()} on failure;
+	 * @return something like /content/files/public/dynamic_resources/itext/{@link ITextDocumentURI#getProcessDefinitionId()}
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
-	public Map<String, String> getRevisions() {
-		TreeMap<String, String> revisions = new TreeMap<String, String>();
-
-		Collection<RepositoryItem> nodes = null;
-		try {
-			nodes = getRepositoryService()
-					.getChildNodesAsRootUser(getITextRepositoryPath());
-		} catch (RepositoryException e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to get files list from directory: '" 
-							+ getITextRepositoryPath() + "';");
+	public String getRepositoryPath() {
+		String webdavServerURL = getRepositoryService().getWebdavServerURL();
+		if (!StringUtil.isEmpty(webdavServerURL)) {
+			return webdavServerURL + REPOSITORY_PATH;
 		}
 
-		if (!ListUtil.isEmpty(nodes)) {
-			for (RepositoryItem node : nodes) {
-				String fileName = node.getNodeName();
-				String timeString = fileName.substring(0, fileName.indexOf(CoreConstants.DOT));
-				Long timeInMillis = Long.valueOf(timeString);
-				revisions.put(
-						new IWTimestamp(timeInMillis).toSQLString(), 
-						"/content" + node.getAbsolutePath());
-			}
-		}
-
-		return revisions.descendingMap();
+		return null;
 	}
 
-	/**
-	 * 
-	 * @return <code>true</code> if {@link ITextDocument#getRevisions()} is not
-	 * empty;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.presentation.bean.DocumentURI#save()
 	 */
-	public boolean isRevisionExist() {
-		return !MapUtil.isEmpty(getRevisions());
-	}
-
-	public void selectedProcessDefinitionIdChange(ValueChangeEvent event) {
-		Object value = event.getNewValue();
-		if (value != null) {
-			setProcessDefinitionId(Long.valueOf(value.toString()));
-			setEntity(getDao().findByProcessDefinition(Long.valueOf(value.toString())));
-
-			if (isUpdatingProcessDefinition()) {
-				closeStreamSilently();
-
-				setId(null);
-				setProcessDefinitionName(null);
-				setRepositoryURI(null);
-				setBundlePath(null);
-				setBundleURL(null);
-				setBundleName(null);
-				setDocumentSource(null);
-				setDocumentStream(null);
-				setBundleDocument(null);
-				setOldProcessDefinitionId(Long.valueOf(value.toString()));
-				setProcessDefinitionUpdated(true);
-			}
-
-			setOldProcessDefinitionId(Long.valueOf(value.toString()));
-		}
-	}
-
-	public void selectedRepositoryURIChange(ValueChangeEvent event) {
- 		Object value = event.getNewValue();
- 		if (!isProcessDefinitionUpdated() && value != null) {
-			setRepositoryURI(value.toString());
- 			if (isUpdatingOldRepositoryURI()) {
- 				closeStreamSilently();
-
- 				setDocumentSource(null);
- 				setDocumentStream(null);
- 	 			setOldRepositoryURI(value.toString());
- 				setRepositoryURIUpdated(true);
- 			}
-
- 			setOldRepositoryURI(value.toString());
- 		}
-	}
-
-	/**
-	 * 
-	 * <p>Handling concurrent modification problem</p>
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
-	 */
-	protected void closeStreamSilently() {
-		/*
-		 * Let's take care of unused stream anymore
-		 */
-		try {
-			if (getDocumentStream() != null) {
-				getDocumentStream().close();
-				setDocumentStream(null);
-			}
-
-			Logger.getLogger(getClass().getName()).log(Level.INFO, 
-					"Stream was closed after using.");
-		} catch (Exception e) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, 
-					"Failed to close stream, cause of: " + e.getMessage());
-		}
-	}
-	
 	@Override
 	public void save() {
 		String fileName = getNewFilename();
 
 		try {
 			if (getRepositoryService().uploadXMLFileAndCreateFoldersFromStringAsRoot(
-					getITextRepositoryPath(), 
+					getRepositoryPath(), 
 					fileName, 
-					getDocumentSource())) {
-				setRepositoryURI(getITextRepositoryPath() + fileName);
+					this.documentSource)) {
+				setRepositoryURI(getRepositoryPath() + fileName);
 				super.save();
 			}
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, 
-					"Failed to save file by path: " + getITextRepositoryPath() + "/" +
+					"Failed to save file by path: " + getRepositoryPath() + "/" +
 							fileName + " Cause of:", e);
 		}
 	}
@@ -509,7 +472,5 @@ public class ITextDocument extends ITextDocumentURI {
 	     * obviously will fail since it's already written with a file and closed.
 	     */
 	    fc.responseComplete();
-
-	    closeStreamSilently();
 	}
 }

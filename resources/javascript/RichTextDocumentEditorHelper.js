@@ -15,6 +15,12 @@ tinyMCE.init({
 });
 
 jQuery(document).ready(function() {
+	RichTextDocumentService.updateTempolarPDF(null, jQuery('textarea[id = "editorForm:sourceCode"]').val(), {
+		callback: function(result) {
+			jQuery("a.windowLink").attr("href", result);
+		}
+	});
+
 	jQuery(".windowLink").fancybox({
 		type:		"iframe",
 		autoSize:	false,

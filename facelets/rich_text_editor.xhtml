@@ -3,7 +3,8 @@
 <div
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:h="http://java.sun.com/jsf/html"
-    xmlns:f="http://java.sun.com/jsf/core">
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets">
 
     <link 
         rel="stylesheet"
@@ -71,75 +72,73 @@
         value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
     <h:form
         id="editorForm">
-        <h:panelGrid
-            columns="2"
-            styleClass="editorTable">
-            <h:panelGroup>
-                <h:outputLabel
-                    for="category"
-                    value="#{localizedStrings['com.idega.block.pdf']['process_definition']}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:selectOneMenu
-                    id="category"
-                    value="#{richTextDocument.processDefinitionId}"
-                    valueChangeListener="#{richTextDocument.selectedProcessDefinitionIdChange}"
-                    onchange="showLoadingMessage('Loading'); submit();">
-                    <f:selectItem
-                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
-                        itemValue="-1"/>
-                    <f:selectItems
-                        value="#{iTextDocumentsService.processDefinitionNames}"/>
-                </h:selectOneMenu>
-            </h:panelGroup>
+        <table
+            class="editorTable">
+            <ui:repeat 
+                id="groups"
+                value="#{documentURIFilterBean.groups}" 
+                var="group"><tr>
+                    <td>
+                        <h:outputLabel
+                            for="typeId"
+                            value="#{group.name}"/>
+                    </td>
+                    <td>
+                        <h:selectOneMenu
+                            id="typeId"
+                            value="#{group.selectedTypeId}"
+                            valueChangeListener="#{group.selectedTypeIdChange}"
+                            onchange="showLoadingMessage('Loading'); submit();"
+                            styleClass="#{group.id}">
+                            <f:selectItem
+                                itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                                noSelectValue="true"/>
+                            <f:selectItems
+                                value="#{group.typesMap}"/>
+                        </h:selectOneMenu>
+                    </td>
+                </tr>
+            </ui:repeat>
             <h:panelGroup
-                rendered="#{richTextDocument.revisionExist}">
-                <h:outputLabel
-                    for="revision"
-                    value="#{localizedStrings['com.idega.block.pdf']['revision']}"/>
+                rendered="#{richTextDocument.multiple}">
+            <tr>
+                <td>
+                    <h:outputLabel
+                        for="prm_id"
+                        value="#{localizedStrings['com.idega.block.pdf']['repository_uri']}"/>
+                </td>
+                <td>
+                    <h:selectOneMenu
+                        id="id"
+                        value="#{richTextDocument.id}"
+                        valueChangeListener="#{richTextDocument.selectedIdChange}"
+                        onchange="showLoadingMessage('Loading'); submit();">
+                        <f:selectItem
+                            itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
+                            noSelectValue="true"/>
+                        <f:selectItems
+                            value="#{richTextDocument.entitiesMap}"/>
+                    </h:selectOneMenu>
+                </td>
+            </tr>
             </h:panelGroup>
-            <h:panelGroup
-                rendered="#{richTextDocument.revisionExist}">
-                <h:selectOneMenu
-                    id="revision"
-                    value="#{richTextDocument.repositoryURI}"
-                    valueChangeListener="#{richTextDocument.selectedRepositoryURIChange}"
-                    onchange="showLoadingMessage('Loading'); submit();">
-                    <f:selectItem
-                        itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
-                        itemValue="-1"/>
-                    <f:selectItems
-                        value="#{richTextDocument.revisions}"/>
-                </h:selectOneMenu>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputLabel
-                    for="helpText"
-                    value="#{localizedStrings['com.idega.block.pdf']['tags']}"/>
-            </h:panelGroup>
-            <h:panelGroup>
-                <h:outputText 
-                    id="helpText" 
-                    value="${'${dateFrom}, ${fisheryName}, ${fisheryAddress}, ${fishingAreaName}, ${fisheryPersonalID}, ${fisheryPostal}, ${shipID}, ${shipName}'}"/>
-            </h:panelGroup>
-        </h:panelGrid>
-        <h:panelGroup>
-            <h:inputTextarea
-                id="sourceCode"
-                value="#{richTextDocument.documentSource}"
-                styleClass="sourceEditorArea"/>
-        </h:panelGroup>
-        <h:panelGroup>
-            <h:inputHidden
-                id="prm_id"
-                value="#{richTextDocument.id}"/>
-            <h:inputHidden
-                id="oldProcessDefinitionId"
-                value="#{richTextDocument.oldProcessDefinitionId}"/>
-            <h:inputHidden
-                id="oldRepositoryURI"
-                value="#{richTextDocument.oldRepositoryURI}"/>
-        </h:panelGroup>
+            <tr>
+                <td>
+                    <h:outputLabel
+                        for="helpText"
+                        value="#{localizedStrings['com.idega.block.pdf']['tags']}"/>
+                </td>
+                <td>
+                    <h:outputText 
+                        id="helpText" 
+                        value="${'${dateFrom}, ${fisheryName}, ${fisheryAddress}, ${fishingAreaName}, ${fisheryPersonalID}, ${fisheryPostal}, ${shipID}, ${shipName}'}"/>
+                </td>
+            </tr>
+        </table>
+        <h:inputTextarea
+            id="sourceCode"
+            value="#{richTextDocument.documentSource}"
+            styleClass="sourceEditorArea"/>
         <h:panelGroup>
             <h:commandButton
                 id="saveButton"
