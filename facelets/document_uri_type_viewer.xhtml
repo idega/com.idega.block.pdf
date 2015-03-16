@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<div
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+	<link
+		rel="stylesheet"
+		type="text/css"
+		href="#{iwResourceResolver['com.idega.block.pdf']['style/viewer.css']}"/>
+
+    <!-- jQuery -->
+	<script 
+		type="text/javascript" 
+		src="http://code.jquery.com/jquery-latest.min.js"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/jquery-plugins/jquery.easing.js']}"/>
+
+    <!-- Fancybox -->
+    <link 
+        rel="stylesheet"
+        type="text/css"
+        href="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.css']}"/>
+	<script 
+		type="text/javascript"
+		src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/fancybox.js']}"/>
+	<script 
+		type="text/javascript"
+		src="#{iwResourceResolver['com.idega.block.web2.0']['javascript/fancybox/2.1.4/helpers/jquery.fancybox-media.js']}"/>
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.pdf']['javascript/viewer.js']}"/>
+
+    <!-- DWR -->
+    <script
+        type="text/javascript"
+        src="/dwr/engine.js" />
+    <script
+        type="text/javascript"
+        src="/dwr/util.js" />
+    <script
+        type="text/javascript"
+        src="/dwr/interface/DocumentURITypeDAO.js" />
+
+    <!-- Helper -->
+    <script 
+        type="text/javascript"
+        src="#{iwResourceResolver['com.idega.block.pdf']['javascript/DocumentURITypeViewerHelper.js']}"/>
+	<div
+        class="overflow">
+        <h:dataTable
+    		id="editorTable"
+    		value="#{documentURITypeService.documentURITypes}"
+    		var="type"
+    		styleClass="table"
+    		rowClasses="tableRow"
+            columnClasses="text,text,text,button_column,button_column,hidden">
+    		<h:column>
+    			<f:facet
+    				name="header">
+    				<h:panelGroup
+    					layout="block"
+    					styleClass="header">
+    					<h:outputText
+    						value="#{localizedStrings['com.idega.block.pdf']['external_id']}"/>
+    				</h:panelGroup>
+    			</f:facet>
+    			<h:outputText
+    				value="#{type.externalId}"/>
+    		</h:column>
+            <h:column>
+                <f:facet
+                    name="header">
+                    <h:panelGroup
+                        layout="block"
+                        styleClass="header">
+                        <h:outputText
+                            value="#{localizedStrings['com.idega.block.pdf']['name']}"/>
+                    </h:panelGroup>
+                </f:facet>
+                <h:outputText
+                    value="#{type.name}"/>
+            </h:column>
+            <h:column>
+                <f:facet
+                    name="header">
+                    <h:panelGroup
+                        layout="block"
+                        styleClass="header">
+                        <h:outputText
+                            value="#{localizedStrings['com.idega.block.pdf']['group']}"/>
+                    </h:panelGroup>
+                </f:facet>
+                <h:outputText
+                    value="#{type.groupName}"/>
+            </h:column>
+    		<h:column>
+    			<f:facet
+    				name="header">
+    				<h:panelGroup
+    					layout="block"
+    					styleClass="header">
+    					<h:outputText
+    						value="#{localizedStrings['com.idega.block.pdf']['edit']}"/>
+    				</h:panelGroup>
+    			</f:facet>
+    			<h:panelGroup
+    				layout="block">
+    				<h:outputLink
+    					styleClass="windowLink"
+    					value="#{type.editorLink}">
+    					<h:graphicImage
+    						value="#{iwResourceResolver['com.idega.block.pdf']['style/images/edit.png']}"
+    						alt="#{localizedStrings['com.idega.block.pdf']['edit']}"/>
+    				</h:outputLink>
+    			</h:panelGroup>
+    		</h:column>
+    		<h:column>
+    			<f:facet 
+    				name="header">
+    				<h:panelGroup
+    					layout="block"
+    					styleClass="header">
+    					<h:outputText
+    						value="#{localizedStrings['com.idega.block.pdf']['delete']}"/>
+    				</h:panelGroup>
+    			</f:facet>
+    			<h:panelGroup
+    				layout="block">
+    				<h:graphicImage
+    					url="#{IWURIResource.res['/idegaweb/bundles/com.idega.block.pdf.bundle/resources/style/images/delete.png']}"
+                        onclick="DocumentURITypeViewerHelper.remove(this.parentNode.parentNode)"
+    					alt="#{localizedStrings['com.idega.block.pdf']['delete']}"/>
+    			</h:panelGroup>
+    		</h:column>
+            <h:column>
+                <h:inputHidden
+                    id="primaryKey"
+                    value="#{type.id}"/>
+            </h:column>
+    	</h:dataTable>
+    </div>
+	<h:panelGroup
+		layout="block">
+		<h:outputLink
+			styleClass="windowLink"
+			value="#{documentURITypeService.editorLink}">
+			<input
+				value="#{localizedStrings['com.idega.block.pdf']['add']}"
+				type="button"
+				class="button"/>
+		</h:outputLink>
+		<h:outputLink
+			styleClass="homepageLink"
+			value="#{documentURITypeService.homepageLink}">
+			<input
+				value="#{localizedStrings['com.idega.block.pdf']['back']}"
+				type="button"/>
+		</h:outputLink>
+	</h:panelGroup>
+</div>
