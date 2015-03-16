@@ -7,7 +7,7 @@ td > input[type="text"], td > select {
 	width: 100%;
 }
 
-td > input[type="submit"] {
+td > input[type="submit"], input[type="submit"], a.windowLink {
 	float: right;
 	margin-left: 5px;
 	margin-top: 12pt;

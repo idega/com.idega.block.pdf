@@ -32,10 +32,29 @@ table.table td {
     font-size: 10px;
 }
 
+.hidden {
+	width: 1px;
+}
+
 tr.tableRow:HOVER {
 	background-color: #EFEFEF;	
 }
 
+.button_column {
+	width: 20px;
+}
+
+td.button_column > img {
+	float: right;
+	margin: 2px;
+}
+
 a.homepageLink, a.windowLink {
 	text-decoration: none;
+	float: right;
+	margin: 2px;
+}
+
+.text {
+	vertical-align: middle;
 }

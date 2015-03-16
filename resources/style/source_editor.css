@@ -12,13 +12,6 @@ label {
 	vertical-align: top;
 }
 
-a.windowLink, input[type="submit"] {
-	float: right;
-	margin-right: 5px;
-	margin-top: 5px;
-	margin-bottom: 5px;
-}
-
 #content iframe {
 	width: 100% !important;
 	height: 294mm !important;

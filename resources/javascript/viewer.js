@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
 		beforeShow:	function () {
 			var iframe = jQuery(".fancybox-iframe");
 			if (iframe != null && iframe.length > 0) {
-				this.height = jQuery(iframe).contents().find('table.editorTable').height() + 30;
+				this.height = jQuery(iframe).contents().find('table.editorTable').height() + 50;
 				this.width = jQuery(iframe).contents().find('table.editorTable').width() + 25;
 
 				jQuery(iframe).load(function() {
