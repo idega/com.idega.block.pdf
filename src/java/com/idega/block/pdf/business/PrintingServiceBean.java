@@ -9,25 +9,34 @@
  */
 package com.idega.block.pdf.business;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.logging.Level;
 
+import org.apache.commons.io.IOUtils;
 import org.ujac.print.DocumentHandlerException;
 import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
 import org.ujac.util.io.HttpResourceLoader;
 
+import com.idega.block.pdf.data.DocumentURIEntity;
 import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
-import com.idega.io.MemoryFileBuffer;
-import com.idega.io.MemoryOutputStream;
 import com.idega.servlet.filter.IWBundleResourceFilter;
+import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 
 /**
@@ -63,29 +72,158 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 * @see com.idega.block.pdf.business.PrintingService#print(java.io.InputStream, java.lang.String)
 	 */
 	@Override
-	public void print(
+	public void printIText(
 			InputStream inputStream, 
 			OutputStream outputStream, 
-			String documentResourcesFolder
-			) throws IOException, DocumentHandlerException {
-		if (inputStream != null) {
+			String documentResourcesFolder, 
+			Map<String, String> expressions
+			) throws DocumentHandlerException, IOException {
+		if (inputStream != null && outputStream != null) {
 			if (StringUtil.isEmpty(documentResourcesFolder)) {
 				documentResourcesFolder = getIWApplicationContext().getDomain().getURL() + "content/files/public/";
 			}
 
-			if (outputStream == null) {
-				MemoryFileBuffer memoryBuffer = new MemoryFileBuffer();
-				memoryBuffer.setMimeType("application/pdf");
-				outputStream = new MemoryOutputStream(memoryBuffer);
+			DocumentPrinter documentPrinter = new DocumentPrinter();
+			if (!MapUtil.isEmpty(expressions)) {
+				documentPrinter.setProperties(expressions);
 			}
 
-			DocumentPrinter documentPrinter = new DocumentPrinter();
 			documentPrinter.setTemplateSource(inputStream);
 			documentPrinter.setResourceLoader(new HttpResourceLoader(documentResourcesFolder));
 			documentPrinter.printDocument(outputStream);
 		}
 	}
-	
+
+	@Override
+	public ByteArrayOutputStream printIText(
+			InputStream inputStream, 
+			String documentResourcesFolder, 
+			Map<String, String> expressions
+			) throws DocumentHandlerException, IOException {
+		ByteArrayOutputStream outputStream = null;
+		if (inputStream != null) {
+			try {
+				outputStream = new ByteArrayOutputStream(inputStream.available());
+			} catch (IOException e) {
+				outputStream = new ByteArrayOutputStream();
+			}
+
+			printIText(inputStream, outputStream, documentResourcesFolder, expressions);
+		}
+
+		return outputStream;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(java.io.InputStream, java.io.OutputStream)
+	 */
+	@Override
+	public void printXHTML(InputStream inputStream, OutputStream outputStream) {
+		if (inputStream != null && outputStream != null) {
+			Document document = new Document();
+		    PdfWriter writer = null;
+			try {
+				writer = PdfWriter.getInstance(document, outputStream);
+			} catch (DocumentException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to initialize " + PdfWriter.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+
+			document.open();
+
+		    try {
+				XMLWorkerHelper.getInstance().parseXHtml(writer, document, inputStream);
+			} catch (IOException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to parse XHTML to PDF cause of:", e);
+			}
+
+		    document.close();
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(java.io.InputStream, java.io.OutputStream)
+	 */
+	@Override
+	public ByteArrayOutputStream printXHTML(InputStream inputStream) {
+		ByteArrayOutputStream outputStream = null;
+		if (inputStream != null) {
+			try {
+				outputStream = new ByteArrayOutputStream(inputStream.available());
+			} catch (IOException e) {
+				outputStream = new ByteArrayOutputStream();
+			}
+
+			printXHTML(inputStream, outputStream);
+		}
+
+		return outputStream;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(java.lang.String)
+	 */
+	@Override
+	public ByteArrayOutputStream printXHTML(String source) {
+		if (!StringUtil.isEmpty(source)) {
+			return printXHTML(IOUtils.toInputStream(source));
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(java.lang.String, java.util.Map)
+	 */
+	@Override
+	public ByteArrayOutputStream printXHTML(String source, 
+			Map<String, String> properties) {
+		if (!StringUtil.isEmpty(source)) {
+			if (!MapUtil.isEmpty(properties)) {
+				for (Entry<String, String> property : properties.entrySet()) {
+					source = StringHandler.replace(source, 
+							"${" + property.getKey() + "}", 
+							property.getValue());
+				}
+			}
+
+			return printXHTML(IOUtils.toInputStream(source));
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(com.idega.block.pdf.data.DocumentURIEntity, java.util.Map)
+	 */
+	@Override
+	public ByteArrayOutputStream printXHTML(
+			DocumentURIEntity entity, 
+			Map<String, String> properties) {
+		if (entity != null) {
+			try {
+				InputStream inputStream = getRepositoryService()
+						.getInputStreamAsRoot(entity.getRepositoryURI());
+				if (inputStream != null) {
+					return printXHTML(IOUtils.toString(inputStream), properties);
+				}
+			} catch (Exception e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get content of file: '" + 
+								entity.getRepositoryURI() + "' cause of: ", e);
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Creates a pdf by transforming an xml template. The given PrintingContext
 	 * supplies the necessary resources for the generation
