@@ -100,6 +100,7 @@ import javax.persistence.Table;
  *
  * @version 1.0.0 2015 saus. 27
  * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+ * @deprecated this entity and data access object is not used at the moment.
  */
 @Entity
 @Table(name=ITextDocumentURIEntity.ENTITY_NAME)
