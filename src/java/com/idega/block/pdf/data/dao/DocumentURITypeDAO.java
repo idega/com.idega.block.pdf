@@ -2,6 +2,7 @@ package com.idega.block.pdf.data.dao;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.idega.block.pdf.data.DocumentURIGroupEntity;
@@ -45,18 +46,18 @@ public interface DocumentURITypeDAO extends GenericDao {
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param ids
-	 * @return
+	 * @param ids is {@link Collection} of {@link DocumentURITypeEntity#getId()}, 
+	 * not <code>null</code>.
+	 * @return entities or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURITypeEntity> findByIds(Collection<Long> ids);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param externalIds
-	 * @return
+	 * @param externalIds is {@link Collection} of id's defined in remote system, 
+	 * not <code>null</code>
+	 * @return entities or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds);
@@ -102,8 +103,8 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * new entity is created when <code>null</code>;
 	 * @param name is {@link DocumentURITypeEntity#getName()}, 
 	 * skipped if <code>null</code>;
-	 * @param externalId TODO
-	 * @param group TODO
+	 * @param externalId is defined in remote system, skipped if <code>null</code>;
+	 * @param group
 	 * @param clazz is {@link Type} or sub-type of {@link DocumentURITypeEntity},
 	 * not <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
@@ -122,7 +123,7 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * new entity is created when <code>null</code>;
 	 * @param name is {@link DocumentURITypeEntity#getName()}, 
 	 * skipped if <code>null</code>;
-	 * @param externalId TODO
+	 * @param externalId is defined in remote system, skipped if <code>null</code>
 	 * @param groupId is id of {@link DocumentURIGroupEntity}, 
 	 * skipped if <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
