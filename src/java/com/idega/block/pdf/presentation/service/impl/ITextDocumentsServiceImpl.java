@@ -343,9 +343,9 @@ public class ITextDocumentsServiceImpl extends DefaultSpringBean implements ITex
 			MemoryOutputStream outputStream = new MemoryOutputStream(new MemoryFileBuffer());
 			String filename = "license-" + System.currentTimeMillis() + ".pdf"; 
 			try {
-				getPrintingService().print(
+				getPrintingService().printIText(
 						IOUtils.toInputStream(source), 
-						outputStream, null);
+						outputStream, null, null);
 				if (getRepositoryService().uploadFile(
 						CoreConstants.SLASH + PDF_RESOURCE_URL, 
 						filename, 

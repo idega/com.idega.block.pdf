@@ -461,7 +461,7 @@ public class ITextDocument extends DocumentURI {
 	     * OutputStream the usual way.
 	     */
 	    try {
-			getPrintingService().print(getDocumentStream(), response.getOutputStream(), null);
+			getPrintingService().printIText(getDocumentStream(), response.getOutputStream(), null, null);
 		} catch (Exception e) {
 			java.util.logging.Logger.getLogger(getClass().getName()).log(
 					Level.WARNING, "Failed to create PDF document, cause of:", e);

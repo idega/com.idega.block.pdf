@@ -83,11 +83,9 @@
 package com.idega.block.pdf.presentation.service;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.apache.commons.io.IOUtils;
 import org.directwebremoting.annotations.Param;
 import org.directwebremoting.annotations.RemoteMethod;
 import org.directwebremoting.annotations.RemoteProxy;
@@ -97,16 +95,13 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.idega.block.pdf.business.PrintingService;
+import com.idega.business.IBOLookup;
+import com.idega.business.IBOLookupException;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.file.util.MimeType;
-import com.idega.io.MemoryFileBuffer;
-import com.idega.io.MemoryOutputStream;
 import com.idega.util.CoreConstants;
 import com.idega.util.StringUtil;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
 
 /**
  * <p>TODO</p>
@@ -145,50 +140,50 @@ public class RichTextDocumentService extends DefaultSpringBean {
 	public static final String JAVASCRIPT_CLASS_NAME = "RichTextDocumentService";
 
 	static final String PDF_RESOURCE_URL = "content/files/public/tmp/";
-	
+
+	private PrintingService printingService;
+
+	protected PrintingService getPrintingService() {
+		if (this.printingService == null) {
+			try {
+				this.printingService = IBOLookup.getServiceInstance(
+						getApplication().getIWApplicationContext(), 
+						PrintingService.class);
+			} catch (IBOLookupException e) {
+				getLogger().log(Level.WARNING, 
+						"Failed to get " + PrintingService.class.getSimpleName() + 
+						" cause of: ", e);
+			}
+		}
+
+		return this.printingService;
+	}
+
 	@RemoteMethod
 	public String updateTempolarPDF(String processDefinitionId, String source) {
 		if (!StringUtil.isEmpty(source)) {
-			
 			if (source.contains("data-mce-bogus")) {
 				source = source.replaceAll("<br data-mce-bogus=\"1\">", "");
 			}
 
-			Document document = new Document();
+			String filename = "license-" + System.currentTimeMillis() + ".pdf";
 
-			MemoryOutputStream outputStream = new MemoryOutputStream(new MemoryFileBuffer());
-		    PdfWriter writer = null;
-			try {
-				writer = PdfWriter.getInstance(document, 
-						outputStream);
-			} catch (DocumentException e) {
-				Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e);
-			}
-
-		    document.open();
-
-		    try {
-				XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-						IOUtils.toInputStream(source));
-			} catch (IOException e1) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(Level.WARNING, "", e1);
-			}
-
-		    document.close();
-
-			String filename = "license-" + System.currentTimeMillis() + ".pdf"; 
-			try {
-				if (getRepositoryService().uploadFile(
-						CoreConstants.SLASH + PDF_RESOURCE_URL, 
-						filename, 
-						MimeType.pdf.toString(), 
-						new ByteArrayInputStream(outputStream.getBuffer().buffer()))) {
-					return getApplication().getIWApplicationContext().getDomain().getURL() 
-							+ PDF_RESOURCE_URL + filename;
+			ByteArrayOutputStream outputStream = getPrintingService()
+					.printXHTML(source);
+			if (outputStream != null) {
+				try {
+					if (getRepositoryService().uploadFile(
+							CoreConstants.SLASH + PDF_RESOURCE_URL, 
+							filename, 
+							MimeType.pdf.toString(), 
+							new ByteArrayInputStream(outputStream.toByteArray()))) {
+						return getApplication().getIWApplicationContext().getDomain().getURL() 
+								+ PDF_RESOURCE_URL + filename;
+					}
+				} catch (Exception e) {
+					getLogger().log(Level.WARNING, 
+							"Failed to create PDF document, cause of:", e);
 				}
-			} catch (Exception e) {
-				java.util.logging.Logger.getLogger(getClass().getName()).log(
-						Level.WARNING, "Failed to create PDF document, cause of:", e);
 			}
 		}
 
