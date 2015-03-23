@@ -54,6 +54,15 @@ public interface DocumentURITypeDAO extends GenericDao {
 
 	/**
 	 * 
+	 * <p>TODO</p>
+	 * @param externalIds
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds);
+
+	/**
+	 * 
 	 * @param name is {@link DocumentURITypeEntity#getName()}, not <code>null</code>;
 	 * @param clazz is {@link Type} or sub-type of {@link DocumentURITypeEntity},
 	 * not <code>null</code>;

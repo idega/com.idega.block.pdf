@@ -248,6 +248,70 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 		return Collections.emptyList();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURIDAO#findByTypes(java.util.Collection)
+	 */
+	@Override
+	public List<DocumentURIEntity> findByTypes(Collection<DocumentURITypeEntity> types) {
+		if (!ListUtil.isEmpty(types)) {
+			ArrayList<Long> ids = new ArrayList<Long>();
+			for (DocumentURITypeEntity type : types) {
+				ids.add(type.getId());
+			}
+
+			return findByTypeIds(ids);
+		}
+
+		return Collections.emptyList();
+	}
+
+	/**
+	 * 
+	 * <p>Avoiding {@link Collection#containsAll(Collection)} trap</p>
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected boolean containsAll(
+			Collection<DocumentURITypeEntity> container, 
+			Collection<DocumentURITypeEntity> elements) {
+		if (!ListUtil.isEmpty(container) && !ListUtil.isEmpty(elements)) {
+			ArrayList<Long> containerIds = new ArrayList<Long>();
+			for (DocumentURITypeEntity type : container) {
+				containerIds.add(type.getId());
+			}
+
+			ArrayList<Long> elementsIds = new ArrayList<Long>();
+			for (DocumentURITypeEntity type : elements) {
+				elementsIds.add(type.getId());
+			}
+
+			return containerIds.containsAll(elementsIds);
+		}
+
+		return false;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURIDAO#findByTypesStrict(java.util.Collection)
+	 */
+	@Override
+	public List<DocumentURIEntity> findByTypesStrict(
+			Collection<DocumentURITypeEntity> types) {
+		List<DocumentURIEntity> filteredEntities = new ArrayList<DocumentURIEntity>();
+
+		if (!ListUtil.isEmpty(types)) {
+			List<DocumentURIEntity> entities = findByTypes(types);
+			for (DocumentURIEntity entity : entities) {
+				if (containsAll(entity.getTypes(), types)) {
+					filteredEntities.add(entity);
+				}
+			}
+		}
+
+		return filteredEntities;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.idega.block.pdf.data.dao.DocumentURIDAO#findAll()
 	 */

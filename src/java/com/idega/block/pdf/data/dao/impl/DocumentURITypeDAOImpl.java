@@ -188,6 +188,19 @@ public class DocumentURITypeDAOImpl extends GenericDaoImpl implements
 		return null;
 	}
 
+	@Override
+	public List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds) {
+		if (!ListUtil.isEmpty(externalIds)) {
+			return getResultList(
+					DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS,
+					DocumentURITypeEntity.class, 
+					new com.idega.core.persistence.Param(
+							DocumentURITypeEntity.externalIdProp, externalIds));
+		}
+
+		return null;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * @see com.idega.block.pdf.data.dao.DocumentURITypeDAO#findByName(java.lang.String)

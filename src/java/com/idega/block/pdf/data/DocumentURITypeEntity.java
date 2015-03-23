@@ -125,6 +125,10 @@ import org.directwebremoting.convert.BeanConverter;
 			query = "FROM DocumentURITypeEntity a WHERE a.id IN (:" + 
 					DocumentURITypeEntity.idProp + ")"),
 	@NamedQuery(
+			name = DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS, 
+			query = "FROM DocumentURITypeEntity a WHERE a.externalId IN (:" + 
+					DocumentURITypeEntity.externalIdProp + ")"),
+	@NamedQuery(
 			name = DocumentURITypeEntity.FIND_BY_NAME, 
 			query = "FROM DocumentURITypeEntity a WHERE a.name = :" + 
 					DocumentURITypeEntity.nameProp),
@@ -145,6 +149,7 @@ public class DocumentURITypeEntity implements Serializable {
 
 	public static final String FIND_BY_ID = "documentURITypeEntity.findById";
 	public static final String FIND_BY_IDS = "documentURITypeEntity.findByIds";
+	public static final String FIND_BY_EXTERNAL_IDS = "documentURITypeEntity.findByExternalIds";
 	public static final String FIND_BY_NAME = "documentURITypeEntity.findByName";
 	public static final String FIND_ALL = "documentURITypeEntity.findAll";
 
@@ -161,7 +166,7 @@ public class DocumentURITypeEntity implements Serializable {
 	private String name;
 
 	public static final String COLUMN_EXTERNAL_ID = "external_id";
-	public static final String externalIdProp = "id";
+	public static final String externalIdProp = "externalId";
 	@RemoteProperty
 	@Column(name = COLUMN_EXTERNAL_ID)
 	private String externalId;
@@ -215,5 +220,10 @@ public class DocumentURITypeEntity implements Serializable {
 
 	public void setDocumentURIs(List<DocumentURIEntity> documentURIs) {
 		this.documentURIs = documentURIs;
+	}
+
+	@Override
+	public String toString() {
+		return "getExternalId(): " + getExternalId() + ", getName() :" + getName();
 	}
 }

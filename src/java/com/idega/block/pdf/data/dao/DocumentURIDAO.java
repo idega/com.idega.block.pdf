@@ -83,11 +83,13 @@
 package com.idega.block.pdf.data.dao;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import com.idega.block.pdf.data.DocumentURIEntity;
 import com.idega.block.pdf.data.DocumentURITypeEntity;
 import com.idega.core.persistence.GenericDao;
+import com.idega.idegaweb.IWBundle;
 
 /**
  * <p>Data access object for {@link DocumentURIEntity}</p>
@@ -123,21 +125,41 @@ public interface DocumentURIDAO extends GenericDao {
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param ids
-	 * @return
+	 * @param ids is {@link Collection} of {@link DocumentURIEntity#getId()}, 
+	 * not <code>null</code>.
+	 * @return entities by primary keys or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURIEntity> findByIds(Collection<Long> ids);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param typeIds
-	 * @return
+	 * @param typeIds is {@link Collection} of {@link DocumentURITypeEntity#getId()}, 
+	 * not <code>null</code>;
+	 * @return entities which are related to given {@link DocumentURITypeEntity}s 
+	 * or {@link Collections#emptyList()} on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURIEntity> findByTypeIds(Collection<Long> typeIds);
+
+	/**
+	 * 
+	 * @param types to search by, not <code>null</code>;
+	 * @return entities which are related to given {@link DocumentURITypeEntity}s 
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	List<DocumentURIEntity> findByTypes(Collection<DocumentURITypeEntity> types);
+
+	/**
+	 * 
+	 * <p>Selects entities having all required types, not one only</p>
+	 * @param types to search by, not <code>null</code>;
+	 * @return entities which are related to given {@link DocumentURITypeEntity}s 
+	 * or {@link Collections#emptyList()} on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	List<DocumentURIEntity> findByTypesStrict(Collection<DocumentURITypeEntity> types);
 
 	/**
 	 *
@@ -158,12 +180,14 @@ public interface DocumentURIDAO extends GenericDao {
 	 * 
 	 * @param id is {@link DocumentURIEntity#getId()} or <code>null</code> 
 	 * when creating new entity;
-	 * @param bundlePath TODO
+	 * @param bundlePath is the path in the {@link IWBundle}, 
+	 * skipped if <code>null</code>;
 	 * @param bundleURL is id of fish type in remote system, 
 	 * not <code>null</code> when creating new entity;
 	 * @param repositoryURI of type in remote system, not <code>null</code> when 
 	 * creating new entity;
-	 * @param types TODO
+	 * @param types to filter {@link DocumentURIEntity}s by, 
+	 * skipped if <code>null</code>;
 	 * @param clazz is type of entity or it's derivative, 
 	 * not <code>null</code> when creating new entity;
 	 * @return created/updated entity or <code>null</code> on failure;
@@ -179,13 +203,17 @@ public interface DocumentURIDAO extends GenericDao {
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param id
-	 * @param bundlePath
-	 * @param bundleURL
-	 * @param repositoryURI
-	 * @param types
-	 * @return
+	 * @param id is {@link DocumentURIEntity#getId()} or <code>null</code> 
+	 * when creating new entity;
+	 * @param bundlePath is the path in the {@link IWBundle}, 
+	 * skipped if <code>null</code>;
+	 * @param bundleURL is id of fish type in remote system, 
+	 * not <code>null</code> when creating new entity;
+	 * @param repositoryURI of type in remote system, not <code>null</code> when 
+	 * creating new entity;
+	 * @param types to filter {@link DocumentURIEntity}s by, 
+	 * skipped if <code>null</code>;
+	 * @return created/updated entity or <code>null</code> on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	DocumentURIEntity update(
@@ -197,16 +225,16 @@ public interface DocumentURIDAO extends GenericDao {
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param entity
+	 * <p>Removes entity</p>
+	 * @param entity to remove, not <code>null</code>;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	void remove(DocumentURIEntity entity);
 
 	/**
 	 * 
-	 * <p>TODO</p>
-	 * @param id
+	 * <p>Removes entity</p>
+	 * @param id is {@link DocumentURIEntity#getId()}, not <code>null</code>;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	void remove(Long id);
