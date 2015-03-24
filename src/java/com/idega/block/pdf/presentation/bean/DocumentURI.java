@@ -92,7 +92,6 @@ import javax.faces.event.ValueChangeEvent;
 
 import com.idega.block.pdf.data.DocumentURIEntity;
 import com.idega.block.pdf.data.DocumentURITypeEntity;
-import com.idega.block.pdf.data.ITextDocumentURIEntity;
 import com.idega.block.pdf.data.dao.DocumentURIDAO;
 import com.idega.block.pdf.presentation.service.DocumentURIGroupService;
 import com.idega.faces.presentation.bean.ManagedBean;
@@ -194,7 +193,7 @@ public class DocumentURI extends ManagedBean<DocumentURIEntity> {
 	/**
 	 * 
 	 * @return extracted {@link IWBundle#getBundleIdentifier()} from
-	 * {@link ITextDocumentURIEntity#getBundlePath()} or <code>null</code>
+	 * {@link DocumentURIEntity#getBundlePath()} or <code>null</code>
 	 * on failure;
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
@@ -215,7 +214,7 @@ public class DocumentURI extends ManagedBean<DocumentURIEntity> {
 
 	/**
 	 * 
-	 * @return {@link ITextDocumentURIEntity#getBundleURL()} + {@link ITextDocumentURIEntity#getBundlePath()}
+	 * @return {@link DocumentURIEntity#getBundleURL()} + {@link DocumentURIEntity#getBundlePath()}
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public String getBundleURI() {
@@ -228,7 +227,7 @@ public class DocumentURI extends ManagedBean<DocumentURIEntity> {
 
 	/**
 	 * 
-	 * @return {@link ITextDocumentURIEntity#getRepositoryURI()};
+	 * @return {@link DocumentURIEntity#getRepositoryURI()};
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	public String getRepositoryURI() {

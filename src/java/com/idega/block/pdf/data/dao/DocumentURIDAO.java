@@ -162,6 +162,17 @@ public interface DocumentURIDAO extends GenericDao {
 	List<DocumentURIEntity> findByTypesStrict(Collection<DocumentURITypeEntity> types);
 
 	/**
+	 * 
+	 * @param types to filter by, not <code>null</code>;
+	 * @return  newest created {@link DocumentURIEntity} for given 
+	 * {@link DocumentURITypeEntity}s or {@link Collections#emptyList()}
+	 * on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	Collection<DocumentURIEntity> findNewestByTypes(
+			Collection<DocumentURITypeEntity> types);
+
+	/**
 	 *
 	 * @return all {@link DocumentURIEntity}s, existing in database.
 	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>

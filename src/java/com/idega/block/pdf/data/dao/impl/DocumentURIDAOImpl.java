@@ -85,8 +85,12 @@ package com.idega.block.pdf.data.dao.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 import java.util.logging.Level;
 
 import org.directwebremoting.annotations.RemoteProxy;
@@ -102,7 +106,6 @@ import com.idega.block.pdf.data.DocumentURIEntity;
 import com.idega.block.pdf.data.DocumentURITypeEntity;
 import com.idega.block.pdf.data.dao.DocumentURIDAO;
 import com.idega.block.pdf.data.dao.DocumentURITypeDAO;
-import com.idega.block.pdf.data.dao.ITextDocumentURIDAO;
 import com.idega.core.persistence.Param;
 import com.idega.core.persistence.impl.GenericDaoImpl;
 import com.idega.data.SimpleQuerier;
@@ -147,23 +150,12 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 	@Autowired
 	private DocumentURITypeDAO documentURITypeDAO;
 
-	@Autowired
-	private ITextDocumentURIDAO textDocumentURIDAO;
-
 	protected DocumentURITypeDAO getDocumentURITypeDAO() {
 		if (this.documentURITypeDAO == null) {
 			ELUtil.getInstance().autowire(this);
 		}
 
 		return this.documentURITypeDAO;
-	}
-
-	protected ITextDocumentURIDAO getITextDocumentURIDAO() {
-		if (this.textDocumentURIDAO == null) {
-			ELUtil.getInstance().autowire(this);
-		}
-
-		return this.textDocumentURIDAO;
 	}
 
 	/* (non-Javadoc) 
@@ -310,6 +302,79 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 		}
 
 		return filteredEntities;
+	}
+
+	/**
+	 * 
+	 * @param entities to filter, not <code>null</code>;
+	 * @param types to filter by, not <code>null</code>;
+	 * @return filtered entities with exact given types;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected List<DocumentURIEntity> getEntitiesByExactTypes(
+			Collection<DocumentURIEntity> entities, 
+			Collection<DocumentURITypeEntity> types) {
+		ArrayList<DocumentURIEntity> filteredEntities = new ArrayList<DocumentURIEntity>();
+
+		if (!ListUtil.isEmpty(types) && !ListUtil.isEmpty(entities)) {
+			for (DocumentURIEntity entity: entities) {
+				if (containsAll(entity.getTypes(), types) && 
+						containsAll(types, entity.getTypes())) {
+					filteredEntities.add(entity);
+				}
+			}
+		}
+
+		return filteredEntities;
+	}
+
+	/**
+	 * 
+	 * @param entities to sort, not <code>null</code>;
+	 * @return entities sorted by time in milliseconds descending, when
+	 * {@link DocumentURIEntity#getRepositoryURI()} has name of creation date;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected Map<Long, DocumentURIEntity> sortByTime(
+			Collection<DocumentURIEntity> entities) {
+		TreeMap<Long, DocumentURIEntity> map = new TreeMap<Long, DocumentURIEntity>();
+
+		if (!ListUtil.isEmpty(entities)) {
+			for (DocumentURIEntity entity: entities) {
+				String uri = entity.getRepositoryURI();
+				
+				try {
+					uri = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
+					Long time = Long.valueOf(uri);
+					map.put(time, entity);
+				} catch (Exception e) {
+					getLogger().info("Can't convert word: '" + uri + "' to long");
+				}
+			}
+		}
+
+		return map.descendingMap();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURIDAO#findNewestByTypes(java.util.Collection)
+	 */
+	@Override
+	public Collection<DocumentURIEntity> findNewestByTypes(
+			Collection<DocumentURITypeEntity> types) {
+		HashMap<Long, DocumentURIEntity> filteredEntities = new HashMap<Long, DocumentURIEntity>();
+
+		List<DocumentURIEntity> entities = findByTypesStrict(types);
+		for (DocumentURIEntity entity : entities) {
+			List<DocumentURIEntity> entitiesByTypes = getEntitiesByExactTypes(
+					entities, entity.getTypes());
+			Map<Long, DocumentURIEntity> sortedEntities = sortByTime(entitiesByTypes);
+			Entry<Long, DocumentURIEntity> entry = sortedEntities.entrySet().iterator().next();
+			filteredEntities.put(entry.getKey(), entry.getValue());
+		}
+
+		return filteredEntities.values();
 	}
 
 	/* (non-Javadoc)
