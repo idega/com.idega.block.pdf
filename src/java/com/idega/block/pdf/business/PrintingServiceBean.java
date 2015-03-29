@@ -29,12 +29,14 @@ import com.idega.business.IBORuntimeException;
 import com.idega.business.IBOServiceBean;
 import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
+import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.servlet.filter.IWBundleResourceFilter;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.datastructures.map.MapUtil;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 
@@ -121,6 +123,13 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	@Override
 	public void printXHTML(InputStream inputStream, OutputStream outputStream) {
 		if (inputStream != null && outputStream != null) {
+			IWMainApplicationSettings settings = IWMainApplication
+					.getDefaultIWMainApplication().getSettings();
+			if (!settings.getBoolean("iText_fonts_registered", Boolean.FALSE)) {
+				FontFactory.registerDirectories();
+				settings.setProperty("iText_fonts_registered", Boolean.TRUE.toString());
+			}
+
 			Document document = new Document();
 		    PdfWriter writer = null;
 			try {
