@@ -189,6 +189,10 @@ public class DocumentURIGroup extends ManagedBean<DocumentURIGroupEntity> {
 		}
 	}
 
+	public void dropSelectedType() {
+		this.selectedTypeId = null;
+	}
+
 	public void selectedTypeIdChange(ValueChangeEvent event) {
 		Object value = event.getNewValue();
  		if (value != null) {

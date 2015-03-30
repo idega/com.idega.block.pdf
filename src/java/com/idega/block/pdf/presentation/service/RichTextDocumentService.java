@@ -84,7 +84,11 @@ package com.idega.block.pdf.presentation.service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Map;
 import java.util.logging.Level;
+
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 
 import org.directwebremoting.annotations.Param;
 import org.directwebremoting.annotations.RemoteMethod;
@@ -96,6 +100,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.pdf.business.PrintingService;
+import com.idega.block.pdf.presentation.filter.DocumentURIFilterBean;
 import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
@@ -105,6 +110,7 @@ import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
 import com.idega.util.CoreUtil;
 import com.idega.util.StringUtil;
+import com.idega.util.datastructures.map.MapUtil;
 
 /**
  * <p>TODO</p>
@@ -206,5 +212,23 @@ public class RichTextDocumentService extends DefaultSpringBean {
 		}
 
 		return "";
+	}
+
+	@RemoteMethod
+	public void resetFilterBean() {
+		FacesContext context = FacesContext.getCurrentInstance();
+		if (context != null) {
+			ExternalContext externalContext = context.getExternalContext();
+			if (externalContext != null) {
+				Map<String, Object> sessionMap = externalContext.getSessionMap();
+				if (!MapUtil.isEmpty(sessionMap)) {
+					DocumentURIFilterBean bean = (DocumentURIFilterBean) sessionMap
+							.get("documentURIFilterBean");
+					if (bean != null) {
+						bean.dropSelectedTypes();
+					}
+				}
+			}
+		}
 	}
 }

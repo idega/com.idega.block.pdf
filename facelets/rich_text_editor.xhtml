@@ -4,7 +4,8 @@
     xmlns="http://www.w3.org/1999/xhtml"
     xmlns:h="http://java.sun.com/jsf/html"
     xmlns:f="http://java.sun.com/jsf/core"
-    xmlns:ui="http://java.sun.com/jsf/facelets">
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:t="http://myfaces.apache.org/tomahawk">
 
     <link 
         rel="stylesheet"
@@ -71,7 +72,8 @@
         styleClass="savedText"
         value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
     <h:form
-        id="editorForm">
+        id="editorForm"
+        onsubmit="RichTextDocumentEditorHelper.SUBMITTED = true;">
         <table
             class="editorTable">
             <ui:repeat 
@@ -88,7 +90,7 @@
                             id="typeId"
                             value="#{group.selectedTypeId}"
                             valueChangeListener="#{group.selectedTypeIdChange}"
-                            onchange="showLoadingMessage('Loading'); submit();"
+                            onchange="RichTextDocumentEditorHelper.submit('#{localizedStrings['com.idega.block.pdf']['loading']}');"
                             styleClass="#{group.id}">
                             <f:selectItem
                                 itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
@@ -112,7 +114,7 @@
                         id="id"
                         value="#{richTextDocument.id}"
                         valueChangeListener="#{richTextDocument.selectedIdChange}"
-                        onchange="showLoadingMessage('Loading'); submit();">
+                        onchange="RichTextDocumentEditorHelper.submit('#{localizedStrings['com.idega.block.pdf']['loading']}');">
                         <f:selectItem
                             itemLabel="#{localizedStrings['com.idega.block.pdf']['select']}"
                             noSelectValue="true"/>
@@ -143,6 +145,7 @@
             <h:commandButton
                 id="saveButton"
                 value="#{localizedStrings['com.idega.block.pdf']['save']}"
+                styleClass="saveButton"
                 action="#{richTextDocument.save}"/>
             <h:outputLink
                 styleClass="windowLink">
@@ -159,5 +162,6 @@
                     type="button"/>
             </h:outputLink>
         </h:panelGroup>
+        <!--<t:saveState value="#{richTextDocument}" />-->
     </h:form>
 </div>

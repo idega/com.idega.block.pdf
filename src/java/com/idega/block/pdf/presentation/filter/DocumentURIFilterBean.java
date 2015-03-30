@@ -161,4 +161,10 @@ public class DocumentURIFilterBean implements Serializable {
 			setSelectedTypeEntities(entity.getTypes());
 		}
 	}
+
+	public void dropSelectedTypes() {
+		for (DocumentURIGroup group : getGroups()) {
+			group.dropSelectedType();
+		}
+	}
 }

@@ -43,3 +43,29 @@ jQuery(document).ready(function() {
 		}
 	});
 });
+
+jQuery(window).load(function() {
+	jQuery(window).on('beforeunload', function(event) {
+		if (RichTextDocumentEditorHelper.SUBMITTED) {
+			RichTextDocumentEditorHelper.SUBMITTED = false;
+			return;
+		}
+		
+		/* if (event != null && event.target != null) {
+			var eventCreator = jQuery(event.target);
+			if (eventCreator.activeElement.hasClass('saveButton')) {
+				return;
+			}
+		} */
+
+		RichTextDocumentService.resetFilterBean();
+	});
+});
+
+var RichTextDocumentEditorHelper = {};
+RichTextDocumentEditorHelper.SUBMITTED = false;
+RichTextDocumentEditorHelper.submit = function(loadingMessage) {
+	showLoadingMessage(loadingMessage);
+	RichTextDocumentEditorHelper.SUBMITTED = true;
+	document.forms[0].submit();
+}
