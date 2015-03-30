@@ -96,11 +96,14 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.idega.block.pdf.business.PrintingService;
+import com.idega.builder.business.BuilderLogic;
 import com.idega.business.IBOLookup;
 import com.idega.business.IBOLookupException;
 import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.file.util.MimeType;
+import com.idega.presentation.IWContext;
 import com.idega.util.CoreConstants;
+import com.idega.util.CoreUtil;
 import com.idega.util.StringUtil;
 
 /**
@@ -157,6 +160,21 @@ public class RichTextDocumentService extends DefaultSpringBean {
 		}
 
 		return this.printingService;
+	}
+
+	public String getHomepageLink() {
+		BuilderLogic bl = BuilderLogic.getInstance();
+		IWContext iwc = CoreUtil.getIWContext();
+		if (iwc == null || !iwc.isLoggedOn()) {
+			return null;
+		}
+
+		String uri = CoreConstants.PAGES_URI_PREFIX;
+		com.idega.core.builder.data.ICPage homePage = bl.getUsersHomePage(iwc.getCurrentUser());
+		if (homePage != null)
+			uri = uri + homePage.getDefaultPageURI();
+
+		return uri;
 	}
 
 	@RemoteMethod
