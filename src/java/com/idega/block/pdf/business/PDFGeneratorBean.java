@@ -34,7 +34,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.w3c.dom.Document;
+import org.xhtmlrenderer.pdf.ITextOutputDevice;
 import org.xhtmlrenderer.pdf.ITextRenderer;
+import org.xhtmlrenderer.pdf.ITextUserAgent;
 import org.xml.sax.InputSource;
 
 import com.idega.core.builder.business.BuilderService;
@@ -77,7 +79,29 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	private ITextRenderer getITextRenderer() {
 		try {
-			return new ITextRenderer();
+			// Just a bugfix for agent not to crash when resource is not found
+			class FontResourceLoader extends ITextUserAgent {
+			    public FontResourceLoader(ITextOutputDevice outputDevice) {
+			        super(outputDevice);
+			    }
+			    @Override
+			    public byte[] getBinaryResource(String uri) {
+
+			    	try{
+			    		return super.getBinaryResource(uri);
+			    	}catch (Exception e) {
+						
+					}
+			    	return new byte[0]; 
+			    }
+			}
+
+			ITextRenderer pdfRenderer = new ITextRenderer();
+			FontResourceLoader fontHandler = new FontResourceLoader(pdfRenderer.getOutputDevice());
+			fontHandler.setSharedContext(pdfRenderer.getSharedContext());
+			pdfRenderer.getSharedContext().setUserAgentCallback(fontHandler);
+			
+			return pdfRenderer;
 		} catch(Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating PDF generator!", e);
 		}
