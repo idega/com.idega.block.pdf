@@ -82,7 +82,9 @@
  */
 package com.idega.block.pdf.data.dao.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -102,6 +104,8 @@ import com.idega.block.pdf.data.DocumentURITypeEntity;
 import com.idega.block.pdf.data.dao.DocumentURIGroupDAO;
 import com.idega.block.pdf.data.dao.DocumentURITypeDAO;
 import com.idega.core.persistence.impl.GenericDaoImpl;
+import com.idega.data.SimpleQuerier;
+import com.idega.util.ArrayUtil;
 import com.idega.util.ListUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
@@ -188,14 +192,63 @@ public class DocumentURITypeDAOImpl extends GenericDaoImpl implements
 		return null;
 	}
 
+	/**
+	 * 
+	 * @param externalIds
+	 * @return
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	protected String[] getIDsByExternalIds(Collection<String> externalIds) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT ID FROM ").append(DocumentURITypeEntity.ENTITY_NAME)
+		.append(" WHERE ").append(DocumentURITypeEntity.COLUMN_EXTERNAL_ID)
+		.append(" IN ('");
+
+		for (Iterator<String> iterator = externalIds.iterator(); iterator.hasNext();) {
+			String externalId = iterator.next();
+			if (!StringUtil.isEmpty(externalId)) {
+				sb.append(externalId);
+				if (iterator.hasNext()) {
+					sb.append("', '");
+				}
+			}
+		}
+
+		sb.append("')");
+
+		try {
+			return SimpleQuerier.executeStringQuery(sb.toString());
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Failed to execute query' " + 
+					sb.toString() + "' cause of: ", e);
+		}
+
+		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURITypeDAO#findByExternalIds(java.util.Collection)
+	 */
 	@Override
 	public List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds) {
 		if (!ListUtil.isEmpty(externalIds)) {
-			return getResultList(
-					DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS,
-					DocumentURITypeEntity.class, 
-					new com.idega.core.persistence.Param(
-							DocumentURITypeEntity.externalIdProp, externalIds));
+//			return getResultList(
+//					DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS,
+//					DocumentURITypeEntity.class, 
+//					new com.idega.core.persistence.Param(
+//							DocumentURITypeEntity.externalIdProp, externalIds));
+
+			ArrayList<Long> primaryKeys = new ArrayList<Long>();
+
+			String[] results = getIDsByExternalIds(externalIds);
+			if (!ArrayUtil.isEmpty(results)) {
+				for (String result: results) {
+					primaryKeys.add(Long.valueOf(result));
+				}
+			}
+
+			return findByIds(primaryKeys);
 		}
 
 		return null;
