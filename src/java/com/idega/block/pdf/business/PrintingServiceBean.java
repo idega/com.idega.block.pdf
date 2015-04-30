@@ -149,7 +149,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 						"Failed to parse XHTML to PDF cause of:", e);
 			}
 
-		    document.close();
+		    try {
+			    document.close();
+		    } catch (Exception e) {
+		    	getLogger().log(Level.WARNING, 
+						"Failed toclose document cause of:", e);
+		    }
 		}
 	}
 
