@@ -50,13 +50,6 @@ jQuery(window).load(function() {
 			RichTextDocumentEditorHelper.SUBMITTED = false;
 			return;
 		}
-		
-		/* if (event != null && event.target != null) {
-			var eventCreator = jQuery(event.target);
-			if (eventCreator.activeElement.hasClass('saveButton')) {
-				return;
-			}
-		} */
 
 		RichTextDocumentService.resetFilterBean();
 	});
