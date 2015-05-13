@@ -60,5 +60,5 @@ RichTextDocumentEditorHelper.SUBMITTED = false;
 RichTextDocumentEditorHelper.submit = function(loadingMessage) {
 	showLoadingMessage(loadingMessage);
 	RichTextDocumentEditorHelper.SUBMITTED = true;
-	document.forms[0].submit();
+	 jQuery('#editorForm').submit();
 }
