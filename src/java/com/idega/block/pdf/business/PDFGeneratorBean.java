@@ -90,9 +90,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			    	try{
 			    		return super.getBinaryResource(uri);
 			    	}catch (Exception e) {
-						
+
 					}
-			    	return new byte[0]; 
+			    	return new byte[0];
 			    }
 			}
 
@@ -100,7 +100,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 			FontResourceLoader fontHandler = new FontResourceLoader(pdfRenderer.getOutputDevice());
 			fontHandler.setSharedContext(pdfRenderer.getSharedContext());
 			pdfRenderer.getSharedContext().setUserAgentCallback(fontHandler);
-			
+
 			return pdfRenderer;
 		} catch(Exception e) {
 			LOGGER.log(Level.SEVERE, "Error creating PDF generator!", e);
@@ -184,7 +184,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public boolean generatePDF(IWContext iwc, UIComponent component, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
-		Document document = getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags);
+		Document document = getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags, false);
 		if (document == null) {
 			return false;
 		}
@@ -222,7 +222,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		}
 	}
 
-	private Document getDocumentToConvertToPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
+	private Document getDocumentToConvertToPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags, boolean resetWriter) {
 		if (component == null)
 			return null;
 
@@ -230,7 +230,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		if (builder == null)
 			return null;
 
-		org.jdom2.Document doc = builder.getRenderedComponent(iwc, component, true, false, false);
+		org.jdom2.Document doc = builder.getRenderedComponent(iwc, component, true, false, false, resetWriter);
 		if (doc == null)
 			return null;
 
@@ -815,6 +815,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public byte[] getBytesOfGeneratedPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags) {
-		return getPDFBytes(getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags));
+		return getBytesOfGeneratedPDF(iwc, component, replaceInputs, checkCustomTags, false);
+	}
+	@Override
+	public byte[] getBytesOfGeneratedPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags, boolean resetWriter) {
+		return getPDFBytes(getDocumentToConvertToPDF(iwc, component, replaceInputs, checkCustomTags, resetWriter));
 	}
 }
