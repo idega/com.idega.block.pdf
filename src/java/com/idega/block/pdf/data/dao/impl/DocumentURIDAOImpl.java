@@ -348,7 +348,7 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 					Long time = Long.valueOf(uri);
 					map.put(time, entity);
 				} catch (Exception e) {
-					getLogger().info("Can't convert word: '" + uri + "' to long");
+					getLogger().fine("Can't convert word: '" + uri + "' to long");
 				}
 			}
 		}
@@ -396,13 +396,13 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 			if (findById(entity.getId()) == null) {
 				persist(entity);
 				if (entity.getId() != null) {
-					getLogger().info("Entity: " + entity + " created!");
+					getLogger().fine("Entity: " + entity + " created!");
 					return entity;
 				}
 			} else {
 				entity = merge(entity);
 				if (entity != null) {
-					getLogger().info("Entity: " + entity + " updated");
+					getLogger().fine("Entity: " + entity + " updated");
 					return entity;
 				}
 			}

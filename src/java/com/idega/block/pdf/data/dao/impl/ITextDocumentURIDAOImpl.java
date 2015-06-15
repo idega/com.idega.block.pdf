@@ -144,13 +144,13 @@ public class ITextDocumentURIDAOImpl extends GenericDaoImpl implements
 			if (findById(entity.getId()) == null) {
 				persist(entity);
 				if (entity.getId() != null) {
-					getLogger().info("Entity: " + entity + " created!");
+					getLogger().fine("Entity: " + entity + " created!");
 					return entity;
 				}
 			} else {
 				entity = merge(entity);
 				if (entity != null) {
-					getLogger().info("Entity: " + entity + " updated");
+					getLogger().fine("Entity: " + entity + " updated");
 					return entity;
 				}
 			}		
