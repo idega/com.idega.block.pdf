@@ -223,7 +223,9 @@ public class DocumentURIDAOImpl extends GenericDaoImpl implements
 			try {
 				resultset = SimpleQuerier.executeStringQuery(sb.toString());
 			} catch (Exception e) {
-				getLogger().log(Level.WARNING, "", e);
+				getLogger().log(Level.WARNING, 
+						"Failed to get results by query: '" + sb.toString() + 
+						"' cause of: ", e);
 			}
 
 			ArrayList<Long> ids = new ArrayList<Long>();
