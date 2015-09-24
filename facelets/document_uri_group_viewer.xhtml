@@ -76,6 +76,19 @@
                         layout="block"
                         styleClass="header">
                         <h:outputText
+                            value="#{localizedStrings['com.idega.block.pdf']['identifier']}"/>
+                    </h:panelGroup>
+                </f:facet>
+                <h:outputText
+                    value="#{group.identifier}"/>
+            </h:column>
+            <h:column>
+                <f:facet
+                    name="header">
+                    <h:panelGroup
+                        layout="block"
+                        styleClass="header">
+                        <h:outputText
                             value="#{localizedStrings['com.idega.block.pdf']['edit']}"/>
                     </h:panelGroup>
                 </f:facet>

@@ -121,7 +121,11 @@ import org.directwebremoting.convert.BeanConverter;
 	@NamedQuery(
 			name = DocumentURIGroupEntity.FIND_BY_NAME, 
 			query = "FROM DocumentURIGroupEntity a WHERE a.name = :" + 
-					DocumentURITypeEntity.nameProp),
+					DocumentURIGroupEntity.nameProp),
+	@NamedQuery(
+			name = DocumentURIGroupEntity.FIND_BY_IDENTIFIER, 
+			query = "FROM DocumentURIGroupEntity a WHERE a.identifier = :" + 
+					DocumentURIGroupEntity.identifierProp),
 	@NamedQuery(
 			name = DocumentURIGroupEntity.FIND_ALL, 
 			query = "FROM DocumentURIGroupEntity a")
@@ -139,6 +143,7 @@ public class DocumentURIGroupEntity implements Serializable {
 
 	public static final String FIND_BY_ID = "documentURIGroupEntity.findById";
 	public static final String FIND_BY_NAME = "documentURIGroupEntity.findByName";
+	public static final String FIND_BY_IDENTIFIER = "documentURIGroupEntity.findByIdentifier";
 	public static final String FIND_ALL = "documentURIGroupEntity.findAll";
 
 	public static final String COLUMN_ID = "id";
@@ -152,6 +157,11 @@ public class DocumentURIGroupEntity implements Serializable {
 	@Column(name = COLUMN_NAME, nullable = false, unique = true)
 	@RemoteProperty
 	private String name;
+
+	public static final String COLUMN_IDENTIFIER= "identifier";
+	public static final String identifierProp = "identifier";
+	@Column(name = COLUMN_IDENTIFIER, unique = true)
+	private String identifier;
 
 	@OneToMany(
 			mappedBy = DocumentURITypeEntity.groupProp, 
@@ -174,6 +184,20 @@ public class DocumentURIGroupEntity implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * 
+	 * @return id or unique name identifying this group purpose. For exmaple,
+	 * it can define the variable name of jbpm process.
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	public String getIdentifier() {
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
 	}
 
 	public List<DocumentURITypeEntity> getTypes() {

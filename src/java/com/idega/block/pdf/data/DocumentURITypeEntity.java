@@ -125,9 +125,12 @@ import org.directwebremoting.convert.BeanConverter;
 			query = "FROM DocumentURITypeEntity a WHERE a.id IN (:" + 
 					DocumentURITypeEntity.idProp + ")"),
 	@NamedQuery(
-			name = DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS, 
-			query = "FROM DocumentURITypeEntity a WHERE a.externalId IN (:" + 
-					DocumentURITypeEntity.externalIdProp + ")"),
+			name = DocumentURITypeEntity.FIND_BY_EXTERNAL_ID, 
+			query =   "SELECT DISTINCT dute "
+					+ "FROM DocumentURITypeEntity as dute "
+					+ "INNER JOIN dute.group due "
+					+ "WHERE dute.externalId = :" + DocumentURITypeEntity.externalIdProp 
+					+ " AND due.identifier = :" + DocumentURIGroupEntity.identifierProp),
 	@NamedQuery(
 			name = DocumentURITypeEntity.FIND_BY_NAME, 
 			query = "FROM DocumentURITypeEntity a WHERE a.name = :" + 
@@ -149,7 +152,7 @@ public class DocumentURITypeEntity implements Serializable {
 
 	public static final String FIND_BY_ID = "documentURITypeEntity.findById";
 	public static final String FIND_BY_IDS = "documentURITypeEntity.findByIds";
-	public static final String FIND_BY_EXTERNAL_IDS = "documentURITypeEntity.findByExternalIds";
+	public static final String FIND_BY_EXTERNAL_ID = "documentURITypeEntity.findByExternalId";
 	public static final String FIND_BY_NAME = "documentURITypeEntity.findByName";
 	public static final String FIND_ALL = "documentURITypeEntity.findAll";
 

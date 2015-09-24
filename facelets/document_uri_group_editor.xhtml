@@ -16,7 +16,7 @@
         rendered="#{not documentURIGroup.submitted}"
         id="editorForm">
         <h:panelGrid
-            columns="3"
+            columns="2"
             styleClass="editorTable">
             <h:panelGroup>
                 <h:outputLabel
@@ -27,6 +27,16 @@
                 <h:inputText
                     id="name"
                     value="#{documentURIGroup.name}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:outputLabel
+                    for="identifier"
+                    value="#{localizedStrings['com.idega.block.pdf']['identifier']}"/>
+            </h:panelGroup>
+            <h:panelGroup>
+                <h:inputText
+                    id="identifier"
+                    value="#{documentURIGroup.identifier}"/>
             </h:panelGroup>
         </h:panelGrid>
         <h:inputHidden

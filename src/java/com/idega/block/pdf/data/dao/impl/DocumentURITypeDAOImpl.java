@@ -233,12 +233,6 @@ public class DocumentURITypeDAOImpl extends GenericDaoImpl implements
 	@Override
 	public List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds) {
 		if (!ListUtil.isEmpty(externalIds)) {
-//			return getResultList(
-//					DocumentURITypeEntity.FIND_BY_EXTERNAL_IDS,
-//					DocumentURITypeEntity.class, 
-//					new com.idega.core.persistence.Param(
-//							DocumentURITypeEntity.externalIdProp, externalIds));
-
 			ArrayList<Long> primaryKeys = new ArrayList<Long>();
 
 			String[] results = getIDsByExternalIds(externalIds);
@@ -252,6 +246,20 @@ public class DocumentURITypeDAOImpl extends GenericDaoImpl implements
 		}
 
 		return null;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURITypeDAO#findByExternalId(java.lang.String, java.lang.String)
+	 */
+	@Override
+	public DocumentURITypeEntity findByExternalId(String externalId,
+			String groupIdentifier) {
+		return getSingleResult(
+			DocumentURITypeEntity.FIND_BY_EXTERNAL_ID,
+			DocumentURITypeEntity.class, 
+			new com.idega.core.persistence.Param(DocumentURITypeEntity.externalIdProp, externalId),
+			new com.idega.core.persistence.Param(DocumentURIGroupEntity.identifierProp, groupIdentifier));
 	}
 
 	/*

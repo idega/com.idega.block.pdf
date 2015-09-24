@@ -143,6 +143,15 @@ public interface DocumentURIGroupDAO extends GenericDao {
 	DocumentURIGroupEntity findByName(String name);
 
 	/**
+	 * 
+	 * @param identifier is {@link DocumentURIGroupEntity#getIdentifier()}, 
+	 * not <code>null</code>;
+	 * @return entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	DocumentURIGroupEntity findByIdentifier(String identifier);
+
+	/**
 	 *
 	 * @return all {@link DocumentURIGroupEntity}s, existing in database.
 	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
@@ -163,6 +172,8 @@ public interface DocumentURIGroupDAO extends GenericDao {
 	 * new entity is created when <code>null</code>;
 	 * @param name is {@link DocumentURIGroupEntity#getName()}, 
 	 * skipped if <code>null</code>;
+	 * @param identifer is {@link DocumentURIGroupEntity#getIdentifier()},
+	 * skipped if <code>null</code>;
 	 * @param clazz is {@link Type} or sub-type of {@link DocumentURIGroupEntity},
 	 * not <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
@@ -171,7 +182,7 @@ public interface DocumentURIGroupDAO extends GenericDao {
 	<T extends DocumentURIGroupEntity> T update(
 			Long id, 
 			String name, 
-			Class<T> clazz);
+			String identifer, Class<T> clazz);
 
 	/**
 	 * 
@@ -183,6 +194,19 @@ public interface DocumentURIGroupDAO extends GenericDao {
 	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	DocumentURIGroupEntity update(Long id, String name);
+
+	/**
+	 * 
+	 * @param id is {@link DocumentURIGroupEntity#getId()} of entity to update,
+	 * new entity is created when <code>null</code>;
+	 * @param name is {@link DocumentURIGroupEntity#getName()}, 
+	 * skipped if <code>null</code>;
+	 * @param identifier is {@link DocumentURIGroupEntity#getIdentifier()},
+	 * skipped if <code>null</code>;
+	 * @return created/updated entity or <code>null</code> on failure;
+	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
+	 */
+	DocumentURIGroupEntity update(Long id, String name, String identifier);
 
 	/**
 	 * 

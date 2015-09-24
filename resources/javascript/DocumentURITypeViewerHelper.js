@@ -1,3 +1,9 @@
+jQuery(document).ready(function() {
+	LazyLoader.loadMultiple(['/idegaweb/bundles/com.idega.block.web2.0/resources/javascript/tablesorter/jquery.tablesorter.min.js'], function() {
+		$("#editorTable").tablesorter(); 
+	}, null);
+});
+
 var DocumentURITypeViewerHelper = {
 		remove : function (row) {
 			if (row == null || row.length <= 0 || row.nodeName != "TR") {

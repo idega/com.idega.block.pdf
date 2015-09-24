@@ -111,6 +111,8 @@ public class DocumentURIGroup extends ManagedBean<DocumentURIGroupEntity> {
 
 	private String name;
 
+	private String identifier;
+
 	private List<DocumentURIType> types;
 
 	private Long selectedTypeId;
@@ -138,6 +140,17 @@ public class DocumentURIGroup extends ManagedBean<DocumentURIGroupEntity> {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getIdentifier() {
+		if (StringUtil.isEmpty(this.identifier) && getEntity() != null) {
+			this.identifier = getEntity().getIdentifier();
+		}
+		return identifier;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
 	}
 
 	/*
@@ -215,7 +228,7 @@ public class DocumentURIGroup extends ManagedBean<DocumentURIGroupEntity> {
 	 */
 	@Override
 	public void save() {
-		if (getDAO().update(this.id, this.name) != null) {
+		if (getDAO().update(this.id, this.name, this.identifier) != null) {
 			setSubmitted(Boolean.TRUE);
 		}
 	}

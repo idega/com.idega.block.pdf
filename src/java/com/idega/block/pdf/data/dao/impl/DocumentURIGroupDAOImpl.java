@@ -189,6 +189,22 @@ public class DocumentURIGroupDAOImpl extends GenericDaoImpl implements
 		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see com.idega.block.pdf.data.dao.DocumentURIGroupDAO#findByIdentifier(java.lang.String)
+	 */
+	@Override
+	public DocumentURIGroupEntity findByIdentifier(String identifier) {
+		if (!StringUtil.isEmpty(identifier)) {
+			return getSingleResult(
+					DocumentURIGroupEntity.FIND_BY_IDENTIFIER,
+					DocumentURIGroupEntity.class, 
+					new com.idega.core.persistence.Param(DocumentURIGroupEntity.identifierProp, identifier));
+		}
+
+		return null;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.idega.block.pdf.data.dao.DocumentURIGroupDAO#findAll()
 	 */
@@ -229,7 +245,7 @@ public class DocumentURIGroupDAOImpl extends GenericDaoImpl implements
 	 */
 	@Override
 	public <T extends DocumentURIGroupEntity> T update(Long id, String name,
-			Class<T> clazz) {
+			String identifer, Class<T> clazz) {
 		T entityToUpdate = null;
 		if (id != null) {
 			entityToUpdate = findById(id, clazz);
@@ -257,6 +273,10 @@ public class DocumentURIGroupDAOImpl extends GenericDaoImpl implements
 			entityToUpdate.setName(name);
 		}
 
+		if (!StringUtil.isEmpty(identifer)) {
+			entityToUpdate.setIdentifier(identifer);
+		}
+
 		return update(entityToUpdate);
 	}
 
@@ -266,7 +286,12 @@ public class DocumentURIGroupDAOImpl extends GenericDaoImpl implements
 	@Override
 	@RemoteMethod
 	public DocumentURIGroupEntity update(Long id, String name) {
-		return update(id, name, DocumentURIGroupEntity.class);
+		return update(id, name, null, DocumentURIGroupEntity.class);
+	}
+
+	@Override
+	public DocumentURIGroupEntity update(Long id, String name, String identifier) {
+		return update(id, name, identifier, DocumentURIGroupEntity.class);
 	}
 
 	/* (non-Javadoc)
