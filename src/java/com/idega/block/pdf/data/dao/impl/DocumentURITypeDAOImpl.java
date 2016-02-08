@@ -255,11 +255,15 @@ public class DocumentURITypeDAOImpl extends GenericDaoImpl implements
 	@Override
 	public DocumentURITypeEntity findByExternalId(String externalId,
 			String groupIdentifier) {
-		return getSingleResult(
-			DocumentURITypeEntity.FIND_BY_EXTERNAL_ID,
-			DocumentURITypeEntity.class, 
-			new com.idega.core.persistence.Param(DocumentURITypeEntity.externalIdProp, externalId),
-			new com.idega.core.persistence.Param(DocumentURIGroupEntity.identifierProp, groupIdentifier));
+		if (!StringUtil.isEmpty(groupIdentifier) && !StringUtil.isEmpty(externalId)) {
+			return getSingleResult(
+					DocumentURITypeEntity.FIND_BY_EXTERNAL_ID,
+					DocumentURITypeEntity.class,
+					new com.idega.core.persistence.Param(DocumentURITypeEntity.externalIdProp, externalId),
+					new com.idega.core.persistence.Param(DocumentURIGroupEntity.identifierProp, groupIdentifier));
+		}
+
+		return null;
 	}
 
 	/*
