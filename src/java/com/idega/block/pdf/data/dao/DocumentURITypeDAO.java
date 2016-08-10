@@ -31,7 +31,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * not <code>null</code>;
 	 * @return {@link DocumentURITypeEntity} by given id or <code>null</code>
 	 * on failure.
-	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
 	 */
 	<T extends DocumentURITypeEntity> T findById(Long id, Class<T> clazz);
 
@@ -40,7 +39,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param id is {@link DocumentURITypeEntity#getId()}, not <code>null</code>.
 	 * @return {@link DocumentURITypeEntity} by given id or <code>null</code>
 	 * on failure.
-	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
 	 */
 	DocumentURITypeEntity findById(Long id);
 
@@ -49,7 +47,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param ids is {@link Collection} of {@link DocumentURITypeEntity#getId()}, 
 	 * not <code>null</code>.
 	 * @return entities or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURITypeEntity> findByIds(Collection<Long> ids);
 
@@ -58,7 +55,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param externalIds is {@link Collection} of id's defined in remote system, 
 	 * not <code>null</code>
 	 * @return entities or {@link Collections#emptyList()} on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	List<DocumentURITypeEntity> findByExternalIds(Collection<String> externalIds);
 
@@ -69,7 +65,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param groupIdentifier is {@link DocumentURIGroupEntity#getIdentifier()},
 	 * not <code>null</code>;
 	 * @return entity by criteria or <code>null</code> on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	DocumentURITypeEntity findByExternalId(String externalId, String groupIdentifier);
 
@@ -80,7 +75,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * not <code>null</code>;
 	 * @return {@link DocumentURITypeEntity} by given name or <code>null</code>
 	 * on failure.
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	<T extends DocumentURITypeEntity> T findByName(String name, Class<T> clazz);
 	
@@ -89,14 +83,12 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param name is {@link DocumentURITypeEntity#getName()}, not <code>null</code>;
 	 * @return {@link DocumentURITypeEntity} by given name or <code>null</code>
 	 * on failure.
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	DocumentURITypeEntity findByName(String name);
 
 	/**
 	 *
 	 * @return all {@link DocumentURITypeEntity}s, existing in database.
-	 * @author <a href="mailto:martynas@idega.com">Martynas Stakė</a>
 	 */
 	List<DocumentURITypeEntity> findAll();
 
@@ -104,7 +96,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * 
 	 * @param entity to update, not <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	<T extends DocumentURITypeEntity> T update(T entity);
 
@@ -119,7 +110,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param clazz is {@link Type} or sub-type of {@link DocumentURITypeEntity},
 	 * not <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	<T extends DocumentURITypeEntity> T update(
 			Long id, 
@@ -138,7 +128,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * @param groupId is id of {@link DocumentURIGroupEntity}, 
 	 * skipped if <code>null</code>;
 	 * @return created/updated entity or <code>null</code> on failure;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	DocumentURITypeEntity update(Long id, String name, 
 			String externalId, Long groupId);
@@ -146,7 +135,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	/**
 	 * 
 	 * @param entity to remove, not <code>null</code>;
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	void removeEntity(DocumentURITypeEntity entity);
 
@@ -154,7 +142,6 @@ public interface DocumentURITypeDAO extends GenericDao {
 	 * 
 	 * <p>Removes entity</p>
 	 * @param id is {@link DocumentURITypeEntity#getId()}, not <code>null</code>
-	 * @author <a href="mailto:martynas@idega.is">Martynas Stakė</a>
 	 */
 	void remove(Long id);
 }
