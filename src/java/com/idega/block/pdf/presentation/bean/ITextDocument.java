@@ -90,6 +90,8 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -186,8 +188,9 @@ public class ITextDocument extends DocumentURI {
 	}
 
 	public Map<String, Long> getEntitiesMap() {
-		TreeMap<String, Long> map = new TreeMap<String, Long>();
-
+		TreeMap<Date, Long> datesMap = new TreeMap<Date, Long>();
+	
+		LinkedHashMap<String, Long> map = new LinkedHashMap<String, Long>();
 		for (DocumentURIEntity entity : getEntities()) {
 			String uri = entity.getRepositoryURI();
 			if (!StringUtil.isEmpty(uri)) {
@@ -195,14 +198,18 @@ public class ITextDocument extends DocumentURI {
 				try {
 					uri = uri.substring(uri.lastIndexOf('/') + 1, uri.lastIndexOf('.'));
 					Long time = Long.valueOf(uri);
-					map.put(new Date(time).toLocaleString(), entity.getId());
+					datesMap.put(new Date(time), entity.getId());
 				} catch (Exception e) {
 					map.put(uri, entity.getId());
 				}
 			}
 		}
 
-		return map.descendingMap();
+		for (Date date : datesMap.descendingMap().keySet()) {
+			map.put(date.toLocaleString(), datesMap.get(date));
+		}
+
+		return map;
 	}
 
 	public boolean isMultiple() {
