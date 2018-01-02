@@ -137,7 +137,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		ByteArrayOutputStream os = null;
 		try {
 			os = new ByteArrayOutputStream();
-			renderer.setDocument(doc, getHost());
+			renderer.setDocument(doc, getHost(true));
 			renderer.layout();
 			renderer.createPDF(os);
 			renderer.finishPDF();
