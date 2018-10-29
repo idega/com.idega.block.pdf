@@ -181,8 +181,8 @@ public class Base64ImageTagProcessor extends com.itextpdf.tool.xml.html.Image {
 	 */
 	public BufferedImage getImage(String url) {
 		InputStream stream = null;
-		if (StringUtil.isEmpty(url)) {
-			LOGGER.warning("URL is not provided");
+		if (StringUtil.isEmpty(url) || url.equals("undefined")) {
+			LOGGER.warning("URL ('" + url + "') is not provided");
 			return null;
 		}
 
@@ -218,7 +218,7 @@ public class Base64ImageTagProcessor extends com.itextpdf.tool.xml.html.Image {
 			if (attributes != null) {
 				String source = attributes.get(HTML.Attribute.SRC);
 				LOGGER.info("Image source has been given: " + source);
-				if (!StringUtil.isEmpty(source)) {
+				if (!StringUtil.isEmpty(source) && !"undefined".equals(source)) {
 					if (source.startsWith("data:image/")) {
 						return source;
 					}
