@@ -90,9 +90,9 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 */
 	@Override
 	public void printIText(
-			InputStream inputStream, 
-			OutputStream outputStream, 
-			String documentResourcesFolder, 
+			InputStream inputStream,
+			OutputStream outputStream,
+			String documentResourcesFolder,
 			Map<String, String> expressions
 			) throws DocumentHandlerException, IOException {
 		if (inputStream != null && outputStream != null) {
@@ -113,8 +113,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 
 	@Override
 	public ByteArrayOutputStream printIText(
-			InputStream inputStream, 
-			String documentResourcesFolder, 
+			InputStream inputStream,
+			String documentResourcesFolder,
 			Map<String, String> expressions
 			) throws DocumentHandlerException, IOException {
 		ByteArrayOutputStream outputStream = null;
@@ -150,8 +150,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			try {
 				writer = PdfWriter.getInstance(document, outputStream);
 			} catch (DocumentException e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to initialize " + PdfWriter.class.getSimpleName() + 
+				getLogger().log(Level.WARNING,
+						"Failed to initialize " + PdfWriter.class.getSimpleName() +
 						" cause of: ", e);
 			}
 
@@ -175,14 +175,14 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		    try {
 				xmlParser.parse(inputStream);
 			} catch (IOException e) {
-				getLogger().log(Level.WARNING, 
+				getLogger().log(Level.WARNING,
 						"Failed to parse XHTML to PDF cause of:", e);
 			}
 
 		    try {
 			    document.close();
 		    } catch (Exception e) {
-		    	getLogger().log(Level.WARNING, 
+		    	getLogger().log(Level.WARNING,
 						"Failed toclose document cause of:", e);
 		    }
 		}
@@ -220,13 +220,13 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 * @see com.idega.block.pdf.business.PrintingService#printXHTML(java.lang.String, java.util.Map)
 	 */
 	@Override
-	public ByteArrayOutputStream printXHTML(String source, 
+	public ByteArrayOutputStream printXHTML(String source,
 			Map<String, String> properties) {
 		if (!StringUtil.isEmpty(source)) {
 			if (!MapUtil.isEmpty(properties)) {
 				for (Entry<String, String> property : properties.entrySet()) {
-					source = StringHandler.replace(source, 
-							"${" + property.getKey() + "}", 
+					source = StringHandler.replace(source,
+							"${" + property.getKey() + "}",
 							property.getValue());
 				}
 			}
@@ -243,7 +243,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 */
 	@Override
 	public ByteArrayOutputStream printXHTML(
-			DocumentURIEntity entity, 
+			DocumentURIEntity entity,
 			Map<String, String> properties) {
 		if (entity != null) {
 			try {
@@ -253,8 +253,8 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 					return printXHTML(IOUtils.toString(inputStream), properties);
 				}
 			} catch (Exception e) {
-				getLogger().log(Level.WARNING, 
-						"Failed to get content of file: '" + 
+				getLogger().log(Level.WARNING,
+						"Failed to get content of file: '" +
 								entity.getRepositoryURI() + "' cause of: ", e);
 			}
 		}
@@ -269,7 +269,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	@Override
 	public DocumentPrinter printDocument(PrintingContext pcx) {
 		try {
-			Map documentProperties = pcx.getDocumentProperties();
+			Map<?, ?> documentProperties = pcx.getDocumentProperties();
 			if (pcx.getBundle() == null) {
 				Object o = documentProperties.get(PrintingContext.IW_BUNDLE_ROPERTY_NAME);
 				if (o instanceof IWBundle) {
