@@ -44,6 +44,7 @@ import com.idega.core.business.DefaultSpringBean;
 import com.idega.core.file.util.MimeTypeUtil;
 import com.idega.event.PDFGeneratedEvent;
 import com.idega.graphics.generator.business.PDFGenerator;
+import com.idega.idegaweb.DefaultIWBundle;
 import com.idega.idegaweb.IWApplicationContext;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
@@ -137,7 +138,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		ByteArrayOutputStream os = null;
 		try {
 			os = new ByteArrayOutputStream();
-			renderer.setDocument(doc, getHost(true));
+			renderer.setDocument(doc, getHost(!DefaultIWBundle.isProductionEnvironment()));
 			renderer.layout();
 			renderer.createPDF(os);
 			renderer.finishPDF();
@@ -223,33 +224,41 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private Document getDocumentToConvertToPDF(IWContext iwc, UIComponent component, boolean replaceInputs, boolean checkCustomTags, boolean resetWriter) {
-		if (component == null)
+		if (component == null) {
 			return null;
+		}
 
 		BuilderService builder = getBuilderService(iwc);
-		if (builder == null)
+		if (builder == null) {
 			return null;
+		}
 
 		org.jdom2.Document doc = builder.getRenderedComponent(iwc, component, true, false, false, resetWriter);
-		if (doc == null)
+		if (doc == null) {
 			return null;
+		}
 
 		Map<String, PDFChanger> pdfChangers = null;
 		try {
 			pdfChangers = WebApplicationContextUtils.getWebApplicationContext(getApplication().getServletContext()).getBeansOfType(PDFChanger.class);
 		} catch (Exception e) {}
-		if (!MapUtil.isEmpty(pdfChangers))
-			for (PDFChanger changer: pdfChangers.values())
+		if (!MapUtil.isEmpty(pdfChangers)) {
+			for (PDFChanger changer: pdfChangers.values()) {
 				doc = changer.getChangedDocument(doc);
+			}
+		}
 
-		if (replaceInputs)
+		if (replaceInputs) {
 			doc = getDocumentWithoutInputs(doc);
-		if (checkCustomTags)
+		}
+		if (checkCustomTags) {
 			doc = getDocumentWithModifiedTags(doc);
+		}
 
 		byte[] memory = getDocumentWithFixedMediaType(doc);
-		if (memory == null)
+		if (memory == null) {
 			return null;
+		}
 
 		Document document = null;
 		InputStream stream = null;
@@ -271,16 +280,19 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public boolean generatePDFFromComponent(String componentUUID, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
-		if (componentUUID == null)
+		if (componentUUID == null) {
 			return false;
+		}
 
 		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null)
+		if (iwc == null) {
 			return false;
+		}
 
 		BuilderService builder = getBuilderService(iwc);
-		if (builder == null)
+		if (builder == null) {
 			return false;
+		}
 
 		UIComponent component = builder.findComponentInPage(iwc, String.valueOf(iwc.getCurrentIBPageID()), componentUUID);
 		return generatePDF(iwc, component, fileName, uploadPath, replaceInputs, checkCustomTags);
@@ -288,12 +300,14 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 	@Override
 	public boolean generatePDFFromPage(String pageUri, String fileName, String uploadPath, boolean replaceInputs, boolean checkCustomTags) {
-		if (pageUri == null)
+		if (pageUri == null) {
 			return false;
+		}
 
 		IWContext iwc = CoreUtil.getIWContext();
-		if (iwc == null)
+		if (iwc == null) {
 			return false;
+		}
 
 		BuilderService builder = getBuilderService(iwc);
 		Page page = null;
@@ -488,8 +502,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private List<Element> getHiddenElements(Element element, List<Element> emptyElements) {
-		if (element == null)
+		if (element == null) {
 			return emptyElements;
+		}
 
 		List<Element> children = element.getChildren();
 		Attribute style = element.getAttribute("style");
@@ -507,8 +522,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	}
 
 	private void addCommentsToEmptyElements(Element element) {
-		if (element == null)
+		if (element == null) {
 			return;
+		}
 
 		List<Content> content = element.getContent();
 		if (ListUtil.isEmpty(content)) {
@@ -527,8 +543,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		List<String> expectedValues = null;
 
 		List<Element> needless = new ArrayList<Element>();
-		if (getApplication().getSettings().getBoolean("pdf.remove_hidden_elements", Boolean.TRUE))
+		if (getApplication().getSettings().getBoolean("pdf.remove_hidden_elements", Boolean.TRUE)) {
 			needless = getHiddenElements(document.getRootElement(), needless);
+		}
 
 		//	<div>
 		List<Element> divs = getDocumentElements(TAG_DIV, document);
