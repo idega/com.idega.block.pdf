@@ -238,11 +238,11 @@ public class Base64ImageTagProcessor extends com.itextpdf.tool.xml.html.Image {
 	public List<Element> end(
 			WorkerContext ctx,
 			Tag tag,
-			List<Element> currentContent) {
+			List<Element> currentContent
+	) {
 	    List<Element> elements = new ArrayList<Element>(1);
 
 	    String src = getBase64Source(tag);
-	    LOGGER.info("String to be parsed: " + src);
 	    if (null != src && src.length() > 0) {
 	        Image img = null;
 	        if (src.startsWith("data:image/")) {
