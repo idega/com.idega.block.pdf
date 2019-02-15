@@ -136,15 +136,18 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		//	Rendering PDF
 		byte[] memory = null;
 		ByteArrayOutputStream os = null;
+		String host = null;
 		try {
+			host = getHost(!DefaultIWBundle.isProductionEnvironment());
 			os = new ByteArrayOutputStream();
-			renderer.setDocument(doc, getHost(!DefaultIWBundle.isProductionEnvironment()));
+			renderer.setDocument(doc, host);
 			renderer.layout();
 			renderer.createPDF(os);
 			renderer.finishPDF();
 			memory = os.toByteArray();
-		} catch (Exception e) {
-			getLogger().log(Level.WARNING, "Error rendering:\n" + XmlUtil.getPrettyPrintedDOM(doc), e);
+		} catch (Throwable e) {
+			getLogger().log(Level.WARNING, "Error rendering PDF from host " + host, e);
+			getLogger().warning("Error rendering PDF from HTML and host " + host + ":\n" + XmlUtil.getPrettyPrintedDOM(doc));
 		} finally {
 			IOUtil.close(os);
 		}
