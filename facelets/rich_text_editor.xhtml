@@ -68,9 +68,9 @@
         src="#{iwResourceResolver['com.idega.block.pdf']['javascript/RichTextDocumentEditorHelper.js']}"/>
 
     <h:outputText
-        rendered="#{richTextDocument.submitted}"
         styleClass="savedText"
-        value="#{localizedStrings['com.idega.block.pdf']['saved']}"/>
+        value="#{localizedStrings['com.idega.block.pdf']['saved']}"
+        rendered="#{richTextDocument.submitted}" />
     <h:form
         id="editorForm"
         onsubmit="RichTextDocumentEditorHelper.SUBMITTED = true;">
