@@ -84,6 +84,8 @@ package com.idega.block.pdf.presentation.handler;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -197,7 +199,13 @@ public class Base64ImageTagProcessor extends com.itextpdf.tool.xml.html.Image {
 			if (url.startsWith(CoreConstants.WEBDAV_SERVLET_URI)) {
 				RepositoryService repository = ELUtil.getInstance().getBean(RepositoryService.BEAN_NAME);
 				stream = repository.getInputStreamAsRoot(url);
-			} else {
+			} else if (url.indexOf("/iw_cache/") != -1) {
+				IWMainApplication iwma = IWMainApplication.getDefaultIWMainApplication();
+				String realPath = iwma.getRealPath(url.substring(url.indexOf("/iw_cache/")));
+				stream = new FileInputStream(new File(realPath));
+			}
+
+			if (stream == null) {
 				URL outsideUrl = new URL(url);
 				outsideUrl.openConnection();
 				stream = outsideUrl.openStream();
