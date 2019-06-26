@@ -13,10 +13,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -326,8 +328,9 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 	private byte[] getDocumentWithFixedMediaType(org.jdom2.Document document) {
 		List<Element> linksFromHead = null;
 		boolean success = true;
+		Set<String> checked = new HashSet<>();
 		while (success && !ListUtil.isEmpty(linksFromHead = getDocumentElements("link", document))) {
-			success = doFixMediaType(document, linksFromHead);
+			success = doFixMediaType(document, linksFromHead, checked);
 		}
 
 		String htmlContent = getBuilderService().getCleanedHtmlContent(getXMLOutputter().outputString(document), false, false, true);
@@ -340,7 +343,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		return null;
 	}
 
-	private boolean doFixMediaType(org.jdom2.Document document, List<Element> styles) {
+	private boolean doFixMediaType(org.jdom2.Document document, List<Element> styles, Set<String> checked) {
 		if (ListUtil.isEmpty(styles)) {
 			return false;
 		}
@@ -357,7 +360,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 		String hrefAttrName = "href";
 		Attribute href = null;
 		List<String> expectedValues = ListUtil.convertStringArrayToList(new String[] {"text/css"});
-		boolean error = false;
+		boolean error = false, anyChanged = false;
 		for (Iterator<Element> stylesIter = styles.iterator(); (!error && stylesIter.hasNext());) {
 			Element style = stylesIter.next();
 			if (!doElementHasAttribute(style, typeAttrName, expectedValues)) {
@@ -366,6 +369,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 
 			href = style.getAttribute(hrefAttrName);
 			String hrefValue = href.getValue();
+			if (checked.contains(hrefValue)) {
+				continue;
+			}
+
 			String cssContent = null;
 			InputStream streamToContent = null;
 			try {
@@ -385,6 +392,7 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				error = true;
 			} finally {
 				IOUtil.close(streamToContent);
+				checked.add(hrefValue);
 			}
 
 			if (StringUtil.isEmpty(cssContent)) {
@@ -402,9 +410,10 @@ public class PDFGeneratorBean extends DefaultSpringBean implements PDFGenerator 
 				stylesBuffer.append("\n/* Style from: ").append(hrefValue).append(" */\n").append(cssContent).append("\n");
 
 				needless.add(style);
+				anyChanged = true;
 			}
 		}
-		if (error) {
+		if (error || !anyChanged) {
 			return false;
 		}
 
