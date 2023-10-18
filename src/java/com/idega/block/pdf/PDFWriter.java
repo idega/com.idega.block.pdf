@@ -39,6 +39,15 @@ public class PDFWriter extends DownloadWriter {
 			return;
 		}
 
+		try {
+			if (!hasPermission(iwc, pathToPdf)) {
+				logger.warning("No acces to " + pathToPdf);
+			}
+		} catch (Exception e) {
+			logger.log(Level.WARNING, "Error checking if has permission to " + pathToPdf, e);
+			return;
+		}
+
 		try{
 			pdfDoc = repository.getRepositoryItemAsRootUser(pathToPdf);
 		} catch (Exception e) {
@@ -53,7 +62,7 @@ public class PDFWriter extends DownloadWriter {
 	}
 
 	@Override
-	public void writeTo(OutputStream streamOut) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream streamOut) throws IOException {
 		if (pdfDoc == null) {
 			logger.log(Level.SEVERE, "Unable to get XForm");
 			return;

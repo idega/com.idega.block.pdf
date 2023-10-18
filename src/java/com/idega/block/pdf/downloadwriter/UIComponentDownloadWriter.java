@@ -19,18 +19,19 @@ import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWResourceBundle;
 import com.idega.io.MediaWritable;
 import com.idega.presentation.IWContext;
-import com.idega.util.CoreUtil;
 import com.idega.util.IOUtil;
 import com.idega.util.StringUtil;
 import com.idega.util.expression.ELUtil;
 
 public class UIComponentDownloadWriter  implements MediaWritable {
-	
+
 	public static final String PARAMETER_DOWNLOAD_BEAN_NAME = "pdf_download_bean";
 	public static final String PARAMETER_DOWNLOAD_COMPONENT_IDENTIFIER = "pdf_download_component";
-	public static final String PARAMETER_FILE_NAME = "pdf_file_name"; 
+	public static final String PARAMETER_FILE_NAME = "pdf_file_name";
+
 	private String mimeType = null;
 	private byte[] bytes;
+
 	@Override
 	public void init(HttpServletRequest request, IWContext iwc) {
 		try{
@@ -45,7 +46,7 @@ public class UIComponentDownloadWriter  implements MediaWritable {
 				fileName = "pdf.pdf";
 			}
 			setMimeType(MimeType.pdf.getMimeType());
-			
+
 			HttpServletResponse response = iwc.getResponse();
 			response.setHeader("Expires", String.valueOf(0));
 			response.setHeader("Cache-Control", "must-revalidate, post-check=0, pre-check=0");
@@ -57,12 +58,12 @@ public class UIComponentDownloadWriter  implements MediaWritable {
 		}
 	}
 	@Override
-	public void writeTo(OutputStream out) throws IOException {
+	public void writeTo(IWContext iwc, OutputStream out) throws IOException {
 		try {
 			out.write(bytes);
 		} catch(Exception e) {
 			getLogger().log(Level.WARNING, "Error streaming from input to output streams", e);
-			addErrorMessage(CoreUtil.getIWContext(), null);
+			addErrorMessage(iwc, null);
 		} finally {
 			out.flush();
 			IOUtil.closeOutputStream(out);
@@ -83,12 +84,12 @@ public class UIComponentDownloadWriter  implements MediaWritable {
 			if(StringUtil.isEmpty(errorMsg)){
 				errorMsg = getResourceBundle(iwc).getLocalizedString("download_failed", "Download failed");
 			}
-			writer.write("<h1>"+ errorMsg +"</h1>"); 
+			writer.write("<h1>"+ errorMsg +"</h1>");
 		} catch (IOException e) {
 			getLogger().log(Level.WARNING, "Failed to add error message", e);
 		}
 	}
-	
+
 	private Logger getLogger(){
 		return Logger.getLogger(UIComponentDownloadWriter.class.getName());
 	}
