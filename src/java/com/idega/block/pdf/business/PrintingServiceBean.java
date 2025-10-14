@@ -45,6 +45,7 @@ import com.itextpdf.tool.xml.XMLWorkerFontProvider;
 import com.itextpdf.tool.xml.XMLWorkerHelper;
 import com.itextpdf.tool.xml.css.CssFilesImpl;
 import com.itextpdf.tool.xml.css.StyleAttrCSSResolver;
+import com.itextpdf.tool.xml.html.CssAppliers;
 import com.itextpdf.tool.xml.html.CssAppliersImpl;
 import com.itextpdf.tool.xml.html.HTML;
 import com.itextpdf.tool.xml.html.TagProcessorFactory;
@@ -144,6 +145,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				FontFactory.registerDirectories();
 				settings.setProperty("iText_fonts_registered", Boolean.TRUE.toString());
 			}
+			FontFactory.register("/resources/fonts/DejaVuSans.ttf", "DejaVuSans");
 
 			Document document = new Document();
 		    PdfWriter writer = null;
@@ -161,7 +163,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	        tagProcessorFactory.removeProcessor(HTML.Tag.IMG);
 	        tagProcessorFactory.addProcessor(new Base64ImageTagProcessor(), HTML.Tag.IMG);
 
-	        final HtmlPipelineContext hpc = new HtmlPipelineContext(new CssAppliersImpl(new XMLWorkerFontProvider()));
+	        XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
+	        fontProvider.register("/resources/fonts/DejaVuSans.ttf", "DejaVuSans");
+
+	        CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
+
+	        final HtmlPipelineContext hpc = new HtmlPipelineContext(cssAppliers);
 	        hpc.setAcceptUnknown(true).autoBookmark(true).setTagFactory(tagProcessorFactory);
 	        final HtmlPipeline htmlPipeline = new HtmlPipeline(hpc, new PdfWriterPipeline(document, writer));
 
