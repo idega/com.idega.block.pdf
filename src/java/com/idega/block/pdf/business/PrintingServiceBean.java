@@ -288,15 +288,9 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 
 			DocumentPrinter documentPrinter = new DocumentPrinter(is, documentProperties);
 
-			/*TemplateInterpreterFactory tif = new DefaultTemplateInterpreterFactory();
-			TemplateInterpreter expi = tif.createTemplateInterpreter();
-			expi.(new IWBundleType(expi));
-			documentPrinter.setTemplateInterpreter(expi);*/
-
 			File resourceDirectory = pcx.getResourceDirectory();
 			if (resourceDirectory != null) {
 				documentPrinter.setResourceLoader(new FileResourceLoader(resourceDirectory));
-
 				loadAllResources(pcx.getBundle(), resourceDirectory);
 			}
 
@@ -311,10 +305,11 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			return documentPrinter;
 		}
 		catch (DocumentHandlerException e) {
-			e.printStackTrace();
+			getLogger().log(Level.WARNING, "Error handling PDF document for " + pcx, e);
 			throw new IBORuntimeException(e);
 		}
 		catch (IOException e) {
+			getLogger().log(Level.WARNING, "I/O error printing PDF document for " + pcx, e);
 			throw new IBORuntimeException(e);
 		}
 	}
