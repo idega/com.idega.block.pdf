@@ -145,7 +145,6 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				FontFactory.registerDirectories();
 				settings.setProperty("iText_fonts_registered", Boolean.TRUE.toString());
 			}
-			FontFactory.register("/resources/fonts/DejaVuSans.ttf", "DejaVuSans");
 
 			Document document = new Document();
 		    PdfWriter writer = null;
@@ -165,6 +164,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 
 	        XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
 	        fontProvider.register("/resources/fonts/DejaVuSans.ttf", "DejaVuSans");
+	        fontProvider.register("/resources/fonts/CourierNew.ttf", "Courier New");
 
 	        CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
 
