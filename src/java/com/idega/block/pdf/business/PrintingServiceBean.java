@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
@@ -24,6 +25,7 @@ import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
 import org.ujac.util.io.HttpResourceLoader;
 
+import com.idega.block.pdf.PDFConstants;
 import com.idega.block.pdf.data.DocumentURIEntity;
 import com.idega.block.pdf.presentation.handler.Base64ImageTagProcessor;
 import com.idega.business.IBORuntimeException;
@@ -32,12 +34,15 @@ import com.idega.idegaweb.IWBundle;
 import com.idega.idegaweb.IWMainApplication;
 import com.idega.idegaweb.IWMainApplicationSettings;
 import com.idega.servlet.filter.IWBundleResourceFilter;
+import com.idega.util.CoreConstants;
+import com.idega.util.ListUtil;
 import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.datastructures.map.MapUtil;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.tool.xml.Pipeline;
 import com.itextpdf.tool.xml.XMLWorker;
@@ -146,7 +151,34 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				settings.setProperty("iText_fonts_registered", Boolean.TRUE.toString());
 			}
 
-			Document document = new Document();
+			//Get the PDF document dimensions
+			String pdfDocDimensions = settings.getProperty(PDFConstants.APP_PROPERTY_PDF_DOCUMENT_DIMENSIONS);
+
+			Document document = null;
+			if (!StringUtil.isEmpty(pdfDocDimensions)) {
+				try {
+					List<String> dimesionsAsString = StringUtil.getValuesFromString(pdfDocDimensions, CoreConstants.SEMICOLON);
+					if (
+							!ListUtil.isEmpty(dimesionsAsString)
+							&& dimesionsAsString.size() == 4
+					) {
+						document = new Document(
+								PageSize.A4,
+								Float.valueOf(dimesionsAsString.get(0)),
+								Float.valueOf(dimesionsAsString.get(1)),
+								Float.valueOf(dimesionsAsString.get(2)),
+								Float.valueOf(dimesionsAsString.get(3))
+						);
+					}
+				} catch (Exception eDim) {
+					getLogger().log(Level.WARNING, "Could not create PDF document with provided dimensions.", eDim);
+				}
+			}
+
+			if (document == null) {
+				document = new Document();
+			}
+
 		    PdfWriter writer = null;
 			try {
 				writer = PdfWriter.getInstance(document, outputStream);
