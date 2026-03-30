@@ -11,9 +11,13 @@ package com.idega.block.pdf.business;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,7 +47,13 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.security.ExternalDigest;
+import com.itextpdf.text.pdf.security.ExternalSignature;
 import com.itextpdf.tool.xml.Pipeline;
 import com.itextpdf.tool.xml.XMLWorker;
 import com.itextpdf.tool.xml.XMLWorkerFontProvider;
@@ -143,9 +153,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	 */
 	@Override
 	public void printXHTML(InputStream inputStream, OutputStream outputStream) {
-		if (inputStream != null && outputStream != null) {
-			IWMainApplicationSettings settings = IWMainApplication
-					.getDefaultIWMainApplication().getSettings();
+		if (inputStream == null || outputStream == null) {
+			return;
+		}
+
+		try {
+			IWMainApplicationSettings settings = IWMainApplication.getDefaultIWMainApplication().getSettings();
 			if (!settings.getBoolean("iText_fonts_registered", Boolean.FALSE)) {
 				FontFactory.registerDirectories();
 				settings.setProperty("iText_fonts_registered", Boolean.TRUE.toString());
@@ -153,6 +166,21 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 
 			//Get the PDF document dimensions
 			String pdfDocDimensions = settings.getProperty(PDFConstants.APP_PROPERTY_PDF_DOCUMENT_DIMENSIONS);
+
+			// Load signing certificate
+			String p12Path = settings.getProperty("pdf.sign_cert_p12_path");
+			String p12Password = settings.getProperty("pdf.sign_cert_p12_pswrd");
+			PrivateKey privateKey = null;
+			Certificate[] chain = null;
+			if (!StringUtil.isEmpty(p12Path) && !StringUtil.isEmpty(p12Password)) {
+				KeyStore keystore = KeyStore.getInstance("PKCS12");
+				try (InputStream ksStream = new FileInputStream(p12Path)) {
+					keystore.load(ksStream, p12Password.toCharArray());
+				}
+				String alias = keystore.aliases().nextElement();
+				privateKey = (PrivateKey) keystore.getKey(alias, p12Password.toCharArray());
+				chain = keystore.getCertificateChain(alias);
+			}
 
 			Document document = null;
 			if (!StringUtil.isEmpty(pdfDocDimensions)) {
@@ -180,10 +208,18 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			}
 
 		    PdfWriter writer = null;
+		    ByteArrayOutputStream tempBaos = privateKey != null && chain != null ?
+		    		new ByteArrayOutputStream() :
+		    		null;
 			try {
-				writer = PdfWriter.getInstance(document, outputStream);
+				writer = PdfWriter.getInstance(
+						document,
+						tempBaos == null ?
+								outputStream :
+								tempBaos
+						);
 				if (
-						getSettings().getBoolean("pdf.set_read_only", true)
+						settings.getBoolean("pdf.set_read_only", true)
 				) {
 					String userPassword = settings.getProperty("pdf.user_password");
 					String ownerPassword = settings.getProperty("pdf.owner_password", "hG3T3smFbu0joA61K96f");
@@ -195,9 +231,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 					);
 				}
 			} catch (DocumentException e) {
-				getLogger().log(Level.WARNING,
-						"Failed to initialize " + PdfWriter.class.getSimpleName() +
-						" cause of: ", e);
+				getLogger().log(Level.WARNING, "Failed to initialize " + PdfWriter.class.getSimpleName() + " cause of: ", e);
 			}
 
 			document.open();
@@ -226,16 +260,41 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		    try {
 				xmlParser.parse(inputStream);
 			} catch (IOException e) {
-				getLogger().log(Level.WARNING,
-						"Failed to parse XHTML to PDF cause of:", e);
+				getLogger().log(Level.WARNING, "Failed to parse XHTML to PDF cause of:", e);
 			}
 
 		    try {
 			    document.close();
 		    } catch (Exception e) {
-		    	getLogger().log(Level.WARNING,
-						"Failed toclose document cause of:", e);
+		    	getLogger().log(Level.WARNING, "Failed to close document cause of:", e);
 		    }
+
+		    //	Sign PDF
+		    if (privateKey != null && chain != null) {
+			    PdfReader reader = new PdfReader(tempBaos.toByteArray());
+			    PdfStamper stamper = PdfStamper.createSignature(reader, outputStream, '\0', null, true);
+			    PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+
+			    appearance.setReason(settings.getProperty("pdf.sign_reason", "Official Decision Letter"));
+			    appearance.setLocation(settings.getProperty("pdf.sign_location", "Iceland"));
+			    appearance.setVisibleSignature(new Rectangle(36, 750, 200, 780), 1, "sig");				// visible signature
+			    appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);	// disallow modifications
+
+			    //	Makes all interactive fields static and prevents field editing after signing
+			    stamper.setFormFlattening(true);
+
+			    ExternalDigest digest = new com.itextpdf.text.pdf.security.BouncyCastleDigest();
+			    ExternalSignature signature = new com.itextpdf.text.pdf.security.PrivateKeySignature(privateKey, "SHA256", "BC");
+
+			    com.itextpdf.text.pdf.security.MakeSignature.signDetached(
+			    		appearance, digest, signature, chain, null, null, null, 0, com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard.CMS
+			    );
+
+			    stamper.close();
+			    reader.close();
+		    }
+		} catch (Exception e) {
+			getLogger().log(Level.WARNING, "Error converting HTML to PDF", e);
 		}
 	}
 
