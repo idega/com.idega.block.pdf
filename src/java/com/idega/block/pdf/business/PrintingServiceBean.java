@@ -185,10 +185,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				if (
 						getSettings().getBoolean("pdf.set_read_only", true)
 				) {
+					String userPassword = settings.getProperty("pdf.user_password");
+					String ownerPassword = settings.getProperty("pdf.owner_password", "hG3T3smFbu0joA61K96f");
 					writer.setEncryption(
-					    null,
-					    getSettings().getProperty("pdf.owner_password", "hG3T3smFbu0joA61K96f") .getBytes(),
-					    0,
+					    StringUtil.isEmpty(userPassword) ? null : userPassword.getBytes(CoreConstants.ENCODING_UTF8),
+					    StringUtil.isEmpty(ownerPassword) ? null : ownerPassword.getBytes(CoreConstants.ENCODING_UTF8),
+					    PdfWriter.ALLOW_PRINTING,
 					    PdfWriter.ENCRYPTION_AES_128
 					);
 				}
