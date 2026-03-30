@@ -182,6 +182,16 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		    PdfWriter writer = null;
 			try {
 				writer = PdfWriter.getInstance(document, outputStream);
+				if (
+						getSettings().getBoolean("pdf.set_read_only", true)
+				) {
+					writer.setEncryption(
+					    null,
+					    getSettings().getProperty("pdf.owner_password", "hG3T3smFbu0joA61K96f") .getBytes(),
+					    0,
+					    PdfWriter.ENCRYPTION_AES_128
+					);
+				}
 			} catch (DocumentException e) {
 				getLogger().log(Level.WARNING,
 						"Failed to initialize " + PdfWriter.class.getSimpleName() +
