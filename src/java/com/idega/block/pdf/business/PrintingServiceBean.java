@@ -191,7 +191,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 					    StringUtil.isEmpty(userPassword) ? null : userPassword.getBytes(CoreConstants.ENCODING_UTF8),
 					    StringUtil.isEmpty(ownerPassword) ? null : ownerPassword.getBytes(CoreConstants.ENCODING_UTF8),
 					    PdfWriter.ALLOW_PRINTING,
-					    PdfWriter.ENCRYPTION_AES_128
+					    PdfWriter.ENCRYPTION_AES_256
 					);
 				}
 			} catch (DocumentException e) {
