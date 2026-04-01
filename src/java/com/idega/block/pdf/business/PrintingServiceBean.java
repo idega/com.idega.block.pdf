@@ -17,13 +17,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.Security;
 import java.security.cert.Certificate;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import org.apache.commons.io.IOUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.ujac.print.DocumentHandlerException;
 import org.ujac.print.DocumentPrinter;
 import org.ujac.util.io.FileResourceLoader;
@@ -44,10 +47,11 @@ import com.idega.util.StringHandler;
 import com.idega.util.StringUtil;
 import com.idega.util.datastructures.map.MapUtil;
 import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
 import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.PageSize;
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
 import com.itextpdf.text.pdf.PdfStamper;
@@ -181,6 +185,12 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 				privateKey = (PrivateKey) keystore.getKey(alias, p12Password.toCharArray());
 				chain = keystore.getCertificateChain(alias);
 			}
+			boolean signPdf = privateKey != null && chain != null;
+			if (signPdf) {
+				if (Security.getProvider("BC") == null) {
+				    Security.addProvider(new BouncyCastleProvider());
+				}
+			}
 
 			Document document = null;
 			if (!StringUtil.isEmpty(pdfDocDimensions)) {
@@ -202,40 +212,30 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 					getLogger().log(Level.WARNING, "Could not create PDF document with provided dimensions.", eDim);
 				}
 			}
-
 			if (document == null) {
 				document = new Document();
 			}
 
-		    PdfWriter writer = null;
-		    ByteArrayOutputStream tempBaos = privateKey != null && chain != null ?
-		    		new ByteArrayOutputStream() :
-		    		null;
-			try {
-				writer = PdfWriter.getInstance(
-						document,
-						tempBaos == null ?
-								outputStream :
-								tempBaos
-						);
-				if (
-						settings.getBoolean("pdf.set_read_only", true)
-				) {
-					String userPassword = settings.getProperty("pdf.user_password");
-					String ownerPassword = settings.getProperty("pdf.owner_password", "hG3T3smFbu0joA61K96f");
-					writer.setEncryption(
-					    StringUtil.isEmpty(userPassword) ? null : userPassword.getBytes(CoreConstants.ENCODING_UTF8),
-					    StringUtil.isEmpty(ownerPassword) ? null : ownerPassword.getBytes(CoreConstants.ENCODING_UTF8),
-					    PdfWriter.ALLOW_PRINTING,
-					    PdfWriter.ENCRYPTION_AES_256
-					);
-				}
-			} catch (DocumentException e) {
-				getLogger().log(Level.WARNING, "Failed to initialize " + PdfWriter.class.getSimpleName() + " cause of: ", e);
-			}
+			ByteArrayOutputStream pdfBuffer = new ByteArrayOutputStream();
+	        boolean readOnly = settings.getBoolean("pdf.set_read_only", true);
+	        String userPassword = settings.getProperty("pdf.user_password");
+	        String ownerPassword = settings.getProperty("pdf.owner_password", UUID.randomUUID().toString());
+
+	        PdfWriter writer = PdfWriter.getInstance(document, pdfBuffer);
+
+	        // Encrypt PDF if read-only and signing
+	        if (readOnly && !StringUtil.isEmpty(ownerPassword)) {
+	            writer.setEncryption(
+	                    StringUtil.isEmpty(userPassword) ? null : userPassword.getBytes(CoreConstants.ENCODING_UTF8),
+	                    ownerPassword.getBytes(CoreConstants.ENCODING_UTF8),
+	                    PdfWriter.ALLOW_PRINTING,
+	                    PdfWriter.ENCRYPTION_AES_128
+	            );
+	        }
 
 			document.open();
 
+			//	HTML → PDF processing
 			final TagProcessorFactory tagProcessorFactory = Tags.getHtmlTagProcessorFactory();
 	        tagProcessorFactory.removeProcessor(HTML.Tag.IMG);
 	        tagProcessorFactory.addProcessor(new Base64ImageTagProcessor(), HTML.Tag.IMG);
@@ -269,29 +269,69 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 		    	getLogger().log(Level.WARNING, "Failed to close document cause of:", e);
 		    }
 
-		    //	Sign PDF
-		    if (privateKey != null && chain != null) {
-			    PdfReader reader = new PdfReader(tempBaos.toByteArray());
-			    PdfStamper stamper = PdfStamper.createSignature(reader, outputStream, '\0', null, true);
-			    PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+		    //	Flatten and encrypt
+		    boolean flatten = settings.getBoolean("pdf.flatten", !signPdf);
+		    if (!signPdf) {
+		    	PdfReader reader = new PdfReader(pdfBuffer.toByteArray());
+	            PdfStamper stamper = new PdfStamper(reader, outputStream);
+	            if (flatten) {
+	            	stamper.setFormFlattening(true);
+	            }
 
-			    appearance.setReason(settings.getProperty("pdf.sign_reason", "Official Decision Letter"));
-			    appearance.setLocation(settings.getProperty("pdf.sign_location", "Iceland"));
-			    appearance.setVisibleSignature(new Rectangle(36, 750, 200, 780), 1, "sig");				// visible signature
-			    appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);	// disallow modifications
+	            if (readOnly) {
+	                stamper.setEncryption(
+	                        StringUtil.isEmpty(userPassword) ? null : userPassword.getBytes(CoreConstants.ENCODING_UTF8),
+	                        StringUtil.isEmpty(ownerPassword) ? null : ownerPassword.getBytes(CoreConstants.ENCODING_UTF8),
+	                        PdfWriter.ALLOW_PRINTING,
+	                        PdfWriter.ENCRYPTION_AES_128
+	                );
+	            }
 
-			    //	Makes all interactive fields static and prevents field editing after signing
-			    stamper.setFormFlattening(true);
+	            stamper.close();
+	            reader.close();
 
-			    ExternalDigest digest = new com.itextpdf.text.pdf.security.BouncyCastleDigest();
-			    ExternalSignature signature = new com.itextpdf.text.pdf.security.PrivateKeySignature(privateKey, "SHA256", "BC");
+		    } else {
+	            // Sign
+		    	byte[] toSignBytes = pdfBuffer.toByteArray();
+	            PdfReader reader = new PdfReader(toSignBytes, StringUtil.isEmpty(ownerPassword) ? null : ownerPassword.getBytes(CoreConstants.ENCODING_UTF8));
+	            PdfStamper stamper = PdfStamper.createSignature(reader, outputStream, '\0', null, true);
 
-			    com.itextpdf.text.pdf.security.MakeSignature.signDetached(
-			    		appearance, digest, signature, chain, null, null, null, 0, com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard.CMS
-			    );
+	            PdfSignatureAppearance appearance = stamper.getSignatureAppearance();
+	            appearance.setReason(settings.getProperty("pdf.sign_reason", "Official Decision Letter"));
+	            appearance.setLocation(settings.getProperty("pdf.sign_location", "Iceland"));
 
-			    stamper.close();
-			    reader.close();
+	            //	Page dimensions
+	            Rectangle pageSize = reader.getPageSize(1);	// first page
+	            float pageHeight = pageSize.getHeight();
+
+	            // Define a "safe top area" for signature
+	            float topMargin = settings.getInt("pdf.signature_top_margin", 24);
+	            float signatureHeight = 50;
+	            float signatureWidth = 120;
+
+	            // Position signature box ABOVE content
+	            float llx = topMargin;						// from left
+	            float urx = llx + signatureWidth;			// width of box
+	            float ury = pageHeight - topMargin;			// top of page minus top margin
+	            float lly = ury - signatureHeight;			// bottom of signature box
+	            appearance.setVisibleSignature(new Rectangle(llx, lly, urx, ury), 1, "sig");
+
+	            appearance.setCertificationLevel(PdfSignatureAppearance.CERTIFIED_NO_CHANGES_ALLOWED);
+
+	            //	Set Unicode font for signature appearance
+	            BaseFont bf = BaseFont.createFont("/resources/fonts/DejaVuSans.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+	            appearance.setLayer2Font(new Font(bf, settings.getInt("pdf.signature_font_size", 10)));	// Font for signer info text
+
+	            ExternalDigest digest = new com.itextpdf.text.pdf.security.BouncyCastleDigest();
+	            ExternalSignature signature = new com.itextpdf.text.pdf.security.PrivateKeySignature(privateKey, "SHA256", "BC");
+
+	            com.itextpdf.text.pdf.security.MakeSignature.signDetached(
+	                    appearance, digest, signature, chain, null, null, null, 0,
+	                    com.itextpdf.text.pdf.security.MakeSignature.CryptoStandard.CMS
+	            );
+
+	            stamper.close();
+	            reader.close();
 		    }
 		} catch (Exception e) {
 			getLogger().log(Level.WARNING, "Error converting HTML to PDF", e);
