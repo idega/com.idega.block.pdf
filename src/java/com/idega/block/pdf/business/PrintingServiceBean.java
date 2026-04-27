@@ -217,7 +217,7 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 			}
 
 			ByteArrayOutputStream pdfBuffer = new ByteArrayOutputStream();
-	        boolean readOnly = settings.getBoolean("pdf.set_read_only", true);
+	        boolean readOnly = settings.getBoolean("pdf.set_read_only", false);
 	        String userPassword = settings.getProperty("pdf.user_password");
 	        String ownerPassword = settings.getProperty("pdf.owner_password", UUID.randomUUID().toString());
 
