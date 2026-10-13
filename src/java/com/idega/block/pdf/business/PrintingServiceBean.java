@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Security;
@@ -241,8 +242,18 @@ public class PrintingServiceBean extends IBOServiceBean implements PrintingServi
 	        tagProcessorFactory.addProcessor(new Base64ImageTagProcessor(), HTML.Tag.IMG);
 
 	        XMLWorkerFontProvider fontProvider = new XMLWorkerFontProvider(XMLWorkerFontProvider.DONTLOOKFORFONTS);
-	        fontProvider.register("/resources/fonts/DejaVuSans.ttf", "DejaVuSans");
-	        fontProvider.register("/resources/fonts/CourierNew.ttf", "Courier New");
+	        URL fontDejaVuUrl = getClass().getResource("/resources/fonts/DejaVuSans.ttf");
+	        if (fontDejaVuUrl != null) {
+	            fontProvider.register(fontDejaVuUrl.toExternalForm(), "DejaVuSans");
+	        } else {
+	            getLogger().warning("DejaVuSans.ttf not found in classpath");
+	        }
+	        URL fontCourierNewUrl = getClass().getResource("/resources/fonts/CourierNew.ttf");
+	        if (fontCourierNewUrl != null) {
+	            fontProvider.register(fontCourierNewUrl.toExternalForm(), "Courier New");
+	        } else {
+	            getLogger().warning("CourierNew.ttf not found in classpath");
+	        }
 
 	        CssAppliers cssAppliers = new CssAppliersImpl(fontProvider);
 
