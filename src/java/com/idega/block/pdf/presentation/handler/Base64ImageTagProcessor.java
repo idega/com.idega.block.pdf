@@ -231,7 +231,14 @@ public class Base64ImageTagProcessor extends com.itextpdf.tool.xml.html.Image {
 						return source;
 					}
 
-					String encodedString = Base64.encodeBytes(getBytes(getImage(source)));
+
+					byte[] imageBytes = getBytes(getImage(source));
+					if (imageBytes == null) {
+						LOGGER.warning("Failed to get image from " + source);
+						return null;
+					}
+
+					String encodedString = Base64.encodeBytes(imageBytes);
 					if (!StringUtil.isEmpty(encodedString)) {
 						return "data:image/" + getImageType() + ";base64," + encodedString;
 					}
